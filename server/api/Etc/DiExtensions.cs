@@ -1,0 +1,173 @@
+using api.Models;
+using dataccess;
+using Microsoft.EntityFrameworkCore;
+using NJsonSchema.CodeGeneration.TypeScript;
+using NSwag;
+using NSwag.CodeGeneration.TypeScript;
+using NSwag.Generation;
+using NSwag.Generation.Processors;
+using Testcontainers.PostgreSql;
+
+namespace api.Etc;
+
+public static class DiExtensions
+{
+    /// <summary>
+    ///     Adds a type to Swagger schemas
+    /// </summary>
+    public static void AddTypeToSwagger<T>(this OpenApiDocumentGeneratorSettings settings)
+    {
+        settings.DocumentProcessors.Add(new TypeMapDocumentProcessor<T>());
+    }
+
+    /// <summary>
+    ///     Adds string constants from a static class to OpenAPI schema
+    ///     Usage: config.AddStringConstants(typeof(SieveConstants));
+    /// </summary>
+    public static void AddStringConstants(this OpenApiDocumentGeneratorSettings settings, Type type)
+    {
+        var processorType = typeof(StringConstantsDocumentProcessor<>).MakeGenericType(type);
+        var processor = (IDocumentProcessor)Activator.CreateInstance(processorType)!;
+        settings.DocumentProcessors.Add(processor);
+    }
+
+    public static async Task GenerateApiClientsFromOpenApi(this WebApplication app, string path)
+    {
+        // Step 1: Generate OpenAPI document with full documentation
+        var document = await app.Services.GetRequiredService<IOpenApiDocumentGenerator>()
+            .GenerateAsync("v1");
+
+        // Step 2: Serialize the document to JSON to verify it contains documentation
+        var openApiJson = document.ToJson();
+
+        // Optional: Save the OpenAPI JSON to verify it has documentation
+        var openApiPath = Path.Combine(Directory.GetCurrentDirectory(), "openapi-with-docs.json");
+        await File.WriteAllTextAsync(openApiPath, openApiJson);
+
+        // Step 3: Parse the document back from JSON to ensure we're only using what's in the OpenAPI spec
+        var documentFromJson = await OpenApiDocument.FromJsonAsync(openApiJson);
+
+        // Step 4: Generate TypeScript client from the parsed OpenAPI document
+        var settings = new TypeScriptClientGeneratorSettings
+        {
+            Template = TypeScriptTemplate.Fetch,
+            // = true,  // Enable JSDoc generation
+            TypeScriptGeneratorSettings =
+            {
+                TypeStyle = TypeScriptTypeStyle.Interface,
+                DateTimeType = TypeScriptDateTimeType.String,
+                NullValue = TypeScriptNullValue.Undefined,
+                TypeScriptVersion = 5.2m,
+                GenerateCloneMethod = false,
+                MarkOptionalProperties = false,
+                GenerateConstructorInterface = true,
+                ConvertConstructorInterfaceData = true,
+                EnumStyle = TypeScriptEnumStyle.Enum
+            }
+        };
+
+        // Step 5: Generate TypeScript client from the parsed OpenAPI document
+        var generator = new TypeScriptClientGenerator(documentFromJson, settings);
+        var code = generator.GenerateFile();
+
+        // Step 6: Post-process to add const objects for constant schemas
+        code = AddConstantObjects(code, documentFromJson);
+
+        var outputPath = Path.Combine(Directory.GetCurrentDirectory() + path);
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+        await File.WriteAllTextAsync(outputPath, code);
+
+
+        var logger = app.Services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("OpenAPI JSON with documentation saved at: " + openApiPath);
+        logger.LogInformation("TypeScript client generated at: " + outputPath);
+    }
+
+    /// <summary>
+    ///     Adds const objects with actual values for schemas marked with constant values
+    /// </summary>
+    private static string AddConstantObjects(string code, OpenApiDocument document)
+    {
+        var constantExports = new List<string>();
+
+        foreach (var schema in document.Definitions)
+            // Check if schema has constant values extension data
+            if (schema.Value.ExtensionData?.TryGetValue("x-constant-values", out var constantValuesObj) == true)
+                if (constantValuesObj is Dictionary<string, object?> constantValues)
+                {
+                    // Generate const object export
+                    var constName = schema.Key;
+                    var constLines = new List<string>
+                    {
+                        "",
+                        $"/** Constant values for {constName} */",
+                        $"export const {constName} = {{"
+                    };
+
+                    foreach (var kvp in constantValues) constLines.Add($"    {kvp.Key}: \"{kvp.Value}\",");
+
+                    // Remove trailing comma from last property
+                    if (constLines.Count > 2) constLines[^1] = constLines[^1].TrimEnd(',');
+
+                    constLines.Add("} as const;");
+
+                    constantExports.Add(string.Join(Environment.NewLine, constLines));
+                }
+
+        // Insert const objects after their interface definitions
+        if (constantExports.Count > 0)
+        {
+            // Find the last interface definition and append const objects there
+            var lastInterfaceIndex = code.LastIndexOf("export interface");
+            if (lastInterfaceIndex != -1)
+            {
+                // Find the end of the last interface (closing brace)
+                var closeBraceIndex = code.IndexOf('}', lastInterfaceIndex);
+                if (closeBraceIndex != -1)
+                {
+                    var insertIndex = closeBraceIndex + 1;
+                    var allConstants = string.Join(Environment.NewLine, constantExports);
+                    code = code.Insert(insertIndex, Environment.NewLine + allConstants);
+                }
+            }
+        }
+
+        return code;
+    }
+
+    public static void AddMyDbContext(this IServiceCollection services)
+    {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        if (environment != "Production")
+        {
+            var postgreSqlContainer = new PostgreSqlBuilder()
+                .WithDatabase("postgres")
+                .WithUsername("postgres")
+                .WithPassword("postgres")
+                .WithPortBinding("5432", true)
+                .WithExposedPort("5432").Build();
+            postgreSqlContainer.StartAsync().GetAwaiter().GetResult();
+            var connectionString = postgreSqlContainer.GetConnectionString();
+            Console.WriteLine("Connecting to DB: " + connectionString);
+            services.AddDbContext<MyDbContext>((services, options) => { options.UseNpgsql(connectionString); });
+        }
+        else
+        {
+            services.AddDbContext<MyDbContext>(
+                (services, options) => { options.UseNpgsql(services.GetRequiredService<AppOptions>().Db); },
+                ServiceLifetime.Transient);
+        }
+    }
+
+    public static void InjectAppOptions(this IServiceCollection services)
+    {
+        services.AddSingleton<AppOptions>(provider =>
+        {
+            var configuration = provider.GetRequiredService<IConfiguration>();
+            var appOptions = new AppOptions();
+            configuration.GetSection(nameof(AppOptions)).Bind(appOptions);
+            return appOptions;
+        });
+    }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "client",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "graph": "npx depcruise src --include-only \"^src\" --output-type dot | dot -T svg > dependency-graph.svg"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.13",
+    "daisyui": "^5.1.12",
+    "dotnet-json-refs": "^1.0.0",
+    "jotai": "^2.14.0",
+    "jotai-devtools": "^0.13.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router": "^7.9.1",
+    "tailwindcss": "^4.1.13",
+    "ts-sieve-query-builder": "0.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "dependency-cruiser": "^17.2.0",
+    "globals": "^16.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.3.5"
+  }
+}
