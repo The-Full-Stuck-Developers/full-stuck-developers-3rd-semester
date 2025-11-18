@@ -80,8 +80,7 @@ public class AuthService(
             Email = dto.Email,
             CreatedAt = timeProvider.GetUtcNow().DateTime.ToUniversalTime(),
             Id = Guid.NewGuid().ToString(),
-            Password = hash.Aggregate("", (current, b) => current + b.ToString("x2")),
-            Role = "User"
+            Password = hash.Aggregate("", (current, b) => current + b.ToString("x2"))
         };
         ctx.Users.Add(user);
         await ctx.SaveChangesAsync();
