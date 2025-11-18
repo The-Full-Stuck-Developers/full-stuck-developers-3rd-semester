@@ -4,6 +4,7 @@ import {customFetch} from "@utilities/customFetch.ts";
 import {resolveRefs} from "dotnet-json-refs";
 
 class LibraryClientWithResolvedRefs extends LibraryClient {
+    /*
     override async getBooks(requestDto: any): Promise<Book[]> {
         const result = await super.getBooks(requestDto);
         return resolveRefs(result);
@@ -11,3 +12,5 @@ class LibraryClientWithResolvedRefs extends LibraryClient {
 }
 
 export const libraryApi = new LibraryClientWithResolvedRefs(baseUrl, customFetch);
+ */
+}

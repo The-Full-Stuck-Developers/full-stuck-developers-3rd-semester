@@ -2,7 +2,7 @@ import {useState} from "react";
 import {type Book, type LoginRequestDto, type RegisterRequestDto} from "@core/generated-client.ts";
 import {authApi} from "@utilities/authApi.ts";
 import toast from "react-hot-toast";
-import {libraryApi} from "@utilities/libraryApi.ts";
+//import {libraryApi} from "@utilities/libraryApi.ts";
 import {SieveQueryBuilder} from "ts-sieve-query-builder";
 
 export default function Auth() {
@@ -26,8 +26,8 @@ export default function Auth() {
                 toast.success('welcome')
             })
         }}>register me</button>
-        
-        
+
+         {/*
         <button className="btn"  onClick={() => {
             const q = SieveQueryBuilder.create<Book>()
                 .page(1)
@@ -44,5 +44,6 @@ export default function Auth() {
                 return <div>{b.title}</div>
             })
         }
+         */}
     </>
 }
