@@ -5,7 +5,7 @@ export default function Home() {
     const navigate = useNavigate();
 
     return <>
-        
+        <h1>TEST</h1>
         <Outlet/>
 
     </>
