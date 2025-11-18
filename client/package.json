@@ -18,10 +18,12 @@
     "dotnet-json-refs": "^1.0.0",
     "jotai": "^2.14.0",
     "jotai-devtools": "^0.13.0",
+    "lucide-react": "^0.554.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.6.0",
     "react-router": "^7.9.1",
+    "react-router-dom": "^7.9.6",
     "tailwindcss": "^4.1.13",
     "ts-sieve-query-builder": "0.2.3"
   },
