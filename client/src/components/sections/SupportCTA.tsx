@@ -14,9 +14,6 @@ export const SupportCTA = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-6 mt-2">
-                    <button className="px-10 py-4 rounded-full bg-white text-emerald-700 font-semibold text-lg shadow-md hover:bg-slate-100 transition">
-                        Create Account
-                    </button>
                     <button className="px-10 py-4 rounded-full border-2 border-white text-white font-semibold text-lg hover:bg-white/10 transition">
                         Contact Admin
                     </button>
