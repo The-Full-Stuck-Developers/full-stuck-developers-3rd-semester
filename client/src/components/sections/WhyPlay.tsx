@@ -1,6 +1,6 @@
 import { Shield, Clock3, Users, TrendingUp } from "lucide-react";
 
-export const WhyPlay = () => {
+export function WhyPlay() {
     return (
         <section className="w-full bg-white py-24 h-200 items-center text-center flex">
             <div className="max-w-6xl mx-auto px-4 flex flex-col items-center text-center gap-12">

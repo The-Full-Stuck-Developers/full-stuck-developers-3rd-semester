@@ -1,6 +1,6 @@
 import { Trophy, Clock, Dice5, Target } from "lucide-react";
 
-export const Footer = () => {
+export function Footer() {
     return (
         <footer id="contact" className="w-full bg-[#1a1f25] text-white py-20">
             <div className="max-w-6xl mx-auto px-6">

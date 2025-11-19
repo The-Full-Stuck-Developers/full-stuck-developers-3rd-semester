@@ -7,7 +7,7 @@ const boards = [
     { numbers: 8, price: 160, popular: false },
 ];
 
-export const BoardsPricing = () => {
+export function BoardsPricing() {
     return (
         <section id="pricing" className="w-full bg-slate-100 py-28">
             <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center gap-16">

@@ -1,4 +1,4 @@
-export const SupportCTA = () => {
+export function SupportCTA()  {
     return (
         <section className="w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-sky-600 text-white py-32">
             <div className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center gap-12">
