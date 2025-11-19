@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export const Navbar = () => {
+export function Navbar() {
     return (
         <nav className="absolute top-3 left-0 w-full z-50 backdrop-blur-sm">
             <div className="max-w-8xl mx-auto flex items-center justify-between px-4 py-4">

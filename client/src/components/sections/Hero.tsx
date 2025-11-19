@@ -1,4 +1,4 @@
-export const Hero = () => {
+export function Hero()  {
     return (
         <section className="w-full h-300 bg-gradient-to-b from-emerald-700 via-sky-700 to-slate-900 text-white py-20 items-center text-center flex">
             <div className="max-w-5xl mx-auto px-4 flex flex-col items-center text-center gap-10 ">
