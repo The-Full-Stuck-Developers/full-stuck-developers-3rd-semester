@@ -23,6 +23,7 @@ public static class DatabaseSeeder
         foreach (var seeder in seeders)
         {
             await seeder.SeedAsync(db);
+            Console.WriteLine(">>> Running DatabaseSeeder.SeedAsync");
         }
     }
 }

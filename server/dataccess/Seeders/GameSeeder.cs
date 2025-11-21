@@ -28,7 +28,7 @@ public class GameSeeder : ISeeder
                 Id = Guid.NewGuid().ToString(),
                 StartTime = DateTime.UtcNow.AddMinutes(-30),
                 IsActive = true,
-                WinningNumbers = null,
+                WinningNumbers = "4,1,16,8,23",
                 Revenue = 5500
             }
         };
