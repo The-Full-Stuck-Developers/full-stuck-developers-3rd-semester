@@ -19,20 +19,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest"/>
+        <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="Xunit"/>
+        <Using Include="Xunit" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../api/api.csproj"/>
-        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.10.0"/>
-        <PackageReference Include="Xunit.DependencyInjection" Version="10.7.0"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0"/>
-        <PackageReference Include="xunit.v3" Version="3.0.1"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4"/>
+        <ProjectReference Include="../api/api.csproj" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.10.0" />
+        <PackageReference Include="Xunit.DependencyInjection" Version="10.7.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+        <PackageReference Include="xunit.v3" Version="3.0.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\dataccess\dataccess.csproj" />
     </ItemGroup>
 
 </Project>

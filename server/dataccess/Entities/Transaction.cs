@@ -1,4 +1,4 @@
-namespace dataccess;
+namespace dataccess.Entities;
 
 public class Transaction
 {

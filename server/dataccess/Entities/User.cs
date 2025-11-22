@@ -1,8 +1,8 @@
-﻿namespace dataccess;
+﻿namespace dataccess.Entities;
 
 public class User
 {
-    public string Id { get; set; }
+    public string Id { get; set; }  
 
     public string Name { get; set; }
     public string Password { get; set; }
@@ -15,7 +15,7 @@ public class User
     public DateTime? ExpiresAt { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
-    public DateTime DeletedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
 }
