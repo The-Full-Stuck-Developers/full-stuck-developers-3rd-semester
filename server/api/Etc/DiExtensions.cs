@@ -160,14 +160,11 @@ public static class DiExtensions
         }
     }
 
-    public static void InjectAppOptions(this IServiceCollection services)
+    public static void InjectAppOptions(this IServiceCollection services, IConfiguration config)
     {
-        services.AddSingleton<AppOptions>(provider =>
-        {
-            var configuration = provider.GetRequiredService<IConfiguration>();
-            var appOptions = new AppOptions();
-            configuration.GetSection(nameof(AppOptions)).Bind(appOptions);
-            return appOptions;
-        });
+        services.AddOptions<AppOptions>()
+            .Bind(config.GetSection(nameof(AppOptions)))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
     }
 }

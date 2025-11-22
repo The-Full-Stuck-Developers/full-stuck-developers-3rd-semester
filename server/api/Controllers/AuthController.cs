@@ -1,29 +1,58 @@
 using api.Models;
+using api.Models.Dtos.Requests;
+using api.Models.Dtos.Responses;
 using api.Models.Requests;
 using api.Services;
+using Docker.DotNet.Models;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers;
 
-[Route("api/")]
+[Route("api/auth")]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost(nameof(Login))]
-    public async Task<JwtResponse> Login([FromBody] LoginRequestDto dto)
+    public async Task<LoginResponse> Login([FromBody] LoginRequest request)
     {
-        return await authService.Login(dto);
+        var userInfo = authService.Authenticate(request);
+        return new LoginResponse();
     }
 
     [HttpPost(nameof(Register))]
-    public async Task<JwtResponse> Register([FromBody] RegisterRequestDto dto)
+    public async Task<RegisterResponse> Register([FromBody] RegisterRequestDto request)
     {
-        return await authService.Register(dto);
+        var userInfo = await authService.Register(request);
+        return new RegisterResponse(Name: userInfo.Name);
     }
 
-    [HttpPost(nameof(WhoAmI))]
+   /* [HttpPost(nameof(WhoAmI))]
     public async Task<JwtClaims> WhoAmI()
     {
         var jwtClaims = await authService.VerifyAndDecodeToken(Request.Headers.Authorization.FirstOrDefault());
         return jwtClaims;
     }
+    [HttpPost(nameof(ForgotPassword))]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+    {
+        await authService.ForgotPassword(dto);
+        return Ok("If the email exists, a reset link was sent.");
+    }
+    [HttpPost(nameof(ResetPassword))]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        await authService.ResetPassword(dto);
+        return Ok("Password updated!");
+    }*/
+   [HttpPost(nameof(Logout))]
+   public async Task<IResult> Logout()
+   {
+       throw new NotImplementedException();
+   }
+   
+   [HttpGet(nameof(UserInfo))]
+   public async Task<IResult> UserInfo()
+   {
+       throw new NotImplementedException();
+   }
 }

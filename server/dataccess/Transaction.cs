@@ -1,3 +1,5 @@
+using dataccess.Entities;
+
 namespace dataccess;
 
 public class Transaction
