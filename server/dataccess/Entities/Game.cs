@@ -2,7 +2,7 @@ namespace dataccess;
 
 public class Game
 {
-    public string Id { get; set; }
+    public string Id { get; set; } 
 
     public DateTime? StartTime { get; set; }
 

@@ -277,10 +277,6 @@ export interface RegisterRequestDto {
 
 /** String constants from SieveConstants */
 export interface SieveConstants {
-    /** Constant value: "GenreName" */
-    readonly GenreName: string;
-    /** Constant value: "GenreId" */
-    readonly GenreId: string;
 }
 
 export interface FileResponse {
@@ -291,8 +287,6 @@ export interface FileResponse {
 
 /** Constant values for SieveConstants */
 export const SieveConstants = {
-    GenreName: "GenreName",
-    GenreId: "GenreId"
 } as const;;
 }
 

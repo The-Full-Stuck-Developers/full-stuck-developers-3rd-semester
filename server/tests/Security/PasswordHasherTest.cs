@@ -9,11 +9,10 @@ public class PasswordHasherTest
 {
     IPasswordHasher<User> sut;
 
-    [Before(Test)]
     public void Setup()
     {
         var builder = WebApplication.CreateBuilder();
-        Program.ConfigureServices(builder);
+        Program.ConfigureServices(builder, builder.Configuration);
 
         var app = builder.Build();
 
@@ -21,7 +20,7 @@ public class PasswordHasherTest
         Console.WriteLine($"Using password hasher: {sut.GetType().Name}");
     }
 
-    [Test]
+    [Fact]
     public async Task HashAnVerifyPassword()
     {
         var password = "S3cret!1";

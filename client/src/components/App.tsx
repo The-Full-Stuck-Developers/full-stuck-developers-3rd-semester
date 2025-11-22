@@ -1,4 +1,4 @@
-import Home from "@components/Home.tsx";
+import {Home} from "@components/Home.tsx";
 import Login from "@components/Login.tsx";
 import { Routes, Route } from "react-router-dom";
 

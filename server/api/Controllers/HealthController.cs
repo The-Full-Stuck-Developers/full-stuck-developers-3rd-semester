@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 
@@ -5,6 +6,7 @@ namespace api.Controllers
 {
     [ApiController]
     [Route("api/Health")]
+    [AllowAnonymous]
     public class HealthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -15,6 +17,7 @@ namespace api.Controllers
         }
 
         [HttpGet("App/Up")]
+        [AllowAnonymous]
         public IActionResult Up()
         {
             return Ok(new
@@ -26,9 +29,10 @@ namespace api.Controllers
         }
 
         [HttpGet("Database/Up")]
+        [AllowAnonymous]
         public async Task<IActionResult> DatabaseUp()
         {
-            var connectionString = _configuration["AppOptions:Db"];
+            var connectionString = _configuration["AppOptions:DefaultConnection"];
 
             try
             {

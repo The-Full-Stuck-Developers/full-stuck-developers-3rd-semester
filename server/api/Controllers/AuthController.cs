@@ -4,12 +4,14 @@ using api.Models.Dtos.Responses;
 using api.Models.Requests;
 using api.Services;
 using Docker.DotNet.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers;
 
 [Route("api/auth")]
+[AllowAnonymous]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost(nameof(Login))]

@@ -1,6 +1,6 @@
 import {Wallet, Grid, RefreshCw, Trophy} from "lucide-react";
 
-export const AboutGame = () => {
+export function AboutGame(){
     return (
         <section id="about" className="w-full bg-slate-100 py-20 h-200 items-center text-center flex">
             <div className="max-w-6xl mx-auto px-4 flex flex-col items-center text-center gap-12">

@@ -1,4 +1,4 @@
-export const SupportCTA = () => {
+export function SupportCTA()  {
     return (
         <section className="w-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-sky-600 text-white py-32">
             <div className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center gap-12">
@@ -14,9 +14,6 @@ export const SupportCTA = () => {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-6 mt-2">
-                    <button className="px-10 py-4 rounded-full bg-white text-emerald-700 font-semibold text-lg shadow-md hover:bg-slate-100 transition">
-                        Create Account
-                    </button>
                     <button className="px-10 py-4 rounded-full border-2 border-white text-white font-semibold text-lg hover:bg-white/10 transition">
                         Contact Admin
                     </button>
