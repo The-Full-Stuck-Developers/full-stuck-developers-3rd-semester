@@ -7,7 +7,7 @@ public class UserDto
     {
         Id = entity.Id;
         Name = entity.Name;
-        Password = entity.Password;
+        Password = entity.PasswordHash;
         Email = entity.Email;
         PhoneNumber = entity.PhoneNumber;
         IsAdmin = entity.IsAdmin;

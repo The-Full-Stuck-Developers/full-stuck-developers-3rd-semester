@@ -1,108 +1,79 @@
-using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using api.Models;
-using api.Models.Requests;
-using dataccess;
-using JWT;
-using JWT.Algorithms;
-using JWT.Builder;
-using JWT.Serializers;
-using ValidationException = Bogus.ValidationException;
+using System.Security.Claims;
+using api.Etc;
+using api.Mappers;
+using api.Models.Dtos.Requests;
+using api.Models.Dtos.Responses;
+using api.Security;
+using api.Services;
+using dataccess.Entities;
+using dataccess.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace api.Services;
 
+
 public class AuthService(
-    MyDbContext ctx,
-    ILogger<AuthService> logger,
-    TimeProvider timeProvider,
-    AppOptions appOptions) : IAuthService
-{
-    public async Task<JwtClaims> VerifyAndDecodeToken(string token)
+        ILogger<AuthService> _logger,
+        IPasswordHasher<User> PasswordHasher,
+        IRepository<User> _userRepository
+    ) : IAuthService
     {
-        if (string.IsNullOrWhiteSpace(token))
-            throw new ValidationException("No token attached!");
-
-        var builder = CreateJwtBuilder();
-
-        string jsonString;
-        try
+        public AuthUserInfo Authenticate(LoginRequest request)
         {
-            jsonString = builder.Decode(token)
-                         ?? throw new ValidationException("Authentication failed!");
+            var user = _userRepository.Query()
+                 .FirstOrDefault(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                _logger.LogWarning("Authentication failed: user with email {Email} not found", request.Email);
+                throw new AuthenticationError();
+            }
+
+            var result = PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+
+                 if (result == PasswordVerificationResult.Success)
+                 {
+                     return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
+
+                 }
+                 _logger.LogWarning("Authentication failed: invalid password for user {Email}", request.Email);
+                 throw new AuthenticationError();
+             }
+
+        public async Task<AuthUserInfo> Register(RegisterRequestDto request)
+        {
+            // Check if email already exists
+             var existingUser = _userRepository.Query()
+                 .Any(u => u.Email == request.Email);
+
+             if (existingUser)
+             {
+                 _logger.LogWarning("Registration failed: email {Email} already in use", request.Email);
+                 throw new AuthenticationError();
+             }
+             var user = new User
+             {
+                 Email = request.Email,
+                 Name = request.Name,
+                 IsAdmin = false,
+                 // set other fields as needed
+             };
+
+             user.PasswordHash = PasswordHasher.HashPassword(user, request.Password);
+
+             await _userRepository.Add(user);
+
+
+             return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
+
         }
-        catch (Exception e)
+        public AuthUserInfo? GetUserInfo(ClaimsPrincipal principal)
         {
-            logger.LogError(e.Message, e);
-            throw new ValidationException("Valided to verify JWT");
+            var userId = principal.GetUserId();
+            return _userRepository
+                .Query()
+                .SingleOrDefault(user => user.Id == userId)
+                ?.ToDto();
         }
-
-        var jwtClaims = JsonSerializer.Deserialize<JwtClaims>(jsonString, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        }) ?? throw new ValidationException("Authentication failed!");
-
-        _ = ctx.Users.FirstOrDefault(u => u.Id == jwtClaims.Id)
-            ?? throw new ValidationException("Authentication is valid, but user is not found!");
-
-        return jwtClaims;
     }
-
-    public async Task<JwtResponse> Login(LoginRequestDto dto)
-    {
-        var user = ctx.Users.FirstOrDefault(u => u.Email == dto.Email)
-                   ?? throw new ValidationException("User is not found!");
-        var passwordsMatch = user.Password ==
-                             SHA512.HashData(
-                                     Encoding.UTF8.GetBytes(dto.Password))
-                                 .Aggregate("", (current, b) => current + b.ToString("x2"));
-        if (!passwordsMatch)
-            throw new ValidationException("Password is incorrect!");
-
-        var token = CreateJwt(user);
-        return new JwtResponse(token);
-    }
-
-    public async Task<JwtResponse> Register(RegisterRequestDto dto)
-    {
-        Validator.ValidateObject(dto, new ValidationContext(dto), true);
-
-        var isEmailTaken = ctx.Users.Any(u => u.Email == dto.Email);
-        if (isEmailTaken)
-            throw new ValidationException("Email is already taken");
-
-        var salt = Guid.NewGuid().ToString();
-        var hash = SHA512.HashData(
-            Encoding.UTF8.GetBytes(dto.Password + salt));
-        var user = new User
-        {
-            Email = dto.Email,
-            CreatedAt = timeProvider.GetUtcNow().DateTime.ToUniversalTime(),
-            Id = Guid.NewGuid().ToString(),
-            Password = hash.Aggregate("", (current, b) => current + b.ToString("x2"))
-        };
-        ctx.Users.Add(user);
-        await ctx.SaveChangesAsync();
-
-        var token = CreateJwt(user);
-        return new JwtResponse(token);
-    }
-
-    private JwtBuilder CreateJwtBuilder()
-    {
-        return JwtBuilder.Create()
-            .WithAlgorithm(new HMACSHA512Algorithm())
-            .WithSecret(appOptions.JwtSecret)
-            .WithUrlEncoder(new JwtBase64UrlEncoder())
-            .WithJsonSerializer(new JsonNetSerializer())
-            .MustVerifySignature();
-    }
-
-    private string CreateJwt(User user)
-    {
-        return CreateJwtBuilder()
-            .AddClaim(nameof(User.Id), user.Id)
-            .Encode();
-    }
-}

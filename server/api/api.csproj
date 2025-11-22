@@ -9,7 +9,8 @@
 
     <ItemGroup>
         <PackageReference Include="Bogus" Version="*" />
-        <PackageReference Include="JWT" Version="11.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
@@ -22,6 +23,8 @@
         <PackageReference Include="Testcontainers.PostgreSql" Version="4.7.0" />
         <PackageReference Include="NSwag.CodeGeneration.TypeScript" Version="*" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
+        <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
     </ItemGroup>
+    
 
 </Project>

@@ -5,7 +5,7 @@ using dataccess;
 
 namespace api.Etc;
 
-public class SieveTestSeeder(MyDbContext ctx, TimeProvider timeProvider) : ISeeder
+public class SieveTestSeeder(MyDbContext ctx, TimeProvider timeProvider)
 {
     public async Task Seed()
     {

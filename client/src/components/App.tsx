@@ -1,13 +1,13 @@
-import {Home} from "../components/Home.tsx";
-import {Route, Routes} from "react-router-dom";
+import {Home} from "@components/Home.tsx";
+import Login from "@components/Login.tsx";
+import { Routes, Route } from "react-router-dom";
+
 function App() {
     return (
-        <>
-            <Routes>
-                <Route path="/" element={<Home />} />
-            </Routes>
-          <Home/>
-        </>
+        <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+        </Routes>
     )
 }
 

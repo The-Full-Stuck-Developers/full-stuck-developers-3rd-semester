@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using dataccess.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace dataccess;
 
@@ -32,7 +33,7 @@ public partial class MyDbContext : DbContext
                 .HasMaxLength(256)
                 .IsRequired();
 
-            entity.Property(e => e.Password)
+            entity.Property(e => e.PasswordHash)
                 .HasColumnName("password")
                 .HasMaxLength(512)
                 .IsRequired();

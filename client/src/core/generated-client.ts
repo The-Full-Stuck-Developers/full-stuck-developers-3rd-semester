@@ -17,11 +17,11 @@ export class AuthClient {
         this.baseUrl = baseUrl ?? "";
     }
 
-    login(dto: LoginRequestDto): Promise<JwtResponse> {
-        let url_ = this.baseUrl + "/api/Login";
+    login(request: LoginRequest): Promise<LoginResponse> {
+        let url_ = this.baseUrl + "/api/auth/Login";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(dto);
+        const content_ = JSON.stringify(request);
 
         let options_: RequestInit = {
             body: content_,
@@ -37,13 +37,13 @@ export class AuthClient {
         });
     }
 
-    protected processLogin(response: Response): Promise<JwtResponse> {
+    protected processLogin(response: Response): Promise<LoginResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as JwtResponse;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as LoginResponse;
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -51,14 +51,14 @@ export class AuthClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<JwtResponse>(null as any);
+        return Promise.resolve<LoginResponse>(null as any);
     }
 
-    register(dto: RegisterRequestDto): Promise<JwtResponse> {
-        let url_ = this.baseUrl + "/api/Register";
+    register(request: RegisterRequestDto): Promise<RegisterResponse> {
+        let url_ = this.baseUrl + "/api/auth/Register";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(dto);
+        const content_ = JSON.stringify(request);
 
         let options_: RequestInit = {
             body: content_,
@@ -74,13 +74,13 @@ export class AuthClient {
         });
     }
 
-    protected processRegister(response: Response): Promise<JwtResponse> {
+    protected processRegister(response: Response): Promise<RegisterResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as JwtResponse;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as RegisterResponse;
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -88,40 +88,83 @@ export class AuthClient {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<JwtResponse>(null as any);
+        return Promise.resolve<RegisterResponse>(null as any);
     }
 
-    whoAmI(): Promise<JwtClaims> {
-        let url_ = this.baseUrl + "/api/WhoAmI";
+    logout(): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/auth/Logout";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
             method: "POST",
             headers: {
-                "Accept": "application/json"
+                "Accept": "application/octet-stream"
             }
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processWhoAmI(_response);
+            return this.processLogout(_response);
         });
     }
 
-    protected processWhoAmI(response: Response): Promise<JwtClaims> {
+    protected processLogout(response: Response): Promise<FileResponse> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as JwtClaims;
-            return result200;
-            });
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<JwtClaims>(null as any);
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    userInfo(): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/auth/UserInfo";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUserInfo(_response);
+        });
+    }
+
+    protected processUserInfo(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
     }
 }
 
@@ -212,30 +255,28 @@ export class HealthClient {
     }
 }
 
-export interface JwtResponse {
-    token: string;
+export interface LoginResponse {
 }
 
-export interface LoginRequestDto {
+export interface LoginRequest {
     email: string;
     password: string;
+    twoFactorCode: string | undefined;
+    twoFactorRecoveryCode: string | undefined;
+}
+
+export interface RegisterResponse {
+    name: string;
 }
 
 export interface RegisterRequestDto {
     email: string;
     password: string;
-}
-
-export interface JwtClaims {
-    id: string;
+    name: string;
 }
 
 /** String constants from SieveConstants */
 export interface SieveConstants {
-    /** Constant value: "GenreName" */
-    readonly GenreName: string;
-    /** Constant value: "GenreId" */
-    readonly GenreId: string;
 }
 
 export interface FileResponse {
@@ -246,8 +287,6 @@ export interface FileResponse {
 
 /** Constant values for SieveConstants */
 export const SieveConstants = {
-    GenreName: "GenreName",
-    GenreId: "GenreId"
 } as const;;
 }
 

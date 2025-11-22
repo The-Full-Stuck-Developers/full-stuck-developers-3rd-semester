@@ -1,8 +1,15 @@
 using System.Text.Json.Serialization;
 using api.Etc;
+using api.Models;
+using api.Security;
 using api.Services;
 using dataccess;
+using dataccess.Entities;
+using dataccess.Repositories;
 using dataccess.Seeders;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Sieve.Models;
@@ -12,69 +19,131 @@ namespace api;
 
 public class Program
 {
-    public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    public static async Task Main(string[] args)
     {
-        services.AddSingleton(TimeProvider.System);
-        services.InjectAppOptions();
+        var builder = WebApplication.CreateBuilder(args);
+        ConfigureServices(builder, builder.Configuration);
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        Console.WriteLine($"Connecting to DB: {connectionString}");
+        var app = builder.Build();
 
+        if (args is [.., "setup", var defaultPassword])
+        {
+            SetupDatabase(app, defaultPassword);
+            Environment.Exit(0);
+        }
+
+        ConfigureApp(app);
+
+        await app.RunAsync();
+    }
+
+    public static void SetupDatabase(WebApplication app, string defaultPassword)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+            seeder.Seed(defaultPassword).Wait();
+        }
+    }
+
+    public static void ConfigureServices(WebApplicationBuilder builder, IConfiguration configuration)
+    {
+        var services = builder.Services;
+
+        // Bind AppOptions
+        var appOptions = new AppOptions();
+        configuration.GetSection("AppOptions").Bind(appOptions);
+        services.AddSingleton(appOptions);
+
+        //Database
         services.AddDbContext<MyDbContext>(options =>
-            options.UseNpgsql(connectionString));
+            options
+                .UseNpgsql(appOptions.DefaultConnection)
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+        services.AddSingleton(TimeProvider.System);
 
+        Console.WriteLine($"Connecting to DB: {appOptions.DefaultConnection}");
+
+        //Repositories
+        services.AddScoped<IRepository<User>, UserRepository>();
+
+        //Controllers
         services.AddControllers().AddJsonOptions(opts =>
         {
-            opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+            opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             opts.JsonSerializerOptions.MaxDepth = 128;
         });
 
+        //OpenApi
         services.AddOpenApiDocument(config =>
         {
             config.AddStringConstants(typeof(SieveConstants));
         });
 
+        //CORS
         services.AddCors();
+
+        //Core Services
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher>();
+
+        // Register Seeder
+        services.AddScoped<DbSeeder>();
+        //Exceptions
         services.AddExceptionHandler<GlobalExceptionHandler>();
 
+        services.AddProblemDetails();
+
+        // JWT Authentication
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = JwtService.CreateValidationParams(builder.Configuration);
+        });
+
+        // Global Authorization
+        services.AddAuthorization(options =>
+        {
+            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser()
+                .Build();
+        });
+
+        //Sieve
         services.Configure<SieveOptions>(options =>
         {
             options.CaseSensitive = false;
             options.DefaultPageSize = 10;
             options.MaxPageSize = 100;
         });
-
         services.AddScoped<ISieveProcessor, ApplicationSieveProcessor>();
     }
 
-    public static async Task Main(string[] args)
+    private async static void ConfigureApp(WebApplication app)
     {
-        var builder = WebApplication.CreateBuilder(args);
-
-        ConfigureServices(builder.Services, builder.Configuration);
-
-        var app = builder.Build();
-
-        app.UseExceptionHandler(config => { });
+        //Scalar and Swagger
+        app.MapScalarApiReference(options => options.OpenApiRoutePattern = "/swagger/v1/swagger.json");
         app.UseOpenApi();
         app.UseSwaggerUi();
 
-        app.MapScalarApiReference(options =>
-            options.OpenApiRoutePattern = "/swagger/v1/swagger.json"
-        );
+        //Middleware
+        app.UseExceptionHandler();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
-        app.UseCors(config => config
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowAnyOrigin()
-            .SetIsOriginAllowed(_ => true));
+        //Cors
+        app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(x => true));
 
+        //Controllers
         app.MapControllers();
 
-        app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts")
-            .GetAwaiter()
-            .GetResult();
+        //Client generation
+        app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts").GetAwaiter().GetResult();
 
         if (app.Environment.IsDevelopment())
         {
@@ -86,7 +155,5 @@ public class Program
                 await DatabaseSeeder.SeedAsync(db);
             }
         }
-
-        app.Run();
     }
 }

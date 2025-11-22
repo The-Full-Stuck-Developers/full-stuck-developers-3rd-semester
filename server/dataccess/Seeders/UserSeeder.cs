@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using dataccess;
+using dataccess.Entities;
 using dataccess.Seeders;
 
 namespace dataccess.Seeders;
@@ -20,7 +21,7 @@ public class UserSeeder : ISeeder
                 Id = Guid.NewGuid().ToString(),
                 Name = "Admin User",
                 Email = "admin@example.com",
-                Password = "hashed_password_here",
+                PasswordHash = "hashed_password_here",
                 PhoneNumber = "12345678",
                 IsAdmin = true,
                 CreatedAt = DateTime.UtcNow,
@@ -32,7 +33,7 @@ public class UserSeeder : ISeeder
                 Id = Guid.NewGuid().ToString(),
                 Name = "Regular User",
                 Email = "user@example.com",
-                Password = "hashed_password_here",
+                PasswordHash = "hashed_password_here",
                 PhoneNumber = "87654321",
                 IsAdmin = false,
                 CreatedAt = DateTime.UtcNow,

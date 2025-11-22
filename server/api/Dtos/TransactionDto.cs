@@ -1,6 +1,5 @@
 using dataccess;
 using dataccess.Entities;
-using Transaction = dataccess.Entities.Transaction;
 
 namespace Dtos;
 
