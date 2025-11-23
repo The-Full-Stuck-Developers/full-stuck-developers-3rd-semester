@@ -3,3 +3,46 @@
 @plugin "daisyui" {
     themes: all;
 }
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(60px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.animate-fade-up {
+    animation: fade-up 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.9s ease-out forwards;
+}
+
+
+
+/* Delay utilities */
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+.animation-delay-600 { animation-delay: 0.6s; }
+.animation-delay-800 { animation-delay: 0.8s; }
+.animation-delay-1000 { animation-delay: 1s; }
+.animation-delay-1200 { animation-delay: 1.2s; }
+.animation-delay-1400 { animation-delay: 1.4s; }
+.animation-delay-1600 { animation-delay: 1.6s; }
+.animation-delay-1800 { animation-delay: 1.8s; }
