@@ -4,12 +4,12 @@ namespace dataccess;
 
 public class Transaction
 {
-    public string Id { get; set; }
-    public string UserId { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid UserId { get; set; }
+    public User User { get; set; } = null!;
     public int Amount { get; set; }
     public int MobilePayTransactionNumber { get; set; }
-    public TransactionStatus Status { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public User User { get; set; }
 }

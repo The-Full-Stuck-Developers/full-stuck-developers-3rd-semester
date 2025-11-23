@@ -16,8 +16,8 @@ public class TransactionDto
         User = entity.User;
     }
     
-    public string Id { get; set; }
-    public string UserId { get; set; }
+    public Guid Id { get; set; }
+    public Guid UserId { get; set; }
     public int Amount { get; set; }
     public int MobilePayTransactionNumber { get; set; }
     public TransactionStatus Status { get; set; }

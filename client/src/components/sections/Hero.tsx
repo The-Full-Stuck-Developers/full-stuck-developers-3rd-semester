@@ -58,8 +58,8 @@ export function Hero() {
 
                         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-[#e30613]/50 transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-slide-up animation-delay-1600">
                             <RefreshCw className="w-14 h-14 mx-auto mb-4 text-[#e30613]"/>
-                            <p className="text-5xl font-black text-white">Sunday</p>
-                            <p className="text-white/80 mt-2">Every Sunday Draw</p>
+                            <p className="text-5xl font-black text-white">Draw</p>
+                            <p className="text-white/80 mt-2">Every Sunday </p>
                         </div>
 
 
