@@ -7,7 +7,7 @@ const COST_MAP: Record<number, number> = {
     5: 20,
     6: 40,
     7: 80,
-    8: 120,
+    8: 160,
 };
 
 export function GameBoard() {
