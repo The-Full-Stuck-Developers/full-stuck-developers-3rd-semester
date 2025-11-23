@@ -26,9 +26,9 @@ export function SupportCTA() {
                         Contact Admin Team
                     </button>
 
-                    <button className="px-10 py-5 rounded-full border-4 border-white text-white font-bold text-xl hover:bg-white hover:text-[#0f2b5b] transition-all duration-300">
-                        How It Works
-                    </button>
+                    {/*<button className="px-10 py-5 rounded-full border-4 border-white text-white font-bold text-xl hover:bg-white hover:text-[#0f2b5b] transition-all duration-300">*/}
+                    {/*    How It Works*/}
+                    {/*</button>*/}
                 </div>
 
                 <p className="mt-10 text-lg text-white/80">

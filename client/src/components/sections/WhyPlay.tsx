@@ -39,7 +39,7 @@ export function WhyPlay() {
                                 Weekly Drawings
                             </h3>
                             <p className="text-gray-600 leading-relaxed">
-                                New winning numbers every Saturday at 5 PM – never miss a draw.
+                                New winning numbers every Sunday – never miss a draw.
                             </p>
                         </div>
                     </div>
@@ -53,7 +53,7 @@ export function WhyPlay() {
                                 Community First
                             </h3>
                             <p className="text-gray-600 leading-relaxed">
-                                30% of all proceeds go directly to Jerne IF youth and senior teams.
+                                70% of all proceeds go directly to players.
                             </p>
                         </div>
                     </div>
@@ -67,7 +67,7 @@ export function WhyPlay() {
                                 Flexible & Fair Pricing
                             </h3>
                             <p className="text-gray-600 leading-relaxed">
-                                Pick 5–8 numbers. Prices from just 20 kr up to 120 kr per row.
+                                Pick 5–8 numbers. Prices from just 20 kr up to 160 kr per row.
                             </p>
                         </div>
                     </div>

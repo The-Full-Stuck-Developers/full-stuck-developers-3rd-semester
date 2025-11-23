@@ -1,13 +1,20 @@
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom"; 
 
 const boards = [
     { numbers: 5, price: 20, popular: false },
     { numbers: 6, price: 40, popular: false },
     { numbers: 7, price: 80, popular: true },
-    { numbers: 8, price: 120, popular: false },
+    { numbers: 8, price: 160, popular: false },
 ];
 
 export function BoardsPricing() {
+    const navigate = useNavigate();
+
+    const handleSelectBoard = () => {
+        navigate("/login");
+    };
+
     return (
         <section id="pricing" className="w-full bg-gray-50 py-20 lg:py-24">
             <div className="max-w-6xl mx-auto px-6">
@@ -25,12 +32,12 @@ export function BoardsPricing() {
                     {boards.map((board) => (
                         <div
                             key={board.numbers}
-                            className={` group relative bg-white rounded-2xl border-2 shadow-lg transition-all duration-300
-                             ${board.popular 
+                            className={`group relative bg-white rounded-2xl border-2 shadow-lg transition-all duration-300
+                                ${board.popular
                                 ? "border-[#e30613] shadow-xl scale-105 -translate-y-3"
                                 : "border-[#0f2b5b]/10 hover:border-[#e30613] hover:shadow-xl"
-                            } `} >
-
+                            }`}
+                        >
                             {board.popular && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#e30613] text-white font-black text-xs px-5 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
                                     Most Popular
@@ -38,7 +45,6 @@ export function BoardsPricing() {
                             )}
 
                             <div className="pt-10 pb-8 px-6 text-center">
-
                                 <div className={`text-5xl font-black mb-2 ${board.popular ? "text-[#e30613]" : "text-[#0f2b5b]"}`}>
                                     {board.numbers}
                                 </div>
@@ -66,13 +72,17 @@ export function BoardsPricing() {
                                     </li>
                                 </ul>
 
+                                {/* React Router version */}
                                 <button
-                                    className={`  w-full py-3.5 rounded-full font-bold text-base transition-all shadow-md
+                                    onClick={handleSelectBoard}
+                                    className={`w-full py-3.5 rounded-full font-bold text-base transition-all shadow-md
                                         ${board.popular
                                         ? "bg-[#e30613] hover:bg-[#c20510] text-white"
                                         : "bg-[#0f2b5b] hover:bg-[#0a1e3f] text-white"
                                     }`}
-                                > Select Board </button>
+                                >
+                                    Select Board
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -84,7 +94,6 @@ export function BoardsPricing() {
                         <span className="text-[#0f2b5b]">30%</span> supports <span className="text-[#e30613]">Jerne IF</span>
                     </p>
                 </div>
-
             </div>
         </section>
     );
