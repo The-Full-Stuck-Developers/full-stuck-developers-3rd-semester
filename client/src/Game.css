@@ -1,7 +1,7 @@
 .gameboard-container {
-    max-width: 700px;
+    max-width: 600px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 30px 16px;
     background: #ffffff;
     min-height: 100vh;
     text-align: center;
@@ -10,8 +10,8 @@
 }
 
 .gameboard-container h1 {
-    font-size: 2.4rem;
-    margin-bottom: 60px;
+    font-size: 2rem;
+    margin-bottom: 40px;
     color: #000000;
     font-weight: 900;
     letter-spacing: 1px;
@@ -20,17 +20,17 @@
 .gameboard-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    max-width: 600px;
-    margin: 0 auto 80px;
+    gap: 14px;
+    max-width: 500px;
+    margin: 0 auto 50px;
 }
 
 .gameboard-box {
     aspect-ratio: 1;
     background: #f5f5f5;
     border: 3px solid #dddddd;
-    border-radius: 16px;
-    font-size: 2.8rem;
+    border-radius: 14px;
+    font-size: 2.2rem;
     font-weight: bold;
     color: #000000;
     cursor: pointer;
@@ -39,16 +39,16 @@
 }
 
 .gameboard-box:hover {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
     border-color: #D32F2F;
-    box-shadow: 0 12px 25px rgba(211,47,47,0.15);
+    box-shadow: 0 10px 20px rgba(211,47,47,0.15);
 }
 
 .gameboard-box.selected {
     background: #D32F2F !important;
     color: #ffffff !important;
     border-color: #000000;
-    box-shadow: 0 0 20px rgba(211,47,47,0.5);
+    box-shadow: 0 0 18px rgba(211,47,47,0.5);
     animation: shake 0.8s ease-in-out;
 }
 
@@ -59,20 +59,20 @@
 }
 
 .gameboard-pris {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 900;
-    margin: 40px 0;
+    margin: 30px 0;
     color: #000000;
 }
 
 .gameboard-next {
-    padding: 18px 70px;
-    font-size: 1.8rem;
+    padding: 14px 56px;
+    font-size: 1.5rem;
     font-weight: bold;
     background: #D32F2F;
     color: #ffffff;
     border: 3px solid #000000;
-    border-radius: 16px;
+    border-radius: 14px;
     cursor: pointer;
     transition: all 0.3s ease;
 }

@@ -1,4 +1,4 @@
-import "./Game.css";
+import "../../Game.css";
 import { useState } from "react";
 import {toast, Toaster} from "react-hot-toast";
 
