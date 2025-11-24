@@ -20,7 +20,7 @@ public class TransactionSeeder : ISeeder
         {
             new Transaction
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 UserId = firstUser.Id,
                 Amount = 500,
                 MobilePayTransactionNumber = 111111,
@@ -29,7 +29,7 @@ public class TransactionSeeder : ISeeder
             },
             new Transaction
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 UserId = firstUser.Id,
                 Amount = 200,
                 MobilePayTransactionNumber = 222222,
