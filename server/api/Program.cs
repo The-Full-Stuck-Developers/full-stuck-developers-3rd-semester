@@ -77,11 +77,20 @@ public class Program
         //OpenApi
         services.AddOpenApiDocument(config =>
         {
-            config.AddStringConstants(typeof(SieveConstants));
+            // config.AddStringConstants(typeof(SieveConstants));
         });
 
         //CORS
-        services.AddCors();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowLocalhost5173", policy =>
+            {
+                policy.WithOrigins("http://localhost:5173")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+            });
+        });
 
         //Core Services
         services.AddScoped<IAuthService, AuthService>();
@@ -96,22 +105,26 @@ public class Program
 
         // JWT Authentication
         services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = JwtService.CreateValidationParams(builder.Configuration);
-        });
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = JwtService.CreateValidationParams(builder.Configuration);
+            });
 
         // Global Authorization
+        services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
         services.AddAuthorization(options =>
         {
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
+
+            options.AddPolicy("IsAdmin", policy =>
+                policy.AddRequirements(new IsAdmin()));
         });
 
         //Sieve
@@ -126,23 +139,29 @@ public class Program
 
     private async static void ConfigureApp(WebApplication app)
     {
-        //Scalar and Swagger
+        // Exception handling should come first
+        app.UseExceptionHandler();
+
+        // Enable CORS BEFORE authentication/authorization
+        app.UseCors(config => config
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowAnyOrigin()
+            .SetIsOriginAllowed(x => true));
+
+        // Authentication and Authorization
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        // Swagger/OpenAPI (can be before or after CORS/auth)
         app.MapScalarApiReference(options => options.OpenApiRoutePattern = "/swagger/v1/swagger.json");
         app.UseOpenApi();
         app.UseSwaggerUi();
 
-        //Middleware
-        app.UseExceptionHandler();
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        //Cors
-        app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().SetIsOriginAllowed(x => true));
-
-        //Controllers
+        // Map controllers
         app.MapControllers();
 
-        //Client generation
+        // Generate client (optional, can be after mapping controllers)
         app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts").GetAwaiter().GetResult();
 
         if (app.Environment.IsDevelopment())
