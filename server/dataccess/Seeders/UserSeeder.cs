@@ -19,7 +19,7 @@ public class UserSeeder : ISeeder
         {
             new User
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 Name = "Admin User",
                 Email = "admin@example.com",
                 PasswordHash = "hashed_password_here",
@@ -31,7 +31,7 @@ public class UserSeeder : ISeeder
             },
             new User
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 Name = "Regular User",
                 Email = "user@example.com",
                 PasswordHash = "hashed_password_here",
@@ -44,7 +44,7 @@ public class UserSeeder : ISeeder
         };
 
         var faker = new Faker<User>()
-            .RuleFor(u => u.Id, f => Guid.NewGuid().ToString())
+            .RuleFor(u => u.Id, f => Guid.NewGuid())
             .RuleFor(u => u.Name, f => f.Name.FullName())
             .RuleFor(u => u.Email, f => f.Internet.Email())
             .RuleFor(u => u.PasswordHash, f => "hashed_password_here")

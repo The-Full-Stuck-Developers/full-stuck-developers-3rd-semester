@@ -17,17 +17,17 @@ public class GameSeeder : ISeeder
         {
             new Game
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 StartTime = DateTime.UtcNow.AddDays(-1),
-                IsActive = false,
+                // IsActive = false,
                 WinningNumbers = "1,5,10,14,22",
                 Revenue = 10000
             },
             new Game
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = Guid.NewGuid(),
                 StartTime = DateTime.UtcNow.AddMinutes(-30),
-                IsActive = true,
+                // IsActive = true,
                 WinningNumbers = "4,1,16,8,23",
                 Revenue = 5500
             }
