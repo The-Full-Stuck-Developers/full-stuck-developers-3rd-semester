@@ -35,7 +35,7 @@ public class DbSeeder(
                 new Game
                 {
                     StartTime = DateTime.UtcNow,
-                    IsActive = true,
+                    // IsActive = true,
                     Revenue = 0,
                     WinningNumbers = null
                 });

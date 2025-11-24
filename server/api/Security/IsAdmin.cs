@@ -15,7 +15,10 @@ public class AdminAuthorizationHandler(IRepository<User> userRepository) : Autho
         AuthorizationHandlerContext context,
         IsAdmin requirement)
     {
-        var userIdClaim = context.User.FindFirst("sub")?.Value ?? context.User.FindFirst("id")?.Value;
+        var userIdClaim = context.User.FindFirst("sub")?.Value
+                          ?? context.User.FindFirst("id")?.Value;
+
+        var userId = Guid.Parse(userIdClaim!);
 
         if (string.IsNullOrEmpty(userIdClaim))
         {
@@ -24,7 +27,7 @@ public class AdminAuthorizationHandler(IRepository<User> userRepository) : Autho
         }
 
         var user = await userRepository.Query()
-            .FirstOrDefaultAsync(u => u.Id == userIdClaim);
+            .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user?.IsAdmin == true)
         {

@@ -5,7 +5,7 @@ import {WhyPlay} from "@components/sections/WhyPlay.tsx";
 import {BoardsPricing} from "@components/sections/BoardsPricing.tsx";
 import {SupportCTA} from "@components/sections/SupportCTA.tsx";
 import {Footer} from "@components/sections/Footer.tsx";
-import {GameBoard} from "@components/sections/GameBoard.tsx";
+import {GameBoard} from "@components/sections/userSection/GameBoard.tsx";
 
 export function Home() {
     return (
@@ -13,7 +13,7 @@ export function Home() {
             <Navbar/>
             <Hero/>
             <AboutGame/>
-            <GameBoard/>
+            {/*<GameBoard/>*/}
             <WhyPlay/>
             <BoardsPricing/>
             <SupportCTA/>

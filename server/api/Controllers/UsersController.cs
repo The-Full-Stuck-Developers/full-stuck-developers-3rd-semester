@@ -24,8 +24,6 @@ public class UsersController(
     // [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<PagedResult<UserDto>>> GetAllUsers([FromQuery] SieveModel sieveModel)
     {
-        Console.Write("tuka smeee");
-
         var query = userRepository.Query();
         var result = sieveProcessor.Apply(sieveModel, query);
         var total = await userRepository.Query().CountAsync();
@@ -43,7 +41,7 @@ public class UsersController(
 
     [HttpGet("{id}")]
     // [Authorize(Policy = "IsAdmin")]
-    public async Task<ActionResult<UserDto>> GetUserById(string id)
+    public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {
         var user = await userRepository.Query()
             .FirstOrDefaultAsync(u => u.Id == id);

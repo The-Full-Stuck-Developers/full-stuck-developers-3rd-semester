@@ -1,4 +1,4 @@
-import "../../Game.css";
+import "../../../gameBoard.css";
 import { useState } from "react";
 import {toast, Toaster} from "react-hot-toast";
 
@@ -7,7 +7,7 @@ const COST_MAP: Record<number, number> = {
     5: 20,
     6: 40,
     7: 80,
-    8: 120,
+    8: 160,
 };
 
 export function GameBoard() {
