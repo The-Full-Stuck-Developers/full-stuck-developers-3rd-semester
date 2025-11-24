@@ -25,9 +25,9 @@ const Pagination: React.FC<PaginationProps> = ({currentPage, totalPages, onPageC
     };
 
     return (
-        <div className="join">
+        <div className=" flex h-full">
             <button
-                className="join-item btn btn-outline"
+                className={`${currentPage ===1 ? "hidden" : "block"} w-20 bg-[#0f2b5b]! text-white cursor-not-allowed rounded-s-lg`}
                 onClick={handlePrev}
                 disabled={currentPage === 1}
             >
@@ -36,17 +36,17 @@ const Pagination: React.FC<PaginationProps> = ({currentPage, totalPages, onPageC
 
             {startPage > 1 && (
                 <>
-                    <button className="join-item btn btn-outline" onClick={() => onPageChange(1)}>
+                    <button className="size-10 hover:bg-slate-200 cursor-pointer border border-[#0f2b5b]" onClick={() => onPageChange(1)}>
                         1
                     </button>
-                    {startPage > 2 && <span className="join-item btn btn-ghost cursor-default">...</span>}
+                    {startPage > 2 && <span className={"size-10 text-center align-middle cursor-default border border-[#0f2b5b] flex items-center justify-center pb-2.5"}>...</span>}
                 </>
             )}
 
             {pages.map((page) => (
                 <button
                     key={page}
-                    className={`join-item btn ${page === currentPage ? "btn-active" : "btn-outline"}`}
+                    className={`size-10  ${page === currentPage ? "bg-[#0f2b5b] text-white cursor-not-allowed" : "hover:bg-slate-200 cursor-pointer border border-[#0f2b5b]"}`}
                     onClick={() => onPageChange(page)}
                 >
                     {page}
@@ -55,15 +55,15 @@ const Pagination: React.FC<PaginationProps> = ({currentPage, totalPages, onPageC
 
             {endPage < totalPages && (
                 <>
-                    {endPage < totalPages - 1 && <span className="join-item btn btn-ghost cursor-default">...</span>}
-                    <button className="join-item btn btn-outline" onClick={() => onPageChange(totalPages)}>
+                    {endPage < totalPages - 1 && <span className="size-10 text-center align-middle cursor-default border border-[#0f2b5b] flex items-center justify-center pb-2.5">...</span>}
+                    <button className="size-10 hover:bg-slate-200 cursor-pointer border border-[#0f2b5b]" onClick={() => onPageChange(totalPages)}>
                         {totalPages}
                     </button>
                 </>
             )}
 
             <button
-                className="join-item btn btn-outline"
+                className={`${currentPage === totalPages ? "hidden" : "block"} w-20 bg-[#0f2b5b] text-white cursor-pointer rounded-e-lg `}
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
             >
