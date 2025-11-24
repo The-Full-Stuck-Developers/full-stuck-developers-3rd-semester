@@ -101,10 +101,9 @@
           "200": {
             "description": "",
             "content": {
-              "application/octet-stream": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "binary"
+                  "$ref": "#/components/schemas/AuthUserInfo"
                 }
               }
             }
@@ -153,13 +152,39 @@
           }
         }
       }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Home"
+        ],
+        "operationId": "Home_Home",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
       "LoginResponse": {
         "type": "object",
-        "additionalProperties": false
+        "additionalProperties": false,
+        "properties": {
+          "jwt": {
+            "type": "string"
+          }
+        }
       },
       "LoginRequest": {
         "type": "object",
@@ -210,6 +235,21 @@
           "name": {
             "type": "string",
             "minLength": 1
+          }
+        }
+      },
+      "AuthUserInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
           }
         }
       },
