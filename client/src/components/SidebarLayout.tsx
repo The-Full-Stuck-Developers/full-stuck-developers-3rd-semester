@@ -1,7 +1,8 @@
-import React, {type JSX, useRef, useState} from "react";
-import {Outlet, useNavigate, useLocation} from "react-router-dom";
-import GroupIcon from '@mui/icons-material/Group';
-import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import React, {type JSX, useEffect, useRef, useState} from "react";
+import {Outlet, useLocation, useNavigate} from "react-router-dom";
+import Logo from "../jerneif-logo.png";
+import {Backpack, Dice5, Menu, Users} from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface MenuItem {
     label: string;
@@ -9,32 +10,45 @@ interface MenuItem {
     icon: JSX.Element;
 }
 
+const tempUser = {
+    fullName: "Jan Kowalski",
+    balanceCents: 124500,
+};
+
 export const SidebarLayout: React.FC = () => {
     const checkboxRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
     const [open, setOpen] = useState(true);
+    const balanceDKK = (tempUser.balanceCents / 100).toFixed(2);
+    const [userMenu, setUserMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    const handleLogout = () => {
+        // Implement later token/localStorage etc
+        navigate("/login");
+    };
 
     const menuItems: MenuItem[] = [
         {
             label: "Users",
             path: "/admin/users",
             icon: (
-                <GroupIcon/>
+                <Users size={26}/>
             ),
         },
         {
             label: "Games",
             path: "",
             icon: (
-                <GroupIcon/>
+                <Dice5 size={26}/>
             ),
         },
         {
             label: "Something else",
             path: "",
             icon: (
-                <GroupIcon/>
+                <Backpack size={26}/>
             ),
         },
 
@@ -62,64 +76,122 @@ export const SidebarLayout: React.FC = () => {
         return location.pathname === path;
     };
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setUserMenu(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
     return (
-        <div className="drawer lg:drawer-open">
-            <input
-                ref={checkboxRef}
-                id="my-drawer-4"
-                type="checkbox"
-                className="drawer-toggle"
-                defaultChecked={true}
-            />
-            <div className="drawer-content flex flex-col">
-                {/* Navbar */}
-                <nav className="navbar w-full bg-base-200">
-                    <button
-                        onClick={handleToggleDrawer}
-                        aria-label="open sidebar"
-                        className="btn btn-square btn-ghost"
-                    >
-                        <span
-                            className={`transition-transform duration-300 ${
-                                open ? "rotate-0" : "rotate-180"
-                            }`}
-                        >
-                            <KeyboardDoubleArrowLeftIcon/>
-                        </span>
-                    </button>
-                </nav>
-                {/* Page content */}
-                <div className="p-4 flex-1 overflow-y-auto">
-                    <Outlet/>
-                </div>
-            </div>
+        <div className={" overflow-x-hidden"}>
+            <style>{`
+                @keyframes fadeInScale {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+                }
+            `}</style>
+            <div className="drawer">
+                <input id="my-drawer" type="checkbox" className="drawer-toggle"/>
+                <div className="">
+                    {/*Top nav*/}
+                    <nav
+                        className="navbar w-screen top-0 left-0 right-0 z-50 bg-[#0f2b5b]/95 backdrop-blur-lg border-b border-white/10">
+                        <div className="w-full px-6 py-5 flex flex-row items-center justify-between">
+                            <label htmlFor="my-drawer" className="btn btn-square">
+                                    <span
+                                        className={`transition-transform duration-300 ${
+                                            open ? "rotate-0" : "rotate-180"
+                                        }`}
+                                    >
+                                        <Menu size={28}/>
+                                    </span>
+                            </label>
 
-            {/* Sidebar Container */}
-            <div className="drawer-side z-50">
-                <label
-                    onClick={handleCloseDrawer}
-                    htmlFor="my-drawer-4"
-                    aria-label="close sidebar"
-                    className="drawer-overlay"
-                ></label>
+                            <div className="flex items-center gap-4 group">
+                                <div
+                                    className="w-12 h-12 rounded-full bg-white/10 border-2 border-dashed border-white/30 flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src={Logo}
+                                        alt="Jerne IF Logo"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = "none";
+                                        }}
+                                    />
+                                </div>
+                                <span className="text-2xl font-black text-white tracking-tight">
+                                        Jerne IF
+                                    </span>
+                            </div>
+                            <div ref={menuRef} className="relative z-50">
+                                <button
+                                    onClick={() => setUserMenu(!userMenu)}
+                                    className="px-6 py-3 rounded-full bg-[#e30613] hover:bg-[#c20510] text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                                >
+                                    {tempUser.fullName}
+                                </button>
 
-                {/* Sidebar Content */}
-                <ul className="menu min-h-full w-80 bg-base-200 m-0 p-0">
-                    <div className={"ps-3 pt-5 mb-3"}>
-                        <span className={"text-2xl text-center"}>Admin panel</span>
+                                {userMenu && (
+                                    <div
+                                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg overflow-hidden z-50 opacity-0 scale-95 animate-[fadeInScale_200ms_ease-out_forwards]"
+                                        style={{
+                                            animation: 'fadeInScale 200ms ease-out forwards',
+                                            transformOrigin: 'top right'
+                                        }}
+                                    >
+                                        <Link to="/" className={"w-full block text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"}>
+                                            My profile
+                                        </Link>
+                                        <button
+                                            onClick={() => {
+                                                handleLogout();
+                                                setUserMenu(false);
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className={"p-14 mx-0"}>
+                        <Outlet/>
                     </div>
-                    {menuItems.map((item) => (
-                        <li key={item.path}>
-                            <button
-                                onClick={() => handleMenuClick(item.path)}
-                                className={`py-5 ${isActive(item.path) ? "bg-base-300 text-primary" : "hover:bg-base-200"}
-`}                            >
-                                {item.icon}
-                                <span>{item.label}</span>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                </div>
+
+                {/*Side Drawer*/}
+                <div className="drawer-side">
+                    <label htmlFor="my-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
+                    <ul className="menu min-h-full w-80 bg-base-200 m-0 p-0">
+                        <div className={"ps-3 pt-5 mb-3"}>
+                            <span className={"text-2xl text-center"}>Admin panel</span>
+                        </div>
+                        {menuItems.map((item, index) => (
+                            <li key={`${item.label}-${index}`}>
+                                <button
+                                    onClick={() => handleMenuClick(item.path)}
+                                    className={`py-5 ${isActive(item.path) ? "bg-[#0f2b5b] text-white" : "hover:bg-[#576a8c] hover:text-white"}`}>
+                                    {item.icon}
+                                    <span>{item.label}</span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         </div>
     );

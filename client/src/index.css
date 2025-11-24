@@ -3,49 +3,6 @@
     themes: all;
 }
 
-/* Drawer fixes for Tailwind v4 */
-.drawer-toggle:not(:checked) ~ .drawer-side {
-    pointer-events: none;
-}
-
-.drawer-toggle:checked ~ .drawer-side {
-    pointer-events: auto;
-}
-
-/* Drawer animation */
-.drawer {
-    --drawer-width: 17.5rem;
-}
-
-.drawer-content {
-    transition: margin-left 0.4s ease-in-out;
-    margin-left: 0;
-}
-
-.drawer-toggle:checked ~ .drawer-content {
-    margin-left: var(--drawer-width);
-}
-
-.drawer-side {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: var(--drawer-width);
-    height: 100vh;
-    transform: translateX(-100%);
-    transition: transform 0.4s ease-in-out;
-    z-index: 50;
-}
-
-.drawer-toggle:checked ~ .drawer-side {
-    transform: translateX(0);
-}
-
-.drawer-overlay {
-    position: absolute;
-    inset: 0;
-}
-
 @keyframes fade-up {
     from {
         opacity: 0;

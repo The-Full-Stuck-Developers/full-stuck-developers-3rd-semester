@@ -6,7 +6,6 @@ export function Navbar() {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f2b5b]/95 backdrop-blur-lg border-b border-white/10">
             <div className="max-w-7xl mx-auto px-6 py-5">
-
                 <div className="flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-4 group">
                         <div className="w-12 h-12 rounded-full bg-white/10 border-2 border-dashed border-white/30 flex items-center justify-center overflow-hidden">

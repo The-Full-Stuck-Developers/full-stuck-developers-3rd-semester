@@ -13,21 +13,29 @@ public class GameSeeder : ISeeder
     {
         if (db.Games.Any()) return;
 
+        var now = DateTime.UtcNow;
+
         var games = new List<Game>
         {
             new Game
             {
                 Id = Guid.NewGuid(),
-                StartTime = DateTime.UtcNow.AddDays(-1),
-                // IsActive = false,
+                StartTime = now.AddDays(-1),
+                BetDeadline = now.AddDays(-2),
+                DrawDate = now.AddDays(-1),
+                WeekNumber = 42,
+                Year = now.Year,
                 WinningNumbers = "1,5,10,14,22",
                 Revenue = 10000
             },
             new Game
             {
                 Id = Guid.NewGuid(),
-                StartTime = DateTime.UtcNow.AddMinutes(-30),
-                // IsActive = true,
+                StartTime = now.AddMinutes(-30),
+                BetDeadline = now.AddHours(-1),
+                DrawDate = now,
+                WeekNumber = 43,
+                Year = now.Year,
                 WinningNumbers = "4,1,16,8,23",
                 Revenue = 5500
             }

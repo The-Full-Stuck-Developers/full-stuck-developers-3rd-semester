@@ -149,10 +149,6 @@ public class Program
             .AllowAnyOrigin()
             .SetIsOriginAllowed(x => true));
 
-        // Authentication and Authorization
-        app.UseAuthentication();
-        app.UseAuthorization();
-
         // Swagger/OpenAPI (can be before or after CORS/auth)
         app.MapScalarApiReference(options => options.OpenApiRoutePattern = "/swagger/v1/swagger.json");
         app.UseOpenApi();
@@ -163,6 +159,10 @@ public class Program
 
         // Generate client (optional, can be after mapping controllers)
         app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts").GetAwaiter().GetResult();
+
+        // Authentication and Authorization
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         if (app.Environment.IsDevelopment())
         {
