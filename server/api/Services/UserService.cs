@@ -1,50 +1,61 @@
-using System.ComponentModel.DataAnnotations;
-using api.Models.Dtos.Requests.User;
-using dataccess;
-using dataccess.Entities;
+using api.Models;
 using Dtos;
+using dataccess.Entities;
+using dataccess.Repositories;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
 
 namespace api.Services;
 
-public class UserService(MyDbContext dbContext) : IUserService
+// public interface IUserService
+// {
+//     Task<PagedResult<UserDto>> GetAllUsers(SieveModel sieveModel);
+//     Task<UserDto?> GetUserById(Guid id);
+//     Task DeleteUser(Guid id);
+// }
+
+public class UserService(
+    IRepository<User> userRepository,
+    ISieveProcessor sieveProcessor) : IUserService
 {
-    public Task<List<UserDto>> GetAllUsers()
+    public async Task<PagedResult<UserDto>> GetAllUsers(SieveModel sieveModel)
     {
-        return dbContext.Users.Select(u => new UserDto(u)).ToListAsync();
-    }
+        var query = userRepository.Query().Where(u => u.DeletedAt == null);
+        var result = sieveProcessor.Apply(sieveModel, query);
+        var total = await query.CountAsync();
+        var items = await result.ToListAsync();
+        var users = items.Select(u => new UserDto(u)).ToList();
 
-    public Task<UserDto?> GetUserById(Guid id)
-    {
-        return dbContext.Users.Where(u => u.Id == id).Select(u => new UserDto(u)).FirstOrDefaultAsync();
-    }
-
-    public async Task<UserDto> CreateUser(CreateUserDto dto)
-    {
-        Validator.ValidateObject(dto, new ValidationContext(dto), true);
-
-        var user = new User
+        return new PagedResult<UserDto>
         {
-            Id = Guid.NewGuid(),
-            Name = dto.Name,
-            Email = dto.Email,
-            PhoneNumber = dto.PhoneNumber,
-            CreatedAt = DateTime.UtcNow,
-            IsAdmin = false,
+            Items = users,
+            Total = total,
+            PageSize = sieveModel.PageSize ?? 10,
+            PageNumber = sieveModel.Page ?? 1
         };
-            
-            dbContext.Users.Add(user);
-            await dbContext.SaveChangesAsync();
-            return new UserDto(user);
     }
 
-    public async Task<UserDto> UpdateUser(UpdateUserDto dto)
+    public async Task<UserDto?> GetUserById(Guid id)
     {
-        throw new NotImplementedException();
+        var user = await userRepository.Query()
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        return user == null ? null : new UserDto(user);
     }
 
-    public Task DeleteUser(Guid id)
+    public async Task DeleteUser(Guid id)
     {
-        throw new NotImplementedException();
+        var user = await userRepository.Query()
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null)
+        {
+            throw new KeyNotFoundException($"User with id {id} not found");
+        }
+
+        await userRepository.DeleteAsync(user);
     }
 }

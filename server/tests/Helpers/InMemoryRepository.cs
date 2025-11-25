@@ -22,8 +22,28 @@ class InMemoryRespository<T>(IList<T> entities) : IRepository<T>
         await Add(entity);
     }
 
+    public Task AddAsync(T entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task DeleteAsync(T entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<T?> GetAsync(Func<T, bool> predicate)
+    {
+        throw new NotImplementedException();
+    }
+
     public IQueryable<T> Query()
     {
         return entities.AsQueryable();
+    }
+
+    public Task UpdateAsync(T entity)
+    {
+        throw new NotImplementedException();
     }
 }

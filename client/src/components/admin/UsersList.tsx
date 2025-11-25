@@ -26,6 +26,7 @@ export default function UsersList() {
 
         client.getAllUsers(null, null, page, pageSize)
             .then(res => {
+                console.log(res)
                 setUsers(res.items);
                 setTotalPages(Math.ceil(res.total / pageSize));
             })
@@ -37,7 +38,20 @@ export default function UsersList() {
     }, [currentPage]);
 
     const handleDelete = (user: UserDto) => {
-        return undefined;
+        const client = new UsersClient(baseUrl, {
+            fetch: async (url, init) => {
+                init = init ?? {};
+                init.headers = {
+                    ...(init.headers ?? {}),
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                };
+                return fetch(url, init);
+            },
+        });
+
+        client.deleteUser(user.id!)
+            .then(() => fetchUsers(currentPage))
+            .catch(console.error);
     };
 
     const handleEdit = (user: UserDto) => {
