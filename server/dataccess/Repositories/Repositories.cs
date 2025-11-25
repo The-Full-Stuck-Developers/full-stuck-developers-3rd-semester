@@ -11,6 +11,11 @@ public class UserRepository(MyDbContext context) : BaseRepository<User>(context)
     protected override DbSet<User> Set => Context.Users;
 }
 
+public class GameRepository(MyDbContext context) : BaseRepository<Game>(context)
+{
+    protected override DbSet<Game> Set => Context.Games;
+}
+
 public abstract class BaseRepository<T>(MyDbContext context) : IRepository<T>
     where T : class
 {

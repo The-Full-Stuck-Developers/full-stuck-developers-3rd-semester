@@ -5,7 +5,7 @@ namespace api.Services;
 
 public interface IGameService
 {
-    Task<Game> GetCurrentGameAsync();                    
+    Task<Game> GetCurrentGameAsync(Guid gameId);                    
     Task<Game> GetOrCreateCurrentGameAsync();           
     Task<Game> DrawWinningNumbersAsync(Guid gameId, string winningNumbersCsv, Guid adminId);
     Task<List<Bet>> GetDigitalWinningBetsAsync(Guid gameId);    

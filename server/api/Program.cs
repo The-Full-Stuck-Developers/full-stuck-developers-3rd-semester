@@ -56,16 +56,19 @@ public class Program
         services.AddSingleton(appOptions);
 
         //Database
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
         services.AddDbContext<MyDbContext>(options =>
             options
-                .UseNpgsql(appOptions.DefaultConnection)
+                .UseNpgsql(connectionString)
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+
         services.AddSingleton(TimeProvider.System);
 
         Console.WriteLine($"Connecting to DB: {appOptions.DefaultConnection}");
 
         //Repositories
         services.AddScoped<IRepository<User>, UserRepository>();
+        services.AddScoped<IRepository<Game>, GameRepository>();
 
         //Controllers
         services.AddControllers().AddJsonOptions(opts =>
@@ -137,42 +140,29 @@ public class Program
         services.AddScoped<ISieveProcessor, ApplicationSieveProcessor>();
     }
 
-    private async static void ConfigureApp(WebApplication app)
+    private static async Task ConfigureApp(WebApplication app)
     {
-        // Exception handling should come first
         app.UseExceptionHandler();
+        app.UseCors("AllowLocalhost5173");
 
-        // Enable CORS BEFORE authentication/authorization
-        app.UseCors(config => config
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowAnyOrigin()
-            .SetIsOriginAllowed(x => true));
-
-        // Swagger/OpenAPI (can be before or after CORS/auth)
-        app.MapScalarApiReference(options => options.OpenApiRoutePattern = "/swagger/v1/swagger.json");
+        // Swagger MUST be before auth
         app.UseOpenApi();
         app.UseSwaggerUi();
 
-        // Map controllers
-        app.MapControllers();
-
-        // Generate client (optional, can be after mapping controllers)
-        app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts").GetAwaiter().GetResult();
-
-        // Authentication and Authorization
+        // Auth after swagger
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.MapControllers();
+
+        await app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts");
+
         if (app.Environment.IsDevelopment())
         {
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-
-                await db.Database.MigrateAsync();
-                await DatabaseSeeder.SeedAsync(db);
-            }
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+            await db.Database.MigrateAsync();
+            await DatabaseSeeder.SeedAsync(db);
         }
     }
 }
