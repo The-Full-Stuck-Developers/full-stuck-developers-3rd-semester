@@ -153,12 +153,6 @@
         }
       }
     },
-    "/": {
-      "get": {
-        "tags": [
-          "Home"
-        ],
-        "operationId": "Home_Home",
     "/api/Users": {
       "get": {
         "tags": [
@@ -355,7 +349,8 @@
         "additionalProperties": false,
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "guid"
           },
           "name": {
             "type": "string"
@@ -365,7 +360,6 @@
           }
         }
       },
-      "SieveConstants": {
       "PagedResultOfUserDto": {
         "type": "object",
         "additionalProperties": false,

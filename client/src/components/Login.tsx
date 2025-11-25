@@ -1,11 +1,9 @@
-import { useState } from "react";
-import axios from "axios";
-import {useAuth} from "../hooks/auth.tsx";
+import {useState} from "react";
 import {useNavigate} from "react-router";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import {type SubmitHandler, useForm} from "react-hook-form";
 import type {LoginRequest} from "@core/generated-client.ts";
 import toast from "react-hot-toast";
-
+import {useAuth} from "../hooks/auth.tsx";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -17,7 +15,7 @@ export default function Login() {
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm<LoginRequest>();
 
     const onSubmit: SubmitHandler<LoginRequest> = async (data) => {

@@ -6,7 +6,9 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "../vite-env.d.ts"
+    "../vite-env.d.ts",
+    "../**/*.tsx",
+    "../**/*.ts",
   ],
   "references": [
     {

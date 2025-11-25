@@ -250,9 +250,7 @@ export class HealthClient {
     }
 }
 
-
-export class HomeClient {
-
+export class UsersClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -261,7 +259,6 @@ export class HomeClient {
         this.http = http ? http : window as any;
         this.baseUrl = baseUrl ?? "";
     }
-
 
     getAllUsers(filters: string | null | undefined, sorts: string | null | undefined, page: number | null | undefined, pageSize: number | null | undefined): Promise<PagedResultOfUserDto> {
         let url_ = this.baseUrl + "/api/Users?";
@@ -273,13 +270,11 @@ export class HomeClient {
             url_ += "Page=" + encodeURIComponent("" + page) + "&";
         if (pageSize !== undefined && pageSize !== null)
             url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
             method: "GET",
             headers: {
-
                 "Accept": "application/json"
             }
         };
@@ -352,21 +347,16 @@ export class HomeClient {
         let options_: RequestInit = {
             method: "DELETE",
             headers: {
-
                 "Accept": "application/octet-stream"
             }
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-
-    protected processHome(response: Response): Promise<FileResponse> {
-
             return this.processDeleteUser(_response);
         });
     }
 
     protected processDeleteUser(response: Response): Promise<FileResponse> {
-
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200 || status === 206) {
@@ -396,6 +386,7 @@ export interface LoginResponse {
 export interface LoginRequest {
     email: string;
     password: string;
+    twoFactorCode: string | undefined;
     twoFactorRecoveryCode: string | undefined;
 }
 
@@ -409,6 +400,11 @@ export interface RegisterRequestDto {
     name: string;
 }
 
+export interface AuthUserInfo {
+    id: string;
+    name: string;
+    isAdmin: boolean;
+}
 
 export interface PagedResultOfUserDto {
     items: UserDto[];
@@ -428,16 +424,13 @@ export interface UserDto {
     createdAt: string;
     updatedAt: string | undefined;
     deletedAt: string | undefined;
-
 }
 
 export interface FileResponse {
     data: Blob;
     status: number;
     fileName?: string;
-
     headers?: { [name: string]: any };
-
 }
 
 export class ApiException extends Error {

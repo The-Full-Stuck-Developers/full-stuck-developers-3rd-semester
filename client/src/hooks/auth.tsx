@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom";
-import {authClient} from "../api-clients";
+import {useNavigate} from "react-router-dom";
 import {useAtom} from "jotai";
 import {tokenAtom, userInfoAtom} from "../atoms/token";
-import type { AuthUserInfo, LoginRequest } from "../core/generated-client";
+import type {AuthUserInfo, LoginRequest} from "../core/generated-client";
+import {authClient} from "../api-clients.ts";
 
 type AuthHook = {
     user: AuthUserInfo | null;
@@ -21,7 +21,7 @@ export const useAuth = () => {
         navigate("/");
     }
 
-    const logout = async() => {
+    const logout = async () => {
         setJwt(null);
         navigate("/login");
     }
