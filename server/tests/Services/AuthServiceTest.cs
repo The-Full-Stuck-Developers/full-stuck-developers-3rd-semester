@@ -28,7 +28,7 @@ public class AuthServiceTest
             {
                 new User()
                 {
-                    Id = "user1",
+                    Id = Guid.NewGuid(),
                     Name = "User1",
                     Email = "admin@example.com",
                     PasswordHash = Hash("fakepassword"),
@@ -36,7 +36,7 @@ public class AuthServiceTest
                 },
                 new User()
                 {
-                    Id = "user2",
+                    Id = Guid.NewGuid(),
                     Name = "User2",
                     Email = "user2@example.com",
                     PasswordHash = Hash("fakepassword"),

@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom"; 
 
 const boards = [
     { numbers: 5, price: 20, popular: false },
@@ -8,69 +9,92 @@ const boards = [
 ];
 
 export function BoardsPricing() {
-    return (
-        <section id="pricing" className="w-full bg-slate-100 py-28">
-            <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center gap-16">
+    const navigate = useNavigate();
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 w-full">
+    const handleSelectBoard = () => {
+        navigate("/login");
+    };
+
+    return (
+        <section id="pricing" className="w-full bg-gray-50 py-20 lg:py-24">
+            <div className="max-w-6xl mx-auto px-6">
+
+                <div className="text-center mb-12">
+                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0f2b5b] tracking-tighter">
+                        CHOOSE YOUR BOARD
+                    </h2>
+                    <p className="mt-3 text-lg text-gray-700 font-medium">
+                        The more numbers you pick — the bigger your chance to win
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {boards.map((board) => (
                         <div
                             key={board.numbers}
-                            className={`relative bg-white rounded-3xl border shadow-md px-10 py-16 flex flex-col items-center text-center
-                                ${board.popular ? "border-blue-400 shadow-lg scale-[1.05]" : "border-slate-200"}
-                            `}
+                            className={`group relative bg-white rounded-2xl border-2 shadow-lg transition-all duration-300
+                                ${board.popular
+                                ? "border-[#e30613] shadow-xl scale-105 -translate-y-3"
+                                : "border-[#0f2b5b]/10 hover:border-[#e30613] hover:shadow-xl"
+                            }`}
                         >
                             {board.popular && (
-                                <span className="absolute -top-4 right-5 bg-blue-600 text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow">
-                                    Popular
-                                </span>
+                                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#e30613] text-white font-black text-xs px-5 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
+                                    Most Popular
+                                </div>
                             )}
 
-                            <p className="text-6xl font-extrabold text-emerald-600 mb-2">
-                                {board.numbers}
-                            </p>
-                            <p className="text-lg uppercase tracking-wide text-slate-500 mb-10">
-                                Numbers
-                            </p>
+                            <div className="pt-10 pb-8 px-6 text-center">
+                                <div className={`text-5xl font-black mb-2 ${board.popular ? "text-[#e30613]" : "text-[#0f2b5b]"}`}>
+                                    {board.numbers}
+                                </div>
+                                <p className="text-sm uppercase tracking-wider text-gray-600 font-bold mb-6">
+                                    Numbers
+                                </p>
 
-                            <div className="mb-10">
-                                <span className="text-4xl font-bold text-slate-900">{board.price}</span>
-                                <span className="text-xl text-slate-500 ml-1">DKK</span>
+                                <div className="mb-8">
+                                    <span className="text-4xl font-black text-[#0f2b5b]">{board.price}</span>
+                                    <span className="text-xl font-medium text-gray-600 ml-1">kr</span>
+                                </div>
+
+                                <ul className="space-y-3 text-left text-gray-700 text-sm font-medium mb-8">
+                                    <li className="flex items-center gap-2">
+                                        <Check size={18} className="text-[#e30613]" />
+                                        Pick from 1–16
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <Check size={18} className="text-[#e30613]" />
+                                        Weekly drawings
+                                    </li>
+                                    <li className="flex items-center gap-2">
+                                        <Check size={18} className="text-[#e30613]" />
+                                        Auto-repeat option
+                                    </li>
+                                </ul>
+
+                                {/* React Router version */}
+                                <button
+                                    onClick={handleSelectBoard}
+                                    className={`w-full py-3.5 rounded-full font-bold text-base transition-all shadow-md
+                                        ${board.popular
+                                        ? "bg-[#e30613] hover:bg-[#c20510] text-white"
+                                        : "bg-[#0f2b5b] hover:bg-[#0a1e3f] text-white"
+                                    }`}
+                                >
+                                    Select Board
+                                </button>
                             </div>
-
-                            <ul className="space-y-4 text-lg text-slate-600 mb-12">
-                                <li className="flex items-center gap-3">
-                                    <Check size={22} className="text-emerald-600" />
-                                    Pick from 1–16
-                                </li>
-                                <li className="flex items-center gap-3">
-                                    <Check size={22} className="text-emerald-600" />
-                                    Weekly drawings
-                                </li>
-                                <li className="flex items-center gap-3">
-                                    <Check size={22} className="text-emerald-600" />
-                                    Auto-repeat option
-                                </li>
-                            </ul>
-
-                            <button
-                                className={`w-full rounded-full py-4 text-lg font-semibold text-white transition shadow-md
-                                    ${board.popular
-                                    ? "bg-gradient-to-r from-emerald-500 to-blue-500 hover:opacity-90"
-                                    : "bg-emerald-600 hover:bg-emerald-500"}
-                                `}
-                            >
-                                Select Board
-                            </button>
                         </div>
                     ))}
                 </div>
 
-                <p className="text-lg text-slate-600 mt-4">
-                    <span className="font-semibold">70%</span> of proceeds go to prizes ·{" "}
-                    <span className="font-semibold">30%</span> supports Jerne IF
-                </p>
+                <div className="text-center mt-12">
+                    <p className="text-lg font-semibold text-gray-700">
+                        <span className="text-[#e30613]">70%</span> to prizes ·{" "}
+                        <span className="text-[#0f2b5b]">30%</span> supports <span className="text-[#e30613]">Jerne IF</span>
+                    </p>
+                </div>
             </div>
         </section>
     );
-};
+}

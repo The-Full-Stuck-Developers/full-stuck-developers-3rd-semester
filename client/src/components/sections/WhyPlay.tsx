@@ -2,72 +2,72 @@ import { Shield, Clock3, Users, TrendingUp } from "lucide-react";
 
 export function WhyPlay() {
     return (
-        <section className="w-full bg-white py-24 h-200 items-center text-center flex">
-            <div className="max-w-6xl mx-auto px-4 flex flex-col items-center text-center gap-12">
+        <section className="w-full bg-gray-50 py-16 lg:py-20">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                <div className="space-y-3">
-                    <h2 className="text-5xl font-bold text-slate-900">
-                        Why Play Dead Pigeons?
+                <div className="text-center mb-12 lg:mb-16">
+                    <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0f2b5b] tracking-tighter">
+                        WHY PLAY DEAD PIGEONS?
                     </h2>
-                    <p className="text-slate-600 text-xl max-w-2xl">
-                        A fun, secure, and community-focused way to support local sports
+                    <p className="mt-4 text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto font-semibold">
+                        A fun, secure, and community-driven way to support Jerne IF Esbjerg
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8">
 
-                    <div className="flex items-center gap-6 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm px-8 py-10 text-left">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
-                            <Shield className="text-blue-600" size={40} />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-semibold text-slate-900">
+                    <div className="group relative bg-white rounded-2xl border-2 border-[#0f2b5b]/10 shadow-lg hover:shadow-2xl hover:border-[#e30613] transition-all duration-300 overflow-hidden">
+                        <div className="p-8 text-left">
+                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#e30613]/10 mb-6 group-hover:bg-[#e30613] group-hover:text-white transition-colors">
+                                <Shield className="w-9 h-9 text-[#e30613] group-hover:text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
                                 Secure Balance System
                             </h3>
-                            <p className="text-base text-slate-500 max-w-sm">
+                            <p className="text-gray-600 leading-relaxed">
                                 Your deposits are tracked and verified by admins before use.
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm px-8 py-10 text-left">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
-                            <Clock3 className="text-blue-600" size={40} />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-semibold text-slate-900">
+                    <div className="group relative bg-white rounded-2xl border-2 border-[#0f2b5b]/10 shadow-lg hover:shadow-2xl hover:border-[#e30613] transition-all duration-300 overflow-hidden">
+                        <div className="p-8 text-left">
+                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#e30613]/10 mb-6 group-hover:bg-[#e30613] group-hover:text-white transition-colors">
+                                <Clock3 className="w-9 h-9 text-[#e30613] group-hover:text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
                                 Weekly Drawings
                             </h3>
-                            <p className="text-base text-slate-500 max-w-sm">
-                                New winning numbers drawn every week – play until 5 PM Saturday.
+                            <p className="text-gray-600 leading-relaxed">
+                                New winning numbers every Sunday – never miss a draw.
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm px-8 py-10 text-left">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
-                            <Users className="text-blue-600" size={40} />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-semibold text-slate-900">
-                                Community Support
+                    <div className="group relative bg-white rounded-2xl border-2 border-[#0f2b5b]/10 shadow-lg hover:shadow-2xl hover:border-[#e30613] transition-all duration-300 overflow-hidden">
+                        <div className="p-8 text-left">
+                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#e30613]/10 mb-6 group-hover:bg-[#e30613] group-hover:text-white transition-colors">
+                                <Users className="w-9 h-9 text-[#e30613] group-hover:text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
+                                Community First
                             </h3>
-                            <p className="text-base text-slate-500 max-w-sm">
-                                30% of all proceeds go directly to supporting Jerne IF.
+                            <p className="text-gray-600 leading-relaxed">
+                                70% of all proceeds go directly to players.
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6 bg-slate-50 rounded-2xl border border-slate-200 shadow-sm px-8 py-10 text-left">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
-                            <TrendingUp className="text-blue-600" size={40} />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-semibold text-slate-900">
-                                Flexible Pricing
+                    <div className="group relative bg-white rounded-2xl border-2 border-[#0f2b5b]/10 shadow-lg hover:shadow-2xl hover:border-[#e30613] transition-all duration-300 overflow-hidden">
+                        <div className="p-8 text-left">
+                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-[#e30613]/10 mb-6 group-hover:bg-[#e30613] group-hover:text-white transition-colors">
+                                <TrendingUp className="w-9 h-9 text-[#e30613] group-hover:text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
+                                Flexible & Fair Pricing
                             </h3>
-                            <p className="text-base text-slate-500 max-w-sm">
-                                Choose 5–8 numbers with prices from 20 to 160 DKK.
+                            <p className="text-gray-600 leading-relaxed">
+                                Pick 5–8 numbers. Prices from just 20 kr up to 160 kr per row.
                             </p>
                         </div>
                     </div>
@@ -76,4 +76,4 @@ export function WhyPlay() {
             </div>
         </section>
     );
-};
+}
