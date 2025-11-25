@@ -31,7 +31,7 @@ export function ActionMenu({ actions }: { actions: ActionItem[] }) {
         <div className="relative" ref={ref}>
             <button
                 onClick={() => setOpen(!open)}
-                className="px-3 py-1.5 bg-slate-300 rounded-md hover:bg-slate-400 flex flex-row items-center"
+                className="px-3 py-1.5 bg-slate-300 rounded-md hover:bg-slate-400 flex flex-row items-center outline cursor-pointer"
             >
                 <EllipsisVertical size={14} className="me-1" />
                 Actions
@@ -53,7 +53,7 @@ export function ActionMenu({ actions }: { actions: ActionItem[] }) {
                                     setOpen(false);
                                     action.onClick();
                                 }}
-                                className="flex items-center w-full text-left px-4 py-2 hover:bg-slate-100"
+                                className="flex items-center w-full text-left px-4 py-2 hover:bg-slate-100 cursor-pointer"
                             >
                                 <div className="w-4 h-4 flex items-center justify-center me-2">{action.icon}</div>
                                 <span style={{ color: action.color ?? "#000000" }}>{action.label}</span>

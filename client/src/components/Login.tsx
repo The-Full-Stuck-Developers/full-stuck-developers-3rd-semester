@@ -1,13 +1,33 @@
-import { useState } from "react";
-import axios from "axios";
+import {useState} from "react";
+import {useNavigate} from "react-router";
+import {type SubmitHandler, useForm} from "react-hook-form";
+import type {LoginRequest} from "@core/generated-client.ts";
+import toast from "react-hot-toast";
+import {useAuth} from "../hooks/auth.tsx";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPass, setShowPass] = useState(false);
     const [error, setError] = useState("");
+    const navigate = useNavigate();
+    const {login} = useAuth();
+    const {
+        register,
+        handleSubmit,
+        formState: {errors},
+    } = useForm<LoginRequest>();
 
-    async function handleLogin(e: React.FormEvent) {
+    const onSubmit: SubmitHandler<LoginRequest> = async (data) => {
+        await toast.promise(login(data), {
+            loading: "Checking credentials...",
+            success: "Welcome back!",
+            error: "Invalid email or password",
+        });
+        navigate("/");
+    };
+
+    /*async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
         try {
             // Backend request will be added later
@@ -15,12 +35,12 @@ export default function Login() {
         } catch {
             setError("Invalid email or password");
         }
-    }
+    }*/
 
     return (
         <div className="min-h-screen flex justify-center items-center bg-white px-6">
             <form
-                onSubmit={handleLogin}
+                onSubmit={handleSubmit(onSubmit)}
                 className="w-full max-w-md flex flex-col gap-5"
             >
                 {/* HEADER */}
