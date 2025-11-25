@@ -5,12 +5,15 @@ import {WhyPlay} from "@components/sections/WhyPlay.tsx";
 import {BoardsPricing} from "@components/sections/BoardsPricing.tsx";
 import {SupportCTA} from "@components/sections/SupportCTA.tsx";
 import {Footer} from "@components/sections/Footer.tsx";
+import Login from "@components/Login.tsx";
+import {useState} from "react";
 import {GameBoard} from "@components/sections/userSection/GameBoard.tsx";
 
 export function Home() {
+    const [isLoginOpen, setIsLoginOpen] = useState(false);
     return (
         <>
-            <Navbar/>
+            <Navbar onLoginClick={() => setIsLoginOpen(true)}/>
             <Hero/>
             <AboutGame/>
             {/*<GameBoard/>*/}
@@ -18,6 +21,13 @@ export function Home() {
             <BoardsPricing/>
             <SupportCTA/>
             <Footer/>
+
+            {/* Login Modal */}
+            <Login
+                isOpen={isLoginOpen}
+                onClose={() => setIsLoginOpen(false)}
+            />
         </>
+
     )
 }

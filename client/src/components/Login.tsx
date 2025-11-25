@@ -4,13 +4,19 @@ import {type SubmitHandler, useForm} from "react-hook-form";
 import type {LoginRequest} from "@core/generated-client.ts";
 import toast from "react-hot-toast";
 import {useAuth} from "../hooks/auth.tsx";
-import Logo from "../jerneif-logo.png";
 
-export default function Login() {
+interface LoginModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+export default function Login({isOpen, onClose}: LoginModalProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPass, setShowPass] = useState(false);
     const [error, setError] = useState("");
+    const [isForgotPassword, setIsForgotPassword] = useState(false);
+    const [resetEmail, setResetEmail] = useState("");
     const navigate = useNavigate();
     const {login} = useAuth();
     const {
@@ -25,105 +31,183 @@ export default function Login() {
             success: "Welcome back!",
             error: "Invalid email or password",
         });
-        navigate("/");
+        onClose(); // Close modal on success
     };
 
-    /*async function handleLogin(e: React.FormEvent) {
+    const handlePasswordReset = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            // Backend request will be added later
-            console.log("Login with", email, password);
-        } catch {
-            setError("Invalid email or password");
-        }
-    }*/
+        // TODO: Backend integration will be added later
+        console.log("Password reset requested for:", resetEmail);
+        toast.success("If an account exists, you'll receive an email shortly");
+        setResetEmail("");
+        setIsForgotPassword(false);
+    };
+    const handleClose = () => {
+        setIsForgotPassword(false);
+        setResetEmail("");
+        setEmail("");
+        setPassword("");
+        setError("");
+        onClose();
+    };
+
+    // Don't render if not open
+    if (!isOpen) return null;
 
     return (
-        <div className="min-h-screen flex justify-center items-center bg-white px-6 relative">
-            {/* BACK BUTTON - Top Left */}
-            <button
-                onClick={() => navigate("/")}
-                className="absolute top-6 left-6 flex items-center gap-2 text-gray-700 hover:text-gray-900 font-medium transition"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                </svg>
-                Back to Home
-            </button>
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="w-full max-w-md flex flex-col gap-5"
-            >
-                {/* LOGO - Top Center */}
-                <div className="flex justify-center mb-6">
-                    <img
-                        src={Logo}
-                        alt="Jerne IF Logo"
-                        className="w-32 h-32 object-contain"
-                        onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                        }}
-                    />
-                </div>
-                {/* HEADER */}
-                <h1 className="text-4xl font-bold">Log in</h1>
+        <>
+            {/* BACKDROP */}
+            <div
+                className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                onClick={handleClose}
+            />
 
-
-                {/* EMAIL */}
-                <label className="font-medium">Email</label>
-                <input
-                    type="email"
-                    placeholder="Enter email"
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
-                />
-
-                {/* PASSWORD FIELD */}
-                <label className="font-medium">Password</label>
-                <div className="relative">
-                    <input
-                        type={showPass ? "text" : "password"}
-                        placeholder="Enter password"
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
-                    />
+            {/* MODAL */}
+            <div className="fixed inset-0 flex justify-center items-center z-50 px-6">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative">
+                    {/* CLOSE BUTTON */}
                     <button
-                        type="button"
-                        className="absolute right-3 top-3 text-gray-500"
-                        onClick={() => setShowPass((p) => !p)}
+                        onClick={handleClose}
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
                     >
-                        👁
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
                     </button>
+
+                    {/* FORGOT PASSWORD VIEW */}
+                    {isForgotPassword ? (
+                        <form onSubmit={handlePasswordReset} className="flex flex-col gap-6">
+                            {/* BACK BUTTON */}
+                            <button
+                                type="button"
+                                onClick={() => setIsForgotPassword(false)}
+                                className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition w-fit"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 19l-7-7 7-7"
+                                    />
+                                </svg>
+                                <span className="font-medium">Reset your password</span>
+                            </button>
+
+                            {/* HEADER */}
+                            <div className="text-center">
+                                <h2 className="text-3xl font-bold mb-2">Forgot your password?</h2>
+                                <p className="text-gray-600">
+                                    You may receive an email after filing in this form.
+                                </p>
+                            </div>
+
+                            {/* EMAIL INPUT */}
+                            <div>
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    value={resetEmail}
+                                    onChange={(e) => setResetEmail(e.target.value)}
+                                    className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-none focus:ring-2 focus:ring-red-700"
+                                    required
+                                />
+                            </div>
+
+                            <p className="text-sm text-gray-500 text-center">
+                                All fields marked with an * are required
+                            </p>
+
+                            {/* RECOVER BUTTON */}
+                            <button
+                                type="submit"
+                                className="bg-gray-800 hover:bg-gray-900 transition text-white py-4 rounded-xl text-lg font-semibold mt-4"
+                            >
+                                Recover password
+                            </button>
+                        </form>
+                    ) : (
+                        /* LOGIN VIEW */
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="flex flex-col gap-5"
+                    >
+                        {/* HEADER */}
+                        <h1 className="text-4xl font-bold mb-2">Log in</h1>
+
+                        {/* EMAIL */}
+                        <div>
+                            <label className="font-medium block mb-2">Email</label>
+                            <input
+                                type="email"
+                                placeholder="Enter email"
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
+                                required
+                            />
+                        </div>
+
+                        {/* PASSWORD FIELD */}
+                        <div>
+                            <label className="font-medium block mb-2">Password</label>
+                            <div className="relative">
+                                <input
+                                    type={showPass ? "text" : "password"}
+                                    placeholder="Enter password"
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute right-3 top-3 text-gray-500"
+                                    onClick={() => setShowPass((p) => !p)}
+                                >
+                                    👁
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* FORGOT PASS */}
+                        <button
+                            type="button"
+                            onClick={() => setIsForgotPassword(true)}
+                            className="text-sm underline font-medium hover:text-red-700 transition text-left"
+                        >
+                            Forgot password?
+                        </button>
+
+                        {/* ERROR MSG */}
+                        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+                        {/* LOGIN BUTTON */}
+                        <button
+                            type="submit"
+                            className="bg-red-700 hover:bg-red-800 transition text-white py-3 rounded-xl text-lg font-semibold"
+                        >
+                            Log in
+                        </button>
+                    </form>
+                    )}
                 </div>
-
-                {/* FORGOT PASS */}
-                <a className="text-sm underline font-medium cursor-pointer">
-                    Forgot password?
-                </a>
-
-                {/* ERROR MSG */}
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-
-                {/* LOGIN BUTTON */}
-                <button
-                    type="submit"
-                    className="bg-red-700 hover:bg-red-800 transition text-white py-3 rounded-xl text-lg font-semibold"
-                >
-                    Log in
-                </button>
-
-            </form>
-        </div>
-    );
-}
+            </div>
+        </>
+    )}
