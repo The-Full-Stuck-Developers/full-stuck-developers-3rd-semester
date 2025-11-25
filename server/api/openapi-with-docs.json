@@ -440,6 +440,22 @@
           }
         }
       },
+      "AuthUserInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          }
+        }
+      },
       "PagedResultOfGameDto": {
         "type": "object",
         "additionalProperties": false,
@@ -465,7 +481,6 @@
         }
       },
       "GameDto": {
-      "AuthUserInfo": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -507,10 +522,6 @@
             "type": "boolean"
           },
           "canBet": {
-          "name": {
-            "type": "string"
-          },
-          "isAdmin": {
             "type": "boolean"
           }
         }
