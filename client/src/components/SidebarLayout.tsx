@@ -1,7 +1,7 @@
 import React, {type JSX, useEffect, useRef, useState} from "react";
 import {Outlet, useLocation, useNavigate} from "react-router-dom";
 import Logo from "../jerneif-logo.png";
-import {Backpack, Dice5, Menu, Users} from "lucide-react";
+import {Backpack, ChevronsDown, Dice5, Menu, Users} from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface MenuItem {
@@ -137,8 +137,9 @@ export const SidebarLayout: React.FC = () => {
                             <div ref={menuRef} className="relative z-50">
                                 <button
                                     onClick={() => setUserMenu(!userMenu)}
-                                    className="px-6 py-3 rounded-full bg-[#e30613] hover:bg-[#c20510] text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                                    className="flex flex-row items-center justify-evenly px-6 py-3 rounded-full bg-[#e30613] hover:bg-[#c20510] text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                                 >
+                                    <ChevronsDown size={24}/>
                                     {tempUser.fullName}
                                 </button>
 

@@ -66,6 +66,8 @@ public class Program
 
         //Repositories
         services.AddScoped<IRepository<User>, UserRepository>();
+        services.AddScoped<IUserService, UserService>();
+
 
         //Controllers
         services.AddControllers().AddJsonOptions(opts =>

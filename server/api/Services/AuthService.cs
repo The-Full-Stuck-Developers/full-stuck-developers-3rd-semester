@@ -62,7 +62,7 @@ public class AuthService(
 
              user.PasswordHash = PasswordHasher.HashPassword(user, request.Password);
 
-             await _userRepository.Add(user);
+             await _userRepository.AddAsync(user);
 
 
              return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);

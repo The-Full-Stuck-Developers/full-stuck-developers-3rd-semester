@@ -5,11 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace dataccess.Repositories;
 
-
-public class UserRepository(MyDbContext context) : BaseRepository<User>(context)
-{
-    protected override DbSet<User> Set => Context.Users;
-}
+using dataccess;
+using dataccess.Entities;
+using dataccess.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 public abstract class BaseRepository<T>(MyDbContext context) : IRepository<T>
     where T : class
@@ -17,29 +16,29 @@ public abstract class BaseRepository<T>(MyDbContext context) : IRepository<T>
     protected MyDbContext Context => context;
     protected abstract DbSet<T> Set { get; }
 
-    public async Task Add(T entity)
+    public async Task AddAsync(T entity)
     {
         await Set.AddAsync(entity);
         await context.SaveChangesAsync();
     }
 
-    public async Task Delete(T entity)
+    public virtual async Task DeleteAsync(T entity)
     {
         Set.Remove(entity);
         await context.SaveChangesAsync();
     }
 
-    public T? Get(Func<T, bool> predicate)
+    public async Task<T?> GetAsync(Func<T, bool> predicate)
     {
-        return Set.Where(predicate).SingleOrDefault();
+        return await Task.FromResult(Set.Where(predicate).SingleOrDefault());
     }
 
     public IQueryable<T> Query()
     {
-        return Set;
+        return Set.AsNoTracking();
     }
 
-    public async Task Update(T entity)
+    public async Task UpdateAsync(T entity)
     {
         Set.Update(entity);
         await context.SaveChangesAsync();

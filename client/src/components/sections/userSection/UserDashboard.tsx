@@ -62,7 +62,7 @@ export default function UserDashboard() {
                     </div>
 
 
-                    <div className="bg-gradient-to-r from-red-500 to-white rounded-2xl p-10 text-white shadow-2xl mb-12">
+                    <div className="bg-gradient-to-r from-[#ed1c24] to-white rounded-2xl p-10 text-white shadow-2xl mb-12">
                         <h2 className="text-3xl font-semibold mb-4">Balance</h2>
                         <div className="text-7xl font-extrabold tracking-tight">
                             {balanceDKK}
