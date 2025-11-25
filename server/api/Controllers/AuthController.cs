@@ -12,16 +12,19 @@ namespace api.Controllers;
 
 [Route("api/auth")]
 [AllowAnonymous]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService, ITokenService tokenService) : ControllerBase
 {
     [HttpPost(nameof(Login))]
+    [AllowAnonymous]
     public async Task<LoginResponse> Login([FromBody] LoginRequest request)
     {
         var userInfo = authService.Authenticate(request);
-        return new LoginResponse();
+        var token = tokenService.CreateToken(userInfo);
+        return new LoginResponse(token);
     }
 
     [HttpPost(nameof(Register))]
+    [AllowAnonymous]
     public async Task<RegisterResponse> Register([FromBody] RegisterRequestDto request)
     {
         var userInfo = await authService.Register(request);
@@ -53,8 +56,8 @@ public class AuthController(IAuthService authService) : ControllerBase
    }
    
    [HttpGet(nameof(UserInfo))]
-   public async Task<IResult> UserInfo()
+   public async Task<AuthUserInfo> UserInfo()
    {
-       throw new NotImplementedException();
+       return authService.GetUserInfo(User);
    }
 }
