@@ -39,7 +39,7 @@ export const SidebarLayout: React.FC = () => {
         },
         {
             label: "Games",
-            path: "",
+            path: "/admin/games",
             icon: (
                 <Dice5 size={26}/>
             ),
