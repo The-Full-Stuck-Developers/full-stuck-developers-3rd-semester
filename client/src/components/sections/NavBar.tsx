@@ -2,7 +2,11 @@ import { Link } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import Logo from "../../jerneif-logo.png";
 
-export function Navbar() {
+interface NavbarProps {
+    onLoginClick: () => void;
+}
+
+export function Navbar({ onLoginClick }: NavbarProps) {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0f2b5b]/95 backdrop-blur-lg border-b border-white/10">
             <div className="max-w-7xl mx-auto px-6 py-5">
@@ -39,13 +43,12 @@ export function Navbar() {
                     </div>
 
                     <div className="flex items-center gap-4">
-
-                        <Link
-                            to="/login"
+                        <button
+                            onClick={onLoginClick}
                             className="px-6 py-3 rounded-full border-2 border-white/30 text-white font-semibold hover:bg-white/10 hover:border-white transition-all"
                         >
                             Login
-                        </Link>
+                        </button>
 
                         <a
                             href="#contact"
