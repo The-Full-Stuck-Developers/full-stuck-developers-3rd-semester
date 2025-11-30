@@ -19,7 +19,7 @@ public class JwtService(IConfiguration config) : ITokenService
 
     public string CreateToken(AuthUserInfo user)
     {
-        var key = Convert.FromBase64String(config.GetValue<string>(JwtSecret)!);
+        var key = Convert.FromBase64String(config["AppOptions:JwtSecret"]!);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             SigningCredentials = new SigningCredentials(

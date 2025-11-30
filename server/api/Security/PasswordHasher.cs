@@ -9,7 +9,7 @@ public class PasswordHasher: IPasswordHasher<User>
 {
     public string HashPassword(User user, string password)
     {
-        var salt = RandomNumberGenerator.GetBytes(128 / 8);
+        var salt = RandomNumberGenerator.GetBytes(64);
         var hash = GenerateHash(password, salt);
         return $"argon2id${Convert.ToBase64String(salt)}${Convert.ToBase64String(hash)}";
     }
