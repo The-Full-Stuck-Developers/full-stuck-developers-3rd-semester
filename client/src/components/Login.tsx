@@ -11,10 +11,10 @@ interface LoginModalProps {
 }
 
 export default function Login({isOpen, onClose}: LoginModalProps) {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+   // const [email, setEmail] = useState("");
+    //const [password, setPassword] = useState("");
     const [showPass, setShowPass] = useState(false);
-    const [error, setError] = useState("");
+    //const [error, setError] = useState("");
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [resetEmail, setResetEmail] = useState("");
     const navigate = useNavigate();
@@ -26,6 +26,7 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
     } = useForm<LoginRequest>();
 
     const onSubmit: SubmitHandler<LoginRequest> = async (data) => {
+        console.log("Form data being sent:", data);
         await toast.promise(login(data), {
             loading: "Checking credentials...",
             success: "Welcome back!",
@@ -45,9 +46,9 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
     const handleClose = () => {
         setIsForgotPassword(false);
         setResetEmail("");
-        setEmail("");
-        setPassword("");
-        setError("");
+        //setEmail("");
+        //setPassword("");
+        //setError("");
         onClose();
     };
 
@@ -159,11 +160,12 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
                             <input
                                 type="email"
                                 placeholder="Enter email"
-                                onChange={(e) => setEmail(e.target.value)}
+                                {...register("email", { required: "Email is required" })}
                                 className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
-                                required
                             />
+                            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
                         </div>
+
 
                         {/* PASSWORD FIELD */}
                         <div>
@@ -172,10 +174,10 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
                                 <input
                                     type={showPass ? "text" : "password"}
                                     placeholder="Enter password"
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    {...register("password", { required: "Password is required" })}
                                     className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
-                                    required
                                 />
+                                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
                                 <button
                                     type="button"
                                     className="absolute right-3 top-3 text-gray-500"
@@ -195,8 +197,7 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
                             Forgot password?
                         </button>
 
-                        {/* ERROR MSG */}
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
+
 
                         {/* LOGIN BUTTON */}
                         <button

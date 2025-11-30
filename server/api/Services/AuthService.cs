@@ -21,8 +21,15 @@ public class AuthService(
     {
         public AuthUserInfo Authenticate(LoginRequest request)
         {
+            // Null checks
+            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+            {
+                _logger.LogWarning("Authentication failed: email or password is empty");
+                throw new AuthenticationError();
+            }
+
             var user = _userRepository.Query()
-                 .FirstOrDefault(u => u.Email == request.Email);
+                .FirstOrDefault(u => u.Email == request.Email);
 
             if (user == null)
             {
@@ -32,14 +39,14 @@ public class AuthService(
 
             var result = PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
 
-                 if (result == PasswordVerificationResult.Success)
-                 {
-                     return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
-
-                 }
-                 _logger.LogWarning("Authentication failed: invalid password for user {Email}", request.Email);
-                 throw new AuthenticationError();
-             }
+            if (result == PasswordVerificationResult.Success)
+            {
+                return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
+            }
+    
+            _logger.LogWarning("Authentication failed: invalid password for user {Email}", request.Email);
+            throw new AuthenticationError();
+        }
 
         public async Task<AuthUserInfo> Register(RegisterRequestDto request)
         {

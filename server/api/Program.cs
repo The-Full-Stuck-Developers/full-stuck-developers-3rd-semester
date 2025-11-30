@@ -42,7 +42,7 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-            seeder.Seed(defaultPassword).Wait();
+            seeder.Seed("hashed_password_here").Wait();
         }
     }
 
@@ -188,9 +188,10 @@ public class Program
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-
                 await db.Database.MigrateAsync();
-                await DatabaseSeeder.SeedAsync(db);
+                
+                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                await seeder.Seed("hashed_password_here");
             }
         }
     }
