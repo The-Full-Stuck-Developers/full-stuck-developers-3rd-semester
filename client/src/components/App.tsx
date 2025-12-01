@@ -7,6 +7,7 @@ import {GameBoard} from "@components/sections/userSection/GameBoard.tsx";
 import UsersList from "@components/admin/UsersList.tsx";
 import {SidebarLayout} from "@components/SidebarLayout.tsx";
 import GameList from "@components/admin/GameList.tsx";
+import "./../../node_modules/flag-icons/css/flag-icons.min.css";
 
 function App() {
     return (
