@@ -21,6 +21,7 @@
     "axios": "^1.13.2",
     "daisyui": "^5.1.12",
     "dotnet-json-refs": "^1.0.0",
+    "flag-icons": "^7.5.0",
     "hooks": "^0.3.2",
     "jotai": "^2.14.0",
     "jotai-devtools": "^0.13.0",

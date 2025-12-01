@@ -56,7 +56,7 @@ public class Program
         services.AddSingleton(appOptions);
 
         //Database
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = appOptions.DefaultConnection;
         services.AddDbContext<MyDbContext>(options =>
             options
                 .UseNpgsql(connectionString)
