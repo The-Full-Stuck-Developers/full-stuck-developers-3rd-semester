@@ -161,7 +161,7 @@ export const SidebarLayout: React.FC = () => {
                                         <ThemeToggle/>
                                         <LanguageToggle/>
                                         </div>
-                                        <Link to="/"
+                                        <Link to="/my-profile"
                                               className={"w-full block text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"}>
                                             My profile
                                         </Link>
