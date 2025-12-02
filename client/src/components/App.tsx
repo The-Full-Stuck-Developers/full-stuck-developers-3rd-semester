@@ -8,6 +8,7 @@ import UsersList from "@components/admin/UsersList.tsx";
 import {SidebarLayout} from "@components/SidebarLayout.tsx";
 import GameList from "@components/admin/GameList.tsx";
 import "./../../node_modules/flag-icons/css/flag-icons.min.css";
+import MyProfilePage from "@components/admin/MyProfilePage.tsx";
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/admin" element={<SidebarLayout />}>
                 <Route path="users" element={<UsersList />} />
                 <Route path="games" element={<GameList/>} />
+                <Route path="my-profile" element={<MyProfilePage/>} />
             </Route>
         </Routes>
     )
