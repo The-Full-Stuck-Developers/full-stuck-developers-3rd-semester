@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace api.Controllers;
 
 [Route("api/auth")]
-[AllowAnonymous]
 public class AuthController(IAuthService authService, ITokenService tokenService) : ControllerBase
 {
     [HttpPost(nameof(Login))]
