@@ -1,0 +1,21 @@
+{
+  "actions": "Handlinger",
+  "edit": "Rediger",
+  "save": "Spare",
+  "renew": "Forny",
+  "delete": "Slet",
+  "confirm": "Bekræfte",
+  "next": "Næste",
+  "name": "Navn",
+  "email": "Email",
+  "phone": "Telefon",
+  "phone_number": "Telefonnummer",
+  "joined": "Tilmeldt",
+  "membership": "Medlemskab",
+  "create": "Skabe",
+  "cancel": "Ophæve",
+  "users": "Brugere",
+  "my_profile": "Min profil",
+  "logout": "Log ud",
+  "prev": "Forr"
+}

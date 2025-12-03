@@ -1,5 +1,6 @@
-import { type JSX, useEffect, useRef, useState } from "react";
-import { EllipsisVertical, AlertTriangle } from "lucide-react";
+import {type JSX, useEffect, useRef, useState} from "react";
+import {AlertTriangle, EllipsisVertical} from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 type ActionItem =
     | {
@@ -13,7 +14,8 @@ type ActionItem =
 }
     | { separator: true };
 
-export function ActionMenu({ actions }: { actions: ActionItem[] }) {
+export function ActionMenu({actions}: { actions: ActionItem[] }) {
+    const {t} = useTranslation();
     const [open, setOpen] = useState(false);
     const [flipUp, setFlipUp] = useState(false);
     const [confirmAction, setConfirmAction] = useState<ActionItem | null>(null);
@@ -66,8 +68,8 @@ export function ActionMenu({ actions }: { actions: ActionItem[] }) {
                     onClick={() => setOpen(!open)}
                     className="px-3 py-1.5 bg-slate-300 rounded-md hover:bg-slate-400 flex flex-row items-center outline cursor-pointer"
                 >
-                    <EllipsisVertical size={14} className="me-1" />
-                    Actions
+                    <EllipsisVertical size={14} className="me-1"/>
+                    {t("actions")}
                 </button>
 
                 {open && (
@@ -86,7 +88,7 @@ export function ActionMenu({ actions }: { actions: ActionItem[] }) {
                                     className="flex items-center w-full text-left px-4 py-2 hover:bg-slate-100 cursor-pointer"
                                 >
                                     <div className="w-4 h-4 flex items-center justify-center me-2">{action.icon}</div>
-                                    <span style={{ color: action.color ?? "#000000" }}>{action.label}</span>
+                                    <span style={{color: action.color ?? "#000000"}}>{action.label}</span>
                                 </button>
                             )
                         )}
@@ -104,15 +106,16 @@ export function ActionMenu({ actions }: { actions: ActionItem[] }) {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex items-start mb-4">
-                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
-                                <AlertTriangle className="text-amber-600" size={20} />
+                            <div
+                                className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mr-3">
+                                <AlertTriangle className="text-amber-600" size={20}/>
                             </div>
                             <div className="flex-1">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                                    {confirmAction.confirmTitle || "Confirm Action"}
+                                    {confirmAction.confirmTitle || t("messages:confirm_action")}
                                 </h3>
                                 <p className="text-sm text-gray-600">
-                                    {confirmAction.confirmMessage || `Are you sure you want to ${confirmAction.label.toLowerCase()}?`}
+                                    {confirmAction.confirmMessage || `${t("messages:are_you_sure_you_want_to")} ${confirmAction.label.toLowerCase()}?`}
                                 </p>
                             </div>
                         </div>
@@ -122,14 +125,14 @@ export function ActionMenu({ actions }: { actions: ActionItem[] }) {
                                 onClick={handleCancel}
                                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
                             >
-                                Cancel
+                                {t("cancel")}
                             </button>
                             <button
                                 onClick={handleConfirm}
                                 className="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-md hover:bg-amber-700 cursor-pointer"
-                                style={{ backgroundColor: confirmAction.color || "#dc2626" }}
+                                style={{backgroundColor: confirmAction.color || "#dc2626"}}
                             >
-                                Confirm
+                                {t("confirm")}
                             </button>
                         </div>
                     </div>
@@ -157,7 +160,7 @@ export default function Demo() {
                         onClick: () => alert("Duplicated"),
                         icon: <span>📋</span>
                     },
-                    { separator: true },
+                    {separator: true},
                     {
                         label: "Archive",
                         onClick: () => alert("Archived"),
