@@ -8,6 +8,14 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
   },
+    server: {
+        proxy: {
+            '/api': {
+                target: 'http://localhost:5284',
+                changeOrigin: true,
+            }
+        }
+    },
   resolve: {
     alias: {
       '@core': path.resolve(__dirname, './src/core'),

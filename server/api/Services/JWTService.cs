@@ -20,7 +20,7 @@ public class JwtService(IConfiguration config) : ITokenService
 
     public string CreateToken(AuthUserInfo user)
     {
-        var key = Convert.FromBase64String(config.GetValue<string>(JwtSecret)!);
+        var key = Convert.FromBase64String(config["AppOptions:JwtSecret"]!);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             SigningCredentials = new SigningCredentials(
@@ -55,16 +55,6 @@ public class JwtService(IConfiguration config) : ITokenService
 
             // Set to 0 when validating on the same system that created the token
             ClockSkew = TimeSpan.Zero,
-            
-            /*
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = configuration["Jwt: Issuer"],
-            ValidAudience = configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppOptions:JwtSecret"] ?? throw new InvalidOperationException("JWT Key is missing in configuration")))
-        */
         }; 
     }
 }

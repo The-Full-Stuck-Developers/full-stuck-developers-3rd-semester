@@ -3,7 +3,8 @@ import {useNavigate} from "react-router";
 import {type SubmitHandler, useForm} from "react-hook-form";
 import type {LoginRequest} from "@core/generated-client.ts";
 import toast from "react-hot-toast";
-import {useAuth} from "../hooks/auth.tsx";
+import {useAuth} from "../../../hooks/auth.tsx";
+import {authClient} from "../../../api-clients.ts";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -11,10 +12,10 @@ interface LoginModalProps {
 }
 
 export default function Login({isOpen, onClose}: LoginModalProps) {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+   // const [email, setEmail] = useState("");
+    //const [password, setPassword] = useState("");
     const [showPass, setShowPass] = useState(false);
-    const [error, setError] = useState("");
+    //const [error, setError] = useState("");
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [resetEmail, setResetEmail] = useState("");
     const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
     } = useForm<LoginRequest>();
 
     const onSubmit: SubmitHandler<LoginRequest> = async (data) => {
+        console.log("Form data being sent:", data);
         await toast.promise(login(data), {
             loading: "Checking credentials...",
             success: "Welcome back!",
@@ -36,18 +38,27 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
 
     const handlePasswordReset = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Backend integration will be added later
-        console.log("Password reset requested for:", resetEmail);
-        toast.success("If an account exists, you'll receive an email shortly");
-        setResetEmail("");
-        setIsForgotPassword(false);
+        try {
+            await toast.promise(
+                authClient.forgotPassword({ email: resetEmail }),
+                {
+                    loading: "Sending reset email...",
+                    success: "If an account exists, you'll receive an email shortly",
+                    error: "Something went wrong. Please try again.",
+                }
+            );
+            setResetEmail("");
+            setIsForgotPassword(false);
+        } catch (error) {
+            console.error("Password reset error:", error);
+        }
     };
     const handleClose = () => {
         setIsForgotPassword(false);
         setResetEmail("");
-        setEmail("");
-        setPassword("");
-        setError("");
+        //setEmail("");
+        //setPassword("");
+        //setError("");
         onClose();
     };
 
@@ -159,11 +170,12 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
                             <input
                                 type="email"
                                 placeholder="Enter email"
-                                onChange={(e) => setEmail(e.target.value)}
+                                {...register("email", { required: "Email is required" })}
                                 className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
-                                required
                             />
+                            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
                         </div>
+
 
                         {/* PASSWORD FIELD */}
                         <div>
@@ -172,10 +184,10 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
                                 <input
                                     type={showPass ? "text" : "password"}
                                     placeholder="Enter password"
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    {...register("password", { required: "Password is required" })}
                                     className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
-                                    required
                                 />
+                                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
                                 <button
                                     type="button"
                                     className="absolute right-3 top-3 text-gray-500"
@@ -195,8 +207,7 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
                             Forgot password?
                         </button>
 
-                        {/* ERROR MSG */}
-                        {error && <p className="text-red-500 text-sm">{error}</p>}
+
 
                         {/* LOGIN BUTTON */}
                         <button

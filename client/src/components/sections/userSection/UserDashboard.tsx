@@ -12,7 +12,7 @@ export default function UserDashboard() {
 
     const handleLogout = () => {
         // Implement later token/localStorage etc
-        navigate("/login");
+        navigate("/");
     };
 
     return (

@@ -42,7 +42,7 @@ public class Program
         using (var scope = app.Services.CreateScope())
         {
             var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-            seeder.Seed(defaultPassword).Wait();
+            seeder.Seed("hashed_password_here").Wait();
         }
     }
 
@@ -101,6 +101,7 @@ public class Program
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher>();
         services.AddScoped<ITokenService, JwtService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         // Register Seeder
         services.AddScoped<DbSeeder>();
@@ -148,6 +149,7 @@ public class Program
             options.AddPolicy("IsAdmin", policy =>
                 policy.AddRequirements(new IsAdmin()));
         });
+        
 
         //Sieve
         services.Configure<SieveOptions>(options =>
@@ -178,10 +180,14 @@ public class Program
 
         if (app.Environment.IsDevelopment())
         {
-            using var scope = app.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-            await db.Database.MigrateAsync();
-            await DatabaseSeeder.SeedAsync(db);
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+                await db.Database.MigrateAsync();
+                
+                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                await seeder.Seed("hashed_password_here");
+            }
         }
     }
 }

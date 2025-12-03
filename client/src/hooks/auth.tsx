@@ -18,12 +18,20 @@ export const useAuth = () => {
     const login = async (request: LoginRequest) => {
         const response = await authClient.login(request);
         setJwt(response.jwt!);
-        navigate("/");
+        // Fetch user info to check if admin
+        const userInfo = await authClient.userInfo();
+
+        // Redirect based on admin status
+        if (userInfo.isAdmin) {
+            navigate("/admin/users");
+        } else {
+            navigate("/user/dashboard");
+        }
     }
 
     const logout = async () => {
         setJwt(null);
-        navigate("/login");
+        navigate("/");
     }
 
     return {
