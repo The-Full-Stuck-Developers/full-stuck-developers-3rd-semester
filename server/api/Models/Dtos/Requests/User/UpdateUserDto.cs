@@ -17,11 +17,11 @@ public record UpdateUserDto
     [MinLength(4)]
     public string PhoneNumber { get; set; }
 
-    [Required]
-    public bool IsAdmin { get; set; }
-
-    public DateTime? ExpiresAt { get; set; }
-
-    [MinLength(6)]
-    public string? Password { get; set; }
+    // [Required]
+    // public bool IsAdmin { get; set; }
+    //
+    // public DateTime? ExpiresAt { get; set; }
+    //
+    // [MinLength(6)]
+    // public string? Password { get; set; }
 }

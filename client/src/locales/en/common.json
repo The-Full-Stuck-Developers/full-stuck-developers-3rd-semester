@@ -1,0 +1,21 @@
+{
+  "actions": "Actions",
+  "edit": "Edit",
+  "renew": "Renew",
+  "save": "Save",
+  "delete": "Delete",
+  "confirm": "Confirm",
+  "next": "Next",
+  "name": "Name",
+  "email": "Email",
+  "phone": "Phone",
+  "phone_number": "Phone number",
+  "joined": "Joined",
+  "membership": "Membership",
+  "create": "Create",
+  "cancel": "Cancel",
+  "users": "Users",
+  "my_profile": "My profile",
+  "logout": "Logout",
+  "prev": "Prev"
+}

@@ -2,8 +2,9 @@ import React, {type JSX, useEffect, useRef, useState} from "react";
 import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
 import Logo from "../jerneif-logo.png";
 import {Backpack, ChevronsDown, Dice5, Menu, Users} from "lucide-react";
-import {LanguageToggle} from "@components/LanguageToggle.tsx";
 import {ThemeToggle} from "@components/ThemeToggle.tsx";
+import {useTranslation} from "react-i18next";
+import {t} from "i18next";
 
 interface MenuItem {
     label: string;
@@ -24,6 +25,23 @@ export const SidebarLayout: React.FC = () => {
     const balanceDKK = (tempUser.balanceCents / 100).toFixed(2);
     const [userMenu, setUserMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+    const {i18n} = useTranslation();
+    const [lang, setLang] = useState<"en" | "dk">(i18n.language.startsWith("dk") ? "dk" : "en");
+
+    // On mount, check localStorage for saved language
+    useEffect(() => {
+        const savedLang = localStorage.getItem("language") as "en" | "dk" | null;
+        if (savedLang && savedLang !== lang) {
+            setLang(savedLang);
+            i18n.changeLanguage(savedLang);
+        }
+    }, [i18n, lang]);
+
+    const changeLanguage = (lng: "en" | "dk") => {
+        setLang(lng);
+        i18n.changeLanguage(lng);
+        localStorage.setItem("language", lng);
+    };
 
     const handleLogout = () => {
         // Implement later token/localStorage etc
@@ -158,12 +176,35 @@ export const SidebarLayout: React.FC = () => {
                                     >
                                         <div className={"px-4 space-y-3 py-3 border-b"}>
 
-                                        <ThemeToggle/>
-                                        <LanguageToggle/>
+                                            <ThemeToggle/>
+                                            <div
+                                                className="relative bg-gray-200 rounded-full flex items-center px-1 py-1 gap-2 w-24 h-9 mx-auto">
+                                                <div
+                                                    className={`absolute h-7 w-10 bg-white rounded-full shadow transition-all duration-300 ${
+                                                        lang === "en" ? "left-1" : "left-[calc(100%-2.5rem-0.25rem)]"
+                                                    }`}
+                                                />
+                                                <button
+                                                    onClick={() => changeLanguage("en")}
+                                                    className={`z-10 mx-auto transition ${
+                                                        lang === "en" ? "opacity-100" : "opacity-50 cursor-pointer"
+                                                    }`}
+                                                >
+                                                    <span className="fi fi-gb text-xl rounded-full mt-1"></span>
+                                                </button>
+                                                <button
+                                                    onClick={() => changeLanguage("dk")}
+                                                    className={`z-10 mx-auto transition ${
+                                                        lang === "dk" ? "opacity-100" : "opacity-50 cursor-pointer"
+                                                    }`}
+                                                >
+                                                    <span className="fi fi-dk text-xl rounded-full mt-1"></span>
+                                                </button>
+                                            </div>
                                         </div>
                                         <Link to="/my-profile"
                                               className={"w-full block text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"}>
-                                            My profile
+                                            {t("my_profile")}
                                         </Link>
                                         <button
                                             onClick={() => {
@@ -172,7 +213,7 @@ export const SidebarLayout: React.FC = () => {
                                             }}
                                             className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
                                         >
-                                            Logout
+                                            {t("logout")}
                                         </button>
                                     </div>
                                 )}

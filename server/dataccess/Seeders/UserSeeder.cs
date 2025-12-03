@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
 using Bogus;
 using dataccess;
@@ -39,7 +40,7 @@ public class UserSeeder : ISeeder
                 IsAdmin = false,
                 CreatedAt = DateTime.UtcNow,
                 DeletedAt = null,
-                ExpiresAt = null,
+                ExpiresAt = DateTime.UtcNow.AddMonths(new Random().Next(1, 12)),
             }
         };
 
@@ -52,7 +53,7 @@ public class UserSeeder : ISeeder
             .RuleFor(u => u.IsAdmin, f => false)
             .RuleFor(u => u.CreatedAt, f => f.Date.Past(1).ToUniversalTime())
             .RuleFor(u => u.DeletedAt, f => (DateTime?)null)
-            .RuleFor(u => u.ExpiresAt, f => (DateTime?)null);
+            .RuleFor(u => u.ExpiresAt, f => f.Date.Future(1).ToUniversalTime());
 
         var randomUsers = faker.Generate(50);
         users.AddRange(randomUsers);

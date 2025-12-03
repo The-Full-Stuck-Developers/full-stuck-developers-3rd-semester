@@ -39,4 +39,20 @@ public class PasswordHasher: IPasswordHasher<User>
         });
         return hashAlgo.DeriveBytes(password, salt, 128);
     }
+
+    public string GenerateRandomPassword(int length = 12)
+    {
+        const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@$?_-";
+        var bytes = new byte[length];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(bytes);
+
+        char[] chars = new char[length];
+        for (int i = 0; i < length; i++)
+        {
+            chars[i] = valid[bytes[i] % valid.Length];
+        }
+
+        return new string(chars);
+    }
 }
