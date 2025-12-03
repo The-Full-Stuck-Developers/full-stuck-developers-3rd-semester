@@ -6,8 +6,8 @@ namespace api.Services;
 public interface ITransactionService
 {
     Task<List<TransactionDto>> GetAllTransactions();
-    Task<TransactionDto?> GetTransactionById(string id);
+    Task<TransactionDto?> GetTransactionById(Guid id);
     Task<TransactionDto> CreateTransaction(CreateTransactionDto dto);
-    Task<TransactionDto?> UpdateTransactionStatus(string id, UpdateTransactionDto dto);
-    Task DeleteTransaction(string id);
+    Task<TransactionDto?> UpdateTransactionStatus(Guid id, UpdateTransactionDto dto);
+    Task DeleteTransaction(Guid id);
 }

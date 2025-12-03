@@ -4,16 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
 
-public class GameService : IGameService
+public class GameService(MyDbContext dbContext) : IGameService
 {
+    /*
     private readonly MyDbContext _db;
     
     public GameService(MyDbContext db)
     {
         _db = db;
     }
+    */
 
-    public Task<Game> GetCurrentGameAsync()
+    public Task<Game> GetCurrentGameAsync(Guid gameId)
     {
         throw new NotImplementedException();
     }

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text;
 using api.Models.Dtos.Responses;
 using api.Security;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -39,7 +40,8 @@ public class JwtService(IConfiguration config) : ITokenService
         var secret = configuration["AppOptions:JwtSecret"]
                      ?? throw new Exception("Jwt secret not found!");
 
-        var key = Convert.FromBase64String(secret);
+        //var key = Convert.FromBase64String(secret);
+        var key = Encoding.UTF8.GetBytes(secret);
         return new TokenValidationParameters
         {
             IssuerSigningKey = new SymmetricSecurityKey(key),

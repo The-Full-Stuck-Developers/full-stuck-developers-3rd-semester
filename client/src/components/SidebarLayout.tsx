@@ -1,8 +1,9 @@
 import React, {type JSX, useEffect, useRef, useState} from "react";
-import {Outlet, useLocation, useNavigate} from "react-router-dom";
+import {Link, Outlet, useLocation, useNavigate} from "react-router-dom";
 import Logo from "../jerneif-logo.png";
 import {Backpack, ChevronsDown, Dice5, Menu, Users} from "lucide-react";
-import { Link } from "react-router-dom";
+import {LanguageToggle} from "@components/LanguageToggle.tsx";
+import {ThemeToggle} from "@components/ThemeToggle.tsx";
 
 interface MenuItem {
     label: string;
@@ -39,7 +40,7 @@ export const SidebarLayout: React.FC = () => {
         },
         {
             label: "Games",
-            path: "",
+            path: "/admin/games",
             icon: (
                 <Dice5 size={26}/>
             ),
@@ -62,8 +63,11 @@ export const SidebarLayout: React.FC = () => {
     };
 
     const handleCloseDrawer = () => {
+        setUserMenu(false);
+
         if (checkboxRef.current) {
             checkboxRef.current.checked = false;
+            setOpen(false);
         }
     };
 
@@ -102,13 +106,14 @@ export const SidebarLayout: React.FC = () => {
                 }
             `}</style>
             <div className="drawer">
-                <input id="my-drawer" type="checkbox" className="drawer-toggle"/>
+                <input id="my-drawer" ref={checkboxRef} type="checkbox" className="drawer-toggle"/>
+
                 <div className="">
                     {/*Top nav*/}
                     <nav
                         className="navbar w-screen top-0 left-0 right-0 z-50 bg-[#0f2b5b]/95 backdrop-blur-lg border-b border-white/10">
                         <div className="w-full px-6 py-5 flex flex-row items-center justify-between">
-                            <label htmlFor="my-drawer" className="btn btn-square">
+                            <label htmlFor="my-drawer" className="btn btn-square rounded-lg">
                                     <span
                                         className={`transition-transform duration-300 ${
                                             open ? "rotate-0" : "rotate-180"
@@ -137,7 +142,7 @@ export const SidebarLayout: React.FC = () => {
                             <div ref={menuRef} className="relative z-50">
                                 <button
                                     onClick={() => setUserMenu(!userMenu)}
-                                    className="flex flex-row items-center justify-evenly px-6 py-3 rounded-full bg-[#e30613] hover:bg-[#c20510] text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
+                                    className="flex flex-row items-center justify-evenly px-4 py-2 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                                 >
                                     <ChevronsDown size={24}/>
                                     {tempUser.fullName}
@@ -145,13 +150,19 @@ export const SidebarLayout: React.FC = () => {
 
                                 {userMenu && (
                                     <div
-                                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg overflow-hidden z-50 opacity-0 scale-95 animate-[fadeInScale_200ms_ease-out_forwards]"
+                                        className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg overflow-hidden z-50 opacity-0 scale-95 animate-[fadeInScale_200ms_ease-out_forwards]"
                                         style={{
                                             animation: 'fadeInScale 200ms ease-out forwards',
                                             transformOrigin: 'top right'
                                         }}
                                     >
-                                        <Link to="/" className={"w-full block text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"}>
+                                        <div className={"px-4 space-y-3 py-3 border-b"}>
+
+                                        <ThemeToggle/>
+                                        <LanguageToggle/>
+                                        </div>
+                                        <Link to="/my-profile"
+                                              className={"w-full block text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"}>
                                             My profile
                                         </Link>
                                         <button
@@ -175,7 +186,7 @@ export const SidebarLayout: React.FC = () => {
                 </div>
 
                 {/*Side Drawer*/}
-                <div className="drawer-side">
+                <div className="drawer-side z-50">
                     <label htmlFor="my-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
                     <ul className="menu min-h-full w-80 bg-base-200 m-0 p-0">
                         <div className={"ps-3 pt-5 mb-3"}>

@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {type UserDto, UsersClient} from "../../core/generated-client.ts";
+import {type UserDto, UsersClient} from "@core/generated-client.ts";
 import {baseUrl} from "@core/baseUrl.ts";
 import Pagination from "../Pagination";
 import {SquarePen, Trash2} from "lucide-react";
@@ -10,7 +10,27 @@ export default function UsersList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
-    const pageSize = 10;
+    // Filter states
+    const [emailFilter, setEmailFilter] = useState("");
+    const [nameFilter, setNameFilter] = useState("");
+    const [phoneFilter, setPhoneFilter] = useState("");
+    const [pageSize, setPageSize] = useState(10);
+
+    const buildFilterString = () => {
+        const filters: string[] = [];
+
+        if (emailFilter) {
+            filters.push(`Email@=*${emailFilter}`);
+        }
+        if (nameFilter) {
+            filters.push(`Name@=*${nameFilter}`);
+        }
+        if (phoneFilter) {
+            filters.push(`PhoneNumber@=*${phoneFilter}`);
+        }
+
+        return filters.length > 0 ? filters.join(",") : null;
+    };
 
     const fetchUsers = (page: number) => {
         const client = new UsersClient(baseUrl, {
@@ -24,14 +44,24 @@ export default function UsersList() {
             },
         });
 
-        client.getAllUsers(null, null, page, pageSize)
+        const filterString = buildFilterString();
+
+        client.getAllUsers(filterString, null, page, pageSize)
             .then(res => {
-                console.log(res)
                 setUsers(res.items);
                 setTotalPages(Math.ceil(res.total / pageSize));
             })
             .catch(console.error);
     };
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setCurrentPage(1);
+            fetchUsers(1);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [emailFilter, nameFilter, phoneFilter, pageSize]);
 
     useEffect(() => {
         fetchUsers(currentPage);
@@ -57,36 +87,48 @@ export default function UsersList() {
     const handleEdit = (user: UserDto) => {
         return undefined;
     };
+
     return (
         <div>
             <p className={"text-3xl mb-2 mx-0 p-0"}>Users</p>
-            <div className={"flex flex-row gap-4 pb-3"}>
-                <div className={""}>
-                    {/*<label className="font-medium">Email</label>*/}
-                    <input
-                        type="email"
-                        placeholder="Enter email"
-                        // onChange={(e) => setEmail(e.target.value)}
-                        className="border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
-                    />
+            <div className={"flex flex-row justify-between"}>
+                <div className={"flex flex-row gap-4 pb-3"}>
+                    <div className={""}>
+                        <input
+                            type="email"
+                            placeholder="Enter email"
+                            value={emailFilter}
+                            onChange={(e) => setEmailFilter(e.target.value)}
+                            className="input input-neutral border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Enter name"
+                            value={nameFilter}
+                            onChange={(e) => setNameFilter(e.target.value)}
+                            className="input input-neutral border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Enter phone"
+                            value={phoneFilter}
+                            onChange={(e) => setPhoneFilter(e.target.value)}
+                            className="input input-neutral border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
+                        />
+                    </div>
                 </div>
                 <div>
-                    {/*<label className="font-medium">Email</label>*/}
-                    <input
-                        type="text"
-                        placeholder="Enter name"
-                        // onChange={(e) => setEmail(e.target.value)}
-                        className="border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
-                    />
-                </div>
-                <div>
-                    {/*<label className="font-medium">Email</label>*/}
-                    <input
-                        type="text"
-                        placeholder="Enter phone"
-                        // onChange={(e) => setEmail(e.target.value)}
-                        className="border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
-                    />
+                    <select
+                        className={"select z-20 select-neutral border rounded-xl px-4 py-1.5 text-lg w-20 focus:outline-verde"}
+                        onChange={(e) => setPageSize(Number(e.target.value))}>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                    </select>
                 </div>
             </div>
             <div
@@ -121,6 +163,7 @@ export default function UsersList() {
                                                     label: "Delete",
                                                     color: "#ff0000",
                                                     icon: <Trash2 color="#ff0000"/>,
+                                                    requiresConfirmation: true,
                                                     onClick: () => handleDelete(user)
                                                 },
                                             ]}
@@ -132,16 +175,16 @@ export default function UsersList() {
                     })}
                     </tbody>
                 </table>
-
             </div>
-            <div className="mt-4 flex justify-center">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                />
-            </div>
+            {totalPages > 1 && (
+                <div className="mt-4 flex justify-center">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                    />
+                </div>
+            )}
         </div>
-
     );
 }

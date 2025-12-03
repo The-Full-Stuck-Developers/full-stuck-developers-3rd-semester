@@ -1,4 +1,5 @@
 using dataccess;
+using dataccess.Entities;
 using Microsoft.Extensions.Options;
 using Sieve.Models;
 using Sieve.Services;
@@ -16,6 +17,22 @@ public class ApplicationSieveProcessor : SieveProcessor
 
     protected override SievePropertyMapper MapProperties(SievePropertyMapper mapper)
     {
+        // Configure User entity
+        mapper.Property<User>(u => u.Id)
+            .CanFilter()
+            .CanSort();
+
+        mapper.Property<User>(u => u.Name)
+            .CanFilter()
+            .CanSort();
+
+        mapper.Property<User>(u => u.Email)
+            .CanFilter()
+            .CanSort();
+
+        mapper.Property<User>(u => u.PhoneNumber)
+            .CanFilter()
+            .CanSort();
 
         return mapper;
     }

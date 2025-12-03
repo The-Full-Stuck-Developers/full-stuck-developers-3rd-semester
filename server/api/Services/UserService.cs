@@ -24,8 +24,9 @@ public class UserService(
     public async Task<PagedResult<UserDto>> GetAllUsers(SieveModel sieveModel)
     {
         var query = userRepository.Query().Where(u => u.DeletedAt == null);
+        var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+        var total = await filteredQuery.CountAsync();
         var result = sieveProcessor.Apply(sieveModel, query);
-        var total = await query.CountAsync();
         var items = await result.ToListAsync();
         var users = items.Select(u => new UserDto(u)).ToList();
 
