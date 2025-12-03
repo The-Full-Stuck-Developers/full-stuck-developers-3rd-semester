@@ -3,7 +3,8 @@ import {useNavigate} from "react-router";
 import {type SubmitHandler, useForm} from "react-hook-form";
 import type {LoginRequest} from "@core/generated-client.ts";
 import toast from "react-hot-toast";
-import {useAuth} from "../hooks/auth.tsx";
+import {useAuth} from "../../../hooks/auth.tsx";
+import {authClient} from "../../../api-clients.ts";
 
 interface LoginModalProps {
     isOpen: boolean;
@@ -37,11 +38,20 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
 
     const handlePasswordReset = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Backend integration will be added later
-        console.log("Password reset requested for:", resetEmail);
-        toast.success("If an account exists, you'll receive an email shortly");
-        setResetEmail("");
-        setIsForgotPassword(false);
+        try {
+            await toast.promise(
+                authClient.forgotPassword({ email: resetEmail }),
+                {
+                    loading: "Sending reset email...",
+                    success: "If an account exists, you'll receive an email shortly",
+                    error: "Something went wrong. Please try again.",
+                }
+            );
+            setResetEmail("");
+            setIsForgotPassword(false);
+        } catch (error) {
+            console.error("Password reset error:", error);
+        }
     };
     const handleClose = () => {
         setIsForgotPassword(false);

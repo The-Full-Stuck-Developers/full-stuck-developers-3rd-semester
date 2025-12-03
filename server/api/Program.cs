@@ -98,6 +98,7 @@ public class Program
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher>();
         services.AddScoped<ITokenService, JwtService>();
+        services.AddScoped<IEmailService, EmailService>();
 
         // Register Seeder
         services.AddScoped<DbSeeder>();
@@ -145,6 +146,7 @@ public class Program
             options.AddPolicy("IsAdmin", policy =>
                 policy.AddRequirements(new IsAdmin()));
         });
+        
 
         //Sieve
         services.Configure<SieveOptions>(options =>
