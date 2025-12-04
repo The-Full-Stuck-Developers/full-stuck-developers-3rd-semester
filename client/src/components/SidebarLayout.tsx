@@ -45,7 +45,7 @@ export const SidebarLayout: React.FC = () => {
 
     const handleLogout = () => {
         // Implement later token/localStorage etc
-        navigate("/login");
+        navigate("/");
     };
 
     const menuItems: MenuItem[] = [

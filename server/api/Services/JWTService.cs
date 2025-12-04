@@ -39,9 +39,8 @@ public class JwtService(IConfiguration config) : ITokenService
     {
         var secret = configuration["AppOptions:JwtSecret"]
                      ?? throw new Exception("Jwt secret not found!");
-
-        //var key = Convert.FromBase64String(secret);
-        var key = Encoding.UTF8.GetBytes(secret);
+        
+        var key = Convert.FromBase64String(secret);
         return new TokenValidationParameters
         {
             IssuerSigningKey = new SymmetricSecurityKey(key),
