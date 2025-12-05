@@ -9,6 +9,7 @@ import ResetPassword from "@components/sections/LoginSection/ResetPassword.tsx";
 import GameList from "@components/admin/GameList.tsx";
 import "./../../node_modules/flag-icons/css/flag-icons.min.css";
 import MyProfilePage from "@components/admin/MyProfilePage.tsx";
+import {UserDeposit} from "@components/sections/userSection/UserDeposit.tsx";
 import { AdminProtectedRoute, UserProtectedRoute } from "@components/routes/auth/ProtectedRoutes.tsx";
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route element={<UserProtectedRoute />}>
                 <Route path="/user/dashboard" element={<UserDashboard />} />
                 <Route path="/user/my-boards" element={<UserBoards />} />
+               <Route path="/user/deposit" element={<UserDeposit userId="1d49a350-b52a-4c2a-aa4b-8a3d5f04c6aa"/>} />
                 <Route path="/game/current" element={<GameBoard/>} />
             </Route>
 
