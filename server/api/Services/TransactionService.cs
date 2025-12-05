@@ -52,11 +52,15 @@ public class TransactionService(MyDbContext dbContext) : ITransactionService
 
     public async Task DeleteTransaction(Guid id)
     {
-        var transaction = await dbContext.Transactions.FirstOrDefaultAsync(t => t.Id == id);
-        if(transaction == null) throw new KeyNotFoundException($"Transaction {id} not found");
+        var transaction = await dbContext.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id);
 
-        dbContext.Remove(transaction);
+        if (transaction == null)
+            throw new KeyNotFoundException($"Transaction {id} not found");
+        
+        transaction.Status = TransactionStatus.Cancelled;
+
         await dbContext.SaveChangesAsync();
-        return;
     }
+
 }

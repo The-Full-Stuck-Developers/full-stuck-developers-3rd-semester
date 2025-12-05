@@ -197,11 +197,12 @@ public partial class MyDbContext : DbContext
                 .HasDefaultValueSql("now()");
 
             entity.HasOne(e => e.User)
-                .WithMany()
+                .WithMany(u => u.Transactions) 
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("transactions_user_id_users_id_foreign_key")
                 .OnDelete(DeleteBehavior.Cascade);
         });
+
 
         modelBuilder.Entity<Bet>(entity =>
         {

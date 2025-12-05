@@ -70,6 +70,8 @@ public class Program
         services.AddScoped<IRepository<User>, UserRepository>();
         services.AddScoped<IRepository<Game>, GameRepository>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITransactionService, TransactionService>();
+
 
 
         //Controllers
