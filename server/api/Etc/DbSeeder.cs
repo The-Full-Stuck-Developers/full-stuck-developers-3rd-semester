@@ -52,6 +52,7 @@ public class DbSeeder(
                     Name = userData.name,
                     PhoneNumber = userData.phoneNumber,
                     IsAdmin = userData.isAdmin,
+                    Balance = 124500,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     PasswordHash = hasher.HashPassword(null, defaultPassword),

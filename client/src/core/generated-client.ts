@@ -703,6 +703,7 @@ export interface AuthUserInfo {
     id: string;
     name: string;
     isAdmin: boolean;
+    balance: number;
 }
 
 export interface PagedResultOfGameDto {
