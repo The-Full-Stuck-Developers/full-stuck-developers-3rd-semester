@@ -5,6 +5,7 @@ import {Backpack, ChevronsDown, Dice5, Menu, Users} from "lucide-react";
 import {ThemeToggle} from "@components/ThemeToggle.tsx";
 import {useTranslation} from "react-i18next";
 import {t} from "i18next";
+import {useAuth} from "../hooks/auth.tsx";
 
 interface MenuItem {
     label: string;
@@ -12,21 +13,16 @@ interface MenuItem {
     icon: JSX.Element;
 }
 
-const tempUser = {
-    fullName: "Jan Kowalski",
-    balanceCents: 124500,
-};
-
 export const SidebarLayout: React.FC = () => {
     const checkboxRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
     const location = useLocation();
     const [open, setOpen] = useState(true);
-    const balanceDKK = (tempUser.balanceCents / 100).toFixed(2);
     const [userMenu, setUserMenu] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const {i18n} = useTranslation();
     const [lang, setLang] = useState<"en" | "dk">(i18n.language.startsWith("dk") ? "dk" : "en");
+    const { user, logout } = useAuth();
 
     // On mount, check localStorage for saved language
     useEffect(() => {
@@ -44,8 +40,7 @@ export const SidebarLayout: React.FC = () => {
     };
 
     const handleLogout = () => {
-        // Implement later token/localStorage etc
-        navigate("/");
+        logout();
     };
 
     const menuItems: MenuItem[] = [
@@ -109,6 +104,15 @@ export const SidebarLayout: React.FC = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Show loading if user not loaded yet
+    if (!user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-2xl">Loading...</div>
+            </div>
+        );
+    }
+
     return (
         <div className={" overflow-x-hidden"}>
             <style>{`
@@ -163,7 +167,7 @@ export const SidebarLayout: React.FC = () => {
                                     className="flex flex-row items-center justify-evenly px-4 py-2 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"
                                 >
                                     <ChevronsDown size={24}/>
-                                    {tempUser.fullName}
+                                    {user.name}
                                 </button>
 
                                 {userMenu && (
