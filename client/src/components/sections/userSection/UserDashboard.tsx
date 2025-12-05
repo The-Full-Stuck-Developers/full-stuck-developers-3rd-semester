@@ -1,17 +1,30 @@
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../../jerneif-logo.png";
-
-const tempUser = {
-    fullName: "Jan Kowalski",
-    balanceCents: 124500,
-};
+import { useAuth } from "../../../hooks/auth";
+import { useEffect, useState } from "react";
 
 export default function UserDashboard() {
     const navigate = useNavigate();
-    const balanceDKK = (tempUser.balanceCents / 100).toFixed(2);
+    const { user, logout } = useAuth();
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (user) {
+            setLoading(false);
+        }
+    } , [user]);
+
+    if (loading || !user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                                <div className="text-2xl">Loading...</div>
+            </div>
+        );
+    }
+    const balanceDKK = (user.balance / 100).toFixed(2);
+    const userName = user.name;
 
     const handleLogout = () => {
-        // Implement later token/localStorage etc
         navigate("/");
     };
 
@@ -35,7 +48,7 @@ export default function UserDashboard() {
                         </Link>
                         <div className="flex items-center gap-6">
                             <div className="text-right">
-                                <p className="text-lg font-bold text-white">{tempUser.fullName}</p>
+                                <p className="text-lg font-bold text-white">{user.name}</p>
                             </div>
 
                             <button
@@ -54,7 +67,7 @@ export default function UserDashboard() {
 
                     <div className="mb-10 text-center">
                         <h1 className="text-5xl font-bold text-gray-900">
-                            Hello, {tempUser.fullName.split(" ")[0]}!
+                            Hello, {userName}!
                         </h1>
                         <p className="text-xl text-gray-600 mt-3">
                             Ready for a next week with Dead Pigeons?

@@ -7,6 +7,6 @@ public static class EntitiesToDtoExtensions
 {
     public static AuthUserInfo ToDto(this User user)
     {
-        return new AuthUserInfo(Id: user.Id, Name: user.Name, IsAdmin: user.IsAdmin);
+        return new AuthUserInfo(Id: user.Id, Name: user.Name, IsAdmin: user.IsAdmin, user.Balance);
     }
 }

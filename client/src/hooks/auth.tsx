@@ -6,6 +6,7 @@ import {authClient} from "../api-clients.ts";
 
 type AuthHook = {
     user: AuthUserInfo | null;
+    isAuthenticated: boolean;
     login: (request: LoginRequest) => Promise<void>;
     logout: () => void;
 };
@@ -36,6 +37,7 @@ export const useAuth = () => {
 
     return {
         user,
+        isAuthenticated: !!user,
         login,
         logout,
     } as AuthHook;

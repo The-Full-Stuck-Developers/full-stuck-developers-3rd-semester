@@ -658,6 +658,10 @@
           },
           "isAdmin": {
             "type": "boolean"
+          },
+          "balance": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
