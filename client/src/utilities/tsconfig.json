@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.settings.json",
+  "compilerOptions": {
+    "composite": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../vite-env.d.ts"
+  ],
+  "references": [
+    {
+      "path": "../core"
+    }
+  ]
+}
