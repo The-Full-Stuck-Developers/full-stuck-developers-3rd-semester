@@ -39,12 +39,15 @@ public class Program
 
     public static void SetupDatabase(WebApplication app, string defaultPassword)
     {
-        using (var scope = app.Services.CreateScope())
-        {
-            var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-            seeder.Seed("hashed_password_here").Wait();
-        }
+        using var scope = app.Services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+        db.Database.Migrate();  // or await MigrateAsync in an async method
+
+        var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+        seeder.Seed(defaultPassword).Wait();
     }
+
 
     public static void ConfigureServices(WebApplicationBuilder builder, IConfiguration configuration)
     {
@@ -92,7 +95,10 @@ public class Program
         {
             options.AddPolicy("AllowLocalhost5173", policy =>
             {
-                policy.WithOrigins("http://localhost:5173")
+                policy.WithOrigins(
+                        "http://localhost:5173",
+                        "https://deadpigeonsapp.fly.dev/"
+                        )
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();
@@ -166,17 +172,18 @@ public class Program
     private static async Task ConfigureApp(WebApplication app)
     {
         app.UseExceptionHandler();
-        app.UseCors("AllowLocalhost5173");
+        app.UseCors("FrontendCors");
 
-        // Swagger MUST be before auth
         app.UseOpenApi();
         app.UseSwaggerUi();
 
-        // Auth after swagger
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
+
+        // Public health/root endpoint so Fly & browsers don't get 401
+        app.MapGet("/", [AllowAnonymous] () => Results.Ok("DeadPigeons API is running"));
 
         await app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts");
 
