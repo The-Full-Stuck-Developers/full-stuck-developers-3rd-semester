@@ -294,6 +294,9 @@ namespace dataccess.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
+                    b.Property<Guid?>("UserId1")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id")
                         .HasName("transactions_primary_key");
 
@@ -362,6 +365,10 @@ namespace dataccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("transactions_user_id_users_id_foreign_key");
+
+                    b.HasOne("dataccess.Entities.User", null)
+                        .WithMany("Transactions")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });
