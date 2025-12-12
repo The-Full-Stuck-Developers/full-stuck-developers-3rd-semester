@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.13.2",
     "daisyui": "^5.1.12",
+    "date-fns": "^4.1.0",
     "dotnet-json-refs": "^1.0.0",
     "flag-icons": "^7.5.0",
     "hooks": "^0.3.2",

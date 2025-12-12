@@ -26,6 +26,7 @@ public class AuthService(
     AppOptions appOptions)
     : IAuthService
 {
+   
     public AuthUserInfo Authenticate(LoginRequestDto request)
         {
             // Null checks
