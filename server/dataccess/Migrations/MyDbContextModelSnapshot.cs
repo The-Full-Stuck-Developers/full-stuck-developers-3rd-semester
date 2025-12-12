@@ -20,7 +20,7 @@ namespace dataccess.Migrations
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_status", new[] { "pending", "accepted", "rejected" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_status", new[] { "pending", "accepted", "rejected", "cancelled" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DefaultNamespace.Bet", b =>
@@ -306,8 +306,6 @@ namespace dataccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("UserId1");
-
                     b.ToTable("transactions", (string)null);
                 });
 
@@ -362,7 +360,7 @@ namespace dataccess.Migrations
             modelBuilder.Entity("dataccess.Transaction", b =>
                 {
                     b.HasOne("dataccess.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
