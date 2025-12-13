@@ -35,8 +35,10 @@ jobs:
 
       - name: ESLint (check only)
         run: npm run lint
+        working-directory: ./client
 
       - name: Commit formatted files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Fixes coding style"
+        working-directory: ./client
