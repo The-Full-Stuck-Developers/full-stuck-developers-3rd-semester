@@ -1,13 +1,13 @@
 import {useNavigate} from "react-router-dom";
 import {useAtom} from "jotai";
 import {tokenAtom, userInfoAtom} from "../atoms/token";
-import type {AuthUserInfo, LoginRequest} from "../core/generated-client";
+import type {AuthUserInfo, LoginRequestDto} from "../core/generated-client";
 import {authClient} from "../api-clients.ts";
 
 type AuthHook = {
     user: AuthUserInfo | null;
     isAuthenticated: boolean;
-    login: (request: LoginRequest) => Promise<void>;
+    login: (request: LoginRequestDto) => Promise<void>;
     logout: () => void;
 };
 
@@ -16,7 +16,7 @@ export const useAuth = () => {
     const [user] = useAtom(userInfoAtom);
     const navigate = useNavigate();
 
-    const login = async (request: LoginRequest) => {
+    const login = async (request: LoginRequestDto) => {
         const response = await authClient.login(request);
         setJwt(response.jwt!);
         // Fetch user info to check if admin

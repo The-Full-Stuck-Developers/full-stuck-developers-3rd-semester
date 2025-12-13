@@ -32,164 +32,116 @@ public class Program
             Environment.Exit(0);
         }
 
-        ConfigureApp(app);
-
+        await ConfigureApp(app);
         await app.RunAsync();
     }
 
     public static void SetupDatabase(WebApplication app, string defaultPassword)
     {
-        using (var scope = app.Services.CreateScope())
-        {
-            var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-            seeder.Seed("hashed_password_here").Wait();
-        }
+        using var scope = app.Services.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+        db.Database.Migrate();
+
+        var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+        seeder.Seed(defaultPassword).Wait();
     }
 
     public static void ConfigureServices(WebApplicationBuilder builder, IConfiguration configuration)
     {
         var services = builder.Services;
 
-        // Bind AppOptions
         var appOptions = new AppOptions();
         configuration.GetSection("AppOptions").Bind(appOptions);
         services.AddSingleton(appOptions);
 
-        //Database
-        var connectionString = appOptions.DefaultConnection;
         services.AddDbContext<MyDbContext>(options =>
-            options
-                .UseNpgsql(connectionString)
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+            options.UseNpgsql(appOptions.DefaultConnection)
+                   .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
-        services.AddSingleton(TimeProvider.System);
-
-        Console.WriteLine($"Connecting to DB: {appOptions.DefaultConnection}");
-
-        //Repositories
-        services.AddScoped<IRepository<User>, UserRepository>();
-        services.AddScoped<IRepository<Game>, GameRepository>();
-        services.AddScoped<IUserService, UserService>();
-        services.AddScoped<ITransactionService, TransactionService>();
-
-
-
-        //Controllers
         services.AddControllers().AddJsonOptions(opts =>
         {
             opts.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             opts.JsonSerializerOptions.MaxDepth = 128;
         });
 
-        //OpenApi
-        services.AddOpenApiDocument(config =>
-        {
-            // config.AddStringConstants(typeof(SieveConstants));
-        });
-
-        //CORS
+        services.AddOpenApiDocument();
+        
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowLocalhost5173", policy =>
+            options.AddPolicy("FrontendCors", policy =>
             {
-                policy.WithOrigins("http://localhost:5173")
+                policy.WithOrigins(
+                        "http://localhost:5173",
+                        "https://deadpigeons.vercel.app"
+                    )
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                    .AllowAnyMethod();
+                    // .AllowCredentials(); // only if you use cookies
             });
         });
 
-        //Core Services
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IPasswordHasher<User>, PasswordHasher>();
         services.AddScoped<ITokenService, JwtService>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher>();
         services.AddScoped<IEmailService, EmailService>();
 
-        // Register Seeder
         services.AddScoped<DbSeeder>();
-        //Exceptions
         services.AddExceptionHandler<GlobalExceptionHandler>();
-
         services.AddProblemDetails();
 
-        // JWT Authentication
-        services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = JwtService.CreateValidationParams(builder.Configuration);
-                //Debugging
-                options.Events = new JwtBearerEvents
-                {
-                    OnAuthenticationFailed = context =>
-                    {
-                        Console.WriteLine(context.Exception.Message);
-                        return Task.CompletedTask;
-                    },
-                    OnTokenValidated = context =>
-                    {
-                        Console.WriteLine("Token validated successfully.");
-                        return Task.CompletedTask;
-                    },
-                };
-
+                options.TokenValidationParameters =
+                    JwtService.CreateValidationParams(builder.Configuration);
             });
 
-        // Global Authorization
-        services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
         services.AddAuthorization(options =>
         {
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
-
-            options.AddPolicy("IsAdmin", policy =>
-                policy.AddRequirements(new IsAdmin()));
         });
-        
 
-        //Sieve
         services.Configure<SieveOptions>(options =>
         {
             options.CaseSensitive = false;
             options.DefaultPageSize = 10;
             options.MaxPageSize = 100;
         });
+
         services.AddScoped<ISieveProcessor, ApplicationSieveProcessor>();
     }
 
     private static async Task ConfigureApp(WebApplication app)
     {
         app.UseExceptionHandler();
-        app.UseCors("AllowLocalhost5173");
+        
+        app.UseCors("FrontendCors");
 
-        // Swagger MUST be before auth
-        app.UseOpenApi();
-        app.UseSwaggerUi();
-
-        // Auth after swagger
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.UseOpenApi();
+        app.UseSwaggerUi();
+
         app.MapControllers();
 
-        await app.GenerateApiClientsFromOpenApi("/../../client/src/core/generated-client.ts");
+        app.MapGet("/", [AllowAnonymous] () =>
+            Results.Ok("DeadPigeons API is running"));
+
+        await app.GenerateApiClientsFromOpenApi(
+            "/../../client/src/core/generated-client.ts");
 
         if (app.Environment.IsDevelopment())
         {
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-                await db.Database.MigrateAsync();
-                
-                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-                await seeder.Seed("hashed_password_here");
-            }
+            using var scope = app.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+            await db.Database.MigrateAsync();
+
+            var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+            await seeder.Seed("hashed_password_here");
         }
     }
 }
