@@ -17,7 +17,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
 
-
 public class AuthService(
     ILogger<AuthService> logger,
     IPasswordHasher<User> passwordHasher,

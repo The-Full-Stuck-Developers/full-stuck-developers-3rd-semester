@@ -85,6 +85,10 @@ public class Program
         services.AddScoped<ITokenService, JwtService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<IGameService, GameService>();
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddScoped<DbSeeder>();
         services.AddExceptionHandler<GlobalExceptionHandler>();
