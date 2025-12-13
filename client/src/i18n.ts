@@ -1,5 +1,5 @@
 import i18n from "i18next";
-import {initReactI18next} from "react-i18next";
+import { initReactI18next } from "react-i18next";
 import enCommon from "./locales/en/common.json";
 import enMessages from "./locales/en/messages.json";
 import enPlaceholders from "./locales/en/placeholders.json";
@@ -13,35 +13,29 @@ import dkUser from "./locales/dk/user.json";
 import dkValidation from "./locales/dk/validation.json";
 
 i18n.use(initReactI18next).init({
-    resources: {
-        en: {
-            common: enCommon,
-            messages: enMessages,
-            placeholders: enPlaceholders,
-            user: enUser,
-            validation: enValidation,
-        },
-        dk: {
-            common: dkCommon,
-            messages: dkMessages,
-            placeholders: dkPlaceholders,
-            user: dkUser,
-            validation: dkValidation,
-        }
+  resources: {
+    en: {
+      common: enCommon,
+      messages: enMessages,
+      placeholders: enPlaceholders,
+      user: enUser,
+      validation: enValidation,
     },
-    lng: "en",
-    fallbackLng: "en",
-    ns: [
-        "common",
-        "messages",
-        "placeholders",
-        "user",
-        "validation",
-    ],
-    defaultNS: "common",
-    interpolation: {
-        escapeValue: false
-    }
+    dk: {
+      common: dkCommon,
+      messages: dkMessages,
+      placeholders: dkPlaceholders,
+      user: dkUser,
+      validation: dkValidation,
+    },
+  },
+  lng: "en",
+  fallbackLng: "en",
+  ns: ["common", "messages", "placeholders", "user", "validation"],
+  defaultNS: "common",
+  interpolation: {
+    escapeValue: false,
+  },
 });
 
 export default i18n;

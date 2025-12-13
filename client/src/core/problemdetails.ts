@@ -1,3 +1,3 @@
 export interface ProblemDetails {
-    title: string
+  title: string;
 }

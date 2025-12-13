@@ -10,7 +10,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "graph": "npx depcruise src --include-only \"^src\" --output-type dot | dot -T svg > dependency-graph.svg"
+    "graph": "npx depcruise src --include-only \"^src\" --output-type dot | dot -T svg > dependency-graph.svg",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -20,6 +22,7 @@
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.13.2",
     "daisyui": "^5.1.12",
+    "date-fns": "^4.1.0",
     "dotnet-json-refs": "^1.0.0",
     "flag-icons": "^7.5.0",
     "hooks": "^0.3.2",
@@ -44,10 +47,19 @@
     "@types/node": "^25.0.1",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.49.0",
+    "@typescript-eslint/parser": "^8.49.0",
     "@vitejs/plugin-react": "^4.4.1",
     "dependency-cruiser": "^17.2.0",
-    "globals": "^16.0.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-unused-imports": "^4.3.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.7.4",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.49.0",
     "vite": "^6.3.5"
   }
 }
