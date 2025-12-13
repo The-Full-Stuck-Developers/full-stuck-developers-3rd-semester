@@ -28,9 +28,9 @@ const Pagination: React.FC<PaginationProps> = ({currentPage, totalPages, onPageC
     };
 
     return (
-        <div className=" flex h-full">
+        <div className="flex h-full text-white">
             <button
-                className={`${currentPage === 1 ? "hidden" : "block"} w-20 bg-[#0f2b5b]! text-white cursor-not-allowed rounded-s-lg`}
+                className={`${currentPage === 1 ? "disabled" : "block"} w-20 bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 rounded-s-lg transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`}
                 onClick={handlePrev}
                 disabled={currentPage === 1}
             >
@@ -39,20 +39,30 @@ const Pagination: React.FC<PaginationProps> = ({currentPage, totalPages, onPageC
 
             {startPage > 1 && (
                 <>
-                    <button className="size-10 hover:bg-slate-200 cursor-pointer border border-[#0f2b5b]"
-                            onClick={() => onPageChange(1)}>
+                    <button
+                        className="size-10 bg-gray-800 hover:bg-gray-700 text-white cursor-pointer border border-gray-700 transition-colors"
+                        onClick={() => onPageChange(1)}
+                    >
                         1
                     </button>
-                    {startPage > 2 && <span
-                        className={"size-10 text-center align-middle cursor-default border border-[#0f2b5b] flex items-center justify-center pb-2.5"}>...</span>}
+                    {startPage > 2 && (
+                        <span className="size-10 text-center align-middle cursor-default bg-gray-900 border border-gray-700 flex items-center justify-center text-gray-400">
+                            ...
+                        </span>
+                    )}
                 </>
             )}
 
             {pages.map((page) => (
                 <button
                     key={page}
-                    className={`size-10  ${page === currentPage ? "bg-[#0f2b5b] text-white cursor-not-allowed" : "hover:bg-slate-200 cursor-pointer border border-[#0f2b5b]"}`}
+                    className={`size-10 border transition-colors ${
+                        page === currentPage
+                            ? "bg-red-600 text-white cursor-default border-red-500"
+                            : "bg-gray-800 hover:bg-gray-700 text-white cursor-pointer border-gray-700"
+                    }`}
                     onClick={() => onPageChange(page)}
+                    disabled={page === currentPage}
                 >
                     {page}
                 </button>
@@ -60,17 +70,22 @@ const Pagination: React.FC<PaginationProps> = ({currentPage, totalPages, onPageC
 
             {endPage < totalPages && (
                 <>
-                    {endPage < totalPages - 1 && <span
-                        className="size-10 text-center align-middle cursor-default border border-[#0f2b5b] flex items-center justify-center pb-2.5">...</span>}
-                    <button className="size-10 hover:bg-slate-200 cursor-pointer border border-[#0f2b5b]"
-                            onClick={() => onPageChange(totalPages)}>
+                    {endPage < totalPages - 1 && (
+                        <span className="size-10 text-center align-middle cursor-default bg-gray-900 border border-gray-700 flex items-center justify-center text-gray-400">
+                            ...
+                        </span>
+                    )}
+                    <button
+                        className="size-10 bg-gray-800 hover:bg-gray-700 text-white cursor-pointer border border-gray-700 transition-colors"
+                        onClick={() => onPageChange(totalPages)}
+                    >
                         {totalPages}
                     </button>
                 </>
             )}
 
             <button
-                className={`${currentPage === totalPages ? "hidden" : "block"} w-20 bg-[#0f2b5b] text-white cursor-pointer rounded-e-lg `}
+                className={`${currentPage === totalPages ? "disabled" : "block"} w-20 bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 rounded-e-lg transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50`}
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
             >

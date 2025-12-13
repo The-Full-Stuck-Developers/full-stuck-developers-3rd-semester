@@ -1,5 +1,7 @@
 {
   "enter_email": "Indtast e-mail",
   "enter_name": "Indtast navn",
-  "enter_phone": "Indtast telefonnummer"
+  "enter_phone": "Indtast telefonnummer",
+  "search_user": "Søg efter e-mail eller navn",
+  "all_statuses": "Alle statusser"
 }

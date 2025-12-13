@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {useNavigate} from "react-router";
 import {type SubmitHandler, useForm} from "react-hook-form";
-import type {LoginRequest} from "@core/generated-client.ts";
+import type {LoginRequestDto} from "@core/generated-client.ts";
 import toast from "react-hot-toast";
 import {useAuth} from "../../../hooks/auth.tsx";
 import {authClient} from "../../../api-clients.ts";
@@ -24,9 +24,9 @@ export default function Login({isOpen, onClose}: LoginModalProps) {
         register,
         handleSubmit,
         formState: {errors},
-    } = useForm<LoginRequest>();
+    } = useForm<LoginRequestDto>();
 
-    const onSubmit: SubmitHandler<LoginRequest> = async (data) => {
+    const onSubmit: SubmitHandler<LoginRequestDto> = async (data) => {
         console.log("Form data being sent:", data);
         await toast.promise(login(data), {
             loading: "Checking credentials...",

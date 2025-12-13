@@ -126,12 +126,12 @@ public class UserService(
 
         if (user == null)
         {
-            throw new KeyNotFoundException($"User with id {id} not found");
+            throw new KeyNotFoundException("User not found");
         }
 
-        if (user.ExpiresAt == null)
+        if (user.IsAdmin)
         {
-            throw new InvalidOperationException("User does not have an active membership to renew");
+            throw new InvalidOperationException("Admin users cannot be renewed");
         }
 
         var now = DateTime.UtcNow;
@@ -151,12 +151,20 @@ public class UserService(
             // Too early to renew
             var daysUntilRenewal = (renewalWindowStart - now).TotalDays;
             throw new InvalidOperationException(
-                $"Membership can only be renewed within 48 hours of expiration. " +
+                $"Membership can only be renewed within 7 days of expiration. " +
                 $"Renewal available in {Math.Ceiling(daysUntilRenewal)} days");
         }
 
         await userRepository.UpdateAsync(user);
 
         return new UserDto(user);
+    }
+
+    public async Task<int> GetUsersCount()
+    {
+        return await userRepository.Query()
+            .Where(u => u.DeletedAt == null)
+            .Where(u => !u.IsAdmin)
+            .CountAsync();
     }
 }
