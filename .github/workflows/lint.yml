@@ -27,17 +27,18 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-	working-directory: ./client
+        working-directory: ./client
 
       - name: Run Prettier
         run: npm run format
-	working-directory: ./client
-
+        working-directory: ./client
 
       - name: ESLint (check only)
         run: npm run lint
+        working-directory: ./client
 
       - name: Commit formatted files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Fixes coding style"
+        working-directory: ./client
