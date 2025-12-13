@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using api.Models;
 using api.Models.Dtos.Requests.Transaction;
 using api.Services;
 using Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Sieve.Models;
 
 namespace api.Controllers;
 
@@ -15,9 +17,19 @@ public class TransactionsController(ITransactionService transactionService) : Co
 {
     [HttpGet]
     // [Authorize(Policy = "IsAdmin")]
-    public async Task<ActionResult<List<TransactionDto>>> GetAllTransactions()
+    public async Task<ActionResult<PagedResult<TransactionDto>>> GetAllTransactions([FromQuery] SieveModel sieveModel)
     {
-        var result = await transactionService.GetAllTransactions();
+        var result = await transactionService.GetAllTransactions(sieveModel);
+
+        return Ok(result);
+    }
+
+    [HttpGet("User/{userId}")]
+    public async Task<ActionResult<PagedResult<TransactionDto>>> GetTransactionsByUser(
+        Guid userId,
+        [FromQuery] SieveModel sieveModel)
+    {
+        var result = await transactionService.GetTransactionsByUser(userId, sieveModel);
         return Ok(result);
     }
 
@@ -36,7 +48,8 @@ public class TransactionsController(ITransactionService transactionService) : Co
     // [Authorize(Policy = "IsAdmin")]
     [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<TransactionDto>> CreateTransaction([FromBody] CreateTransactionDto createTransactionDto)
+    public async Task<ActionResult<TransactionDto>> CreateTransaction(
+        [FromBody] CreateTransactionDto createTransactionDto)
     {
         if (!ModelState.IsValid)
         {
@@ -105,5 +118,32 @@ public class TransactionsController(ITransactionService transactionService) : Co
         {
             return NotFound(new { message = $"Transaction with id {id} not found" });
         }
+    }
+
+    [HttpPatch("{id}/approve")]
+    // [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<PagedResult<TransactionDto>>> ApproveTransaction(Guid id)
+    {
+        var transaction = await transactionService.ApproveTransaction(id);
+
+        return Ok(transaction);
+    }
+
+    [HttpPatch("{id}/reject")]
+    // [Authorize(Policy = "IsAdmin")]
+    public async Task<IActionResult> RejectTransaction(Guid id)
+    {
+        await transactionService.RejectTransaction(id);
+
+        return NoContent();
+    }
+
+    [HttpGet("GetPendingTransactionsCount")]
+    // [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<int>> GetPendingTransactionsCount()
+    {
+        var count = await transactionService.GetPendingTransactionsCount();
+
+        return Ok(new { count = count });
     }
 }

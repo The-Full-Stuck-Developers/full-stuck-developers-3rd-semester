@@ -107,4 +107,13 @@ public class UsersController(IUserService userService) : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpGet("GetPlayerCount")]
+// [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<int>> GetPlayersCount()
+    {
+        var count = await userService.GetUsersCount();
+
+        return Ok(new { count = count });
+    }
 }

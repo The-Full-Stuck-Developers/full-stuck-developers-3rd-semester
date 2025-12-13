@@ -2,13 +2,15 @@ import {useEffect, useState} from "react";
 import {type CreateUserDto, type UpdateUserDto, type UserDto, UsersClient} from "@core/generated-client.ts";
 import {baseUrl} from "@core/baseUrl.ts";
 import Pagination from "../Pagination";
-import {Check, SquarePen, Trash2, UserPlus, X} from "lucide-react";
+import {Check, Mail, Phone, SquarePen, TicketCheck, Trash2, UserPlus, UserX, Wallet, X} from "lucide-react";
 import {ActionMenu} from "@components/ActionMenu.tsx";
 import toast, {Toaster} from "react-hot-toast";
 import {useTranslation} from "react-i18next";
+import {useNavigate} from "react-router-dom";
 
 export default function UsersList() {
     const {t} = useTranslation();
+    const navigate = useNavigate();
     const [users, setUsers] = useState<UserDto[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -17,6 +19,7 @@ export default function UsersList() {
     const [emailFilter, setEmailFilter] = useState("");
     const [nameFilter, setNameFilter] = useState("");
     const [phoneFilter, setPhoneFilter] = useState("");
+    const [isAdminFilter, setIsAdminFilter] = useState(false);
     const [pageSize, setPageSize] = useState(10);
 
     // Edit modal states
@@ -27,6 +30,7 @@ export default function UsersList() {
         email: "",
         phoneNumber: ""
     });
+    const [editErrors, setEditErrors] = useState<Record<string, string[]>>({});
 
     // Create modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -52,6 +56,10 @@ export default function UsersList() {
         }
         if (phoneFilter) {
             filters.push(`PhoneNumber@=*${phoneFilter}`);
+        }
+
+        if (isAdminFilter) {
+            filters.push(`IsAdmin==true`);
         }
 
         return filters.length > 0 ? filters.join(",") : null;
@@ -89,7 +97,7 @@ export default function UsersList() {
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [emailFilter, nameFilter, phoneFilter, pageSize]);
+    }, [emailFilter, nameFilter, phoneFilter, pageSize, isAdminFilter]);
 
     useEffect(() => {
         fetchUsers(currentPage);
@@ -139,10 +147,21 @@ export default function UsersList() {
             await client.updateUser(selectedUser.id, updateDto);
             fetchUsers(currentPage);
             handleCloseEditModal();
+            setEditErrors({});
             toast.success("User updated successfully.");
-        } catch (error) {
-            console.error("Error updating user:", error);
-            toast.error("Error updating user, please try again.",);
+        } catch (err: any) {
+            if (err.status === 400) {
+                const validation = err.errors;
+                const formatted: Record<string, string[]> = {};
+
+                Object.keys(validation).forEach(key => {
+                    formatted[key] = validation[key];
+                });
+
+                setEditErrors(formatted);
+            } else {
+                toast.error("Something went wrong, please try again later.");
+            }
         }
     };
 
@@ -151,7 +170,6 @@ export default function UsersList() {
     };
 
     const handleCloseCreateModal = () => {
-        console.log('asdasd');
         setIsCreateModalOpen(false);
         setCreateForm({
             name: "",
@@ -161,6 +179,7 @@ export default function UsersList() {
             isAdmin: false,
             activateMembership: false,
         });
+        setCreateErrors({});
     };
 
     const handleCreateUser = async (e: React.MouseEvent) => {
@@ -234,18 +253,19 @@ export default function UsersList() {
         <div>
             <Toaster position="top-center"/>
             <div className={"flex flex-row items-center justify-between w-full pb-8"}>
-                <p className={"text-3xl mb-2 mx-0 p-0"}>{t("users")}</p>
+                <p className={"text-white text-3xl mb-2 mx-0 p-0"}>{t("users")}</p>
                 <button
                     onClick={handleOpenCreateModal}
-                    className={"px-3 py-1.5 bg-slate-300 rounded-md hover:bg-slate-400 flex flex-row items-center outline cursor-pointer"}>
+                    className={"flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"}>
                     <UserPlus size={18} className={"me-2"}/>
                     <span>
-                        {t("user:create_new_user")}
-                    </span>
+                            {t("user:create_new_user")}
+                        </span>
                 </button>
             </div>
-            <div className={"flex flex-row justify-between"}>
-                <div className={"flex flex-row gap-4 pb-3"}>
+            <div
+                className={"flex flex-row justify-between bg-gray-800 rounded-2xl p-6 border border-gray-700 mb-6"}>
+                <div className={"flex flex-row gap-4"}>
                     <div className={""}>
                         <input
                             type="email"
@@ -253,7 +273,7 @@ export default function UsersList() {
                             value={emailFilter}
                             required={true}
                             onChange={(e) => setEmailFilter(e.target.value)}
-                            className="input input-neutral border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
+                            className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                     </div>
                     <div>
@@ -263,7 +283,7 @@ export default function UsersList() {
                             value={nameFilter}
                             required={true}
                             onChange={(e) => setNameFilter(e.target.value)}
-                            className="input input-neutral border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
+                            className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                     </div>
                     <div>
@@ -273,13 +293,26 @@ export default function UsersList() {
                             value={phoneFilter}
                             required={true}
                             onChange={(e) => setPhoneFilter(e.target.value)}
-                            className="input input-neutral border rounded-xl px-4 py-1.5 text-lg w-full focus:outline-verde"
+                            className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                     </div>
+                    <div className={"flex flex-row items-center"}>
+                        <input
+                            type="checkbox"
+                            id="isAdmin"
+                            checked={isAdminFilter}
+                            onChange={(e) => setIsAdminFilter(e.target.checked)}
+                            className="w-4 h-4 cursor-pointer accent-red-600 border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        />
+                        <label htmlFor="isAdmin" className="ml-2 text-lg text-white font-medium cursor-pointer">
+                            {t("user:admin")}
+                        </label>
+                    </div>
+
                 </div>
                 <div>
                     <select
-                        className={"select z-20 select-neutral border rounded-xl px-4 py-1.5 text-lg w-20 focus:outline-verde"}
+                        className={"px-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent w-18 cursor-pointer"}
                         onChange={(e) => setPageSize(Number(e.target.value))}>
                         <option value={10}>10</option>
                         <option value={25}>25</option>
@@ -287,94 +320,143 @@ export default function UsersList() {
                     </select>
                 </div>
             </div>
-            <div
-                className="relative overflow-visible bg-neutral-primary-soft shadow-xs rounded-base border border-default w-full rounded-xl">
-                <table className="w-full text-sm text-left rtl:text-right text-body">
-                    <thead className="{text-sm px-2 text-body border-b rounded-base border-default rounded-t-xl}">
-                    <tr className={"bg-slate-300 px-2"}>
-                        <th scope="col" className={"px-3 py-3 font-medium rounded-tl-xl"}>{t("name")}</th>
-                        <th scope="col" className={"py-3 font-medium"}>{t("email")}</th>
-                        <th scope="col" className={"py-3 font-medium"}>{t("phone")}</th>
-                        <th scope="col" className={"py-3 font-medium"}>{t("joined")}</th>
-                        <th scope="col" className={"py-3 font-medium"}>{t("membership")}</th>
-                        <th scope="col" className={"py-3  rounded-tr-xl"}></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {users.map((user, index) => {
-                        const isLast = index === users.length - 1;
-                        return (
-                            <tr key={user.id}
-                                className={`border-b border-default even:bg-slate-200 ${isLast ? "last:border-0" : ""}`}>
-                                <td className={`max-w-[120px] px-3 py-2 text-ellipsis ${isLast ? "rounded-bl-xl" : ""}`}>{user.name}</td>
-                                <td className="max-w-[200px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap">{user.email}</td>
-                                <td className="max-w-[120px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap">{user.phoneNumber}</td>
-                                <td className="max-w-[120px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap">{new Date(user.createdAt).toLocaleString("en-GB", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    second: "2-digit"
-                                })}</td>
-                                <td
-                                    className={`max-w-[120px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap ${
-                                        user.expiresAt && new Date(user.expiresAt) < new Date() ? "text-red-600" : ""
-                                    }`}
-                                >
-                                    {user.expiresAt
-                                        ? new Date(user.expiresAt).toLocaleString("en-GB", {
-                                            year: "numeric",
-                                            month: "long",
-                                            day: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                            second: "2-digit"
-                                        })
-                                        : "Not Set"}
-                                </td>
+            {users.length > 0 ?
+                <div
+                    className="relative overflow-visible bg-gray-800 rounded-2xl border border-gray-700 text-white ">
+                    <table className="w-full text-sm text-left rtl:text-right text-body">
+                        <thead className="{bg-gray-800/40}">
+                        <tr className={"px-2 bg-gray-700"}>
+                            <th scope="col"
+                                className={"px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider rounded-tl-xl"}>{t("name")}</th>
+                            <th scope="col"
+                                className={"px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"}>{t("contact")}</th>
+                            {/*<th scope="col" className={"py-3 font-medium"}>{t("phone")}</th>*/}
+                            <th scope="col"
+                                className={"px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"}>{t("joined")}</th>
+                            <th scope="col"
+                                className={"px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"}>{t("membership")}</th>
+                            <th scope="col" className={"py-3 rounded-tr-xl"}></th>
+                        </tr>
+                        </thead>
+                        <tbody className={"divide-y divide-gray-700"}>
+                        {users.map((user, index) => {
+                            const isLast = index === users.length - 1;
+                            return (
+                                <tr key={user.id}
+                                    className={"hover:bg-gray-700"}>
+                                    <td className={`max-w-[200px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap flex flex-row items-center align-middle h-max`}>
+                                        <div
+                                            className={"w-10 h-10 min-w-10 max-w-10 min-h-10 max-h-10 size-10 rounded-full bg-linear-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-bold text-sm"}>
+                                            {user.name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('')}
+                                        </div>
+                                        <span className={"ml-2"}>
+                                        {user.name}
+                                    </span>
+                                    </td>
+                                    <td className="max-w-[200px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                                        <div className={"flex flex-row items-center gap-1"}>
+                                            <Mail size={16}/>
+                                            <span>
+                                            {user.email}
+                                        </span>
+                                        </div>
 
-                                <td className={`w-12 px-3 py-2 ${isLast ? "rounded-br-xl" : ""}`}>
-                                    <div className="py-2">
-                                        <ActionMenu
-                                            actions={[
-                                                {
-                                                    label: t("edit"),
-                                                    icon: <SquarePen/>,
-                                                    onClick: () => handleEdit(user)
-                                                },
-                                                {
-                                                    separator: true
-                                                },
-                                                {
-                                                    label: t("renew"),
-                                                    color: "#00a63e",
-                                                    icon: <Check color="#00a63e"/>,
-                                                    requiresConfirmation: true,
-                                                    onClick: () => handleRenewMembership(user)
-                                                },
-                                                {
-                                                    separator: true
-                                                },
-                                                {
-                                                    label: t("delete"),
-                                                    color: "#ff0000",
-                                                    icon: <Trash2 color="#ff0000"/>,
-                                                    requiresConfirmation: true,
-                                                    onClick: () => handleDelete(user)
-                                                },
-                                            ]}
-                                        />
-                                    </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                    </tbody>
-                </table>
-            </div>
+                                        <div className={"flex flex-row items-center gap-1 text-gray-500"}>
+                                            <Phone size={16}/>
+                                            <span>
+                                            {user.phoneNumber}
+                                        </span>
+                                        </div>
+                                    </td>
+                                    <td className="max-w-[120px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap">{new Date(user.createdAt).toLocaleString("en-GB", {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                    })}</td>
+                                    <td
+                                        className={`max-w-[120px] px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap ${
+                                            user.expiresAt && new Date(user.expiresAt) < new Date() ? "text-red-600" : ""
+                                        }`}
+                                    >
+                                        {user.expiresAt
+                                            ? new Date(user.expiresAt).toLocaleString("en-GB", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                second: "2-digit"
+                                            })
+                                            : t("not_set")}
+                                    </td>
+
+                                    <td className={`w-12 px-3 py-2 ${isLast ? "rounded-br-xl" : ""}`}>
+                                        <div className="py-2">
+                                            <ActionMenu
+                                                dropdown={true}
+                                                actions={[
+                                                    {
+                                                        label: t("edit"),
+                                                        icon: <SquarePen color="#d0d0d0"/>,
+                                                        color: "#d0d0d0",
+                                                        onClick: () => handleEdit(user)
+                                                    },
+                                                    ...(!user.isAdmin ? [
+                                                        {
+                                                            label: t("renew"),
+                                                            color: "#00a63e",
+                                                            icon: <TicketCheck color="#00a63e"/>,
+                                                            requiresConfirmation: true,
+                                                            onClick: () => handleRenewMembership(user)
+                                                        }
+                                                    ] : []),
+                                                    ...(!user.isAdmin ? [
+                                                        {
+                                                            label: t('transactions'),
+                                                            color: "#d0d0d0",
+                                                            icon: <Wallet color="#d0d0d0"/>,
+                                                            onClick: () => navigate(`/admin/transactions/user/${user.id}`)
+                                                        },
+                                                    ] : []),
+
+                                                    {
+                                                        separator: true,
+                                                    },
+                                                    {
+                                                        label: t("delete"),
+                                                        color: "#ff0000",
+                                                        icon: <Trash2 color="#ff0000"/>,
+                                                        requiresConfirmation: true,
+                                                        onClick: () => handleDelete(user)
+                                                    },
+                                                ]}
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                        </tbody>
+                    </table>
+                </div>
+                :
+                <div className="flex flex-col justify-center items-center h-full text-3xl text-white">
+                    <UserX size={50}/>
+                    <span>
+                        {t('no_users_found')}
+                    </span>
+                    <button
+                        onClick={handleOpenCreateModal}
+                        className={"mt-6 flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"}>
+                        <UserPlus size={18} className={"me-2"}/>
+                        <span>
+                            {t("user:create_new_user")}
+                        </span>
+                    </button>
+                </div>
+            }
             {totalPages > 1 && (
-                <div className="mt-4 flex justify-center">
+                <div className="mt-6 flex justify-center">
                     <Pagination
                         currentPage={currentPage}
                         totalPages={totalPages}
@@ -386,7 +468,8 @@ export default function UsersList() {
             {/* Edit User Modal */}
             {isEditModalOpen && (
                 <div className="fixed inset-0 bg-slate-700/65 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+                    <div
+                        className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg w-full max-w-md p-6 text-white">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold">{t("user:edit_user")}</h2>
                             <button
@@ -403,38 +486,38 @@ export default function UsersList() {
                                     <label className="block text-sm font-medium mb-1">{t("name")}</label>
                                     <input
                                         type="text"
-                                        value={createForm.name}
-                                        onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
-                                        className="w-full border rounded-lg px-3 py-2 focus:outline-verde"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                                        className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                         required
                                     />
-                                    {createErrors.Name &&
-                                        <p className="text-red-500 text-sm mt-1">{createErrors.Name}</p>}
+                                    {editErrors.Name &&
+                                        <p className="text-red-500 text-sm mt-1">{editErrors.Name}</p>}
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t("email")}</label>
                                     <input
                                         type="email"
-                                        value={createForm.email}
-                                        onChange={(e) => setCreateForm({...createForm, email: e.target.value})}
-                                        className="w-full border rounded-lg px-3 py-2 focus:outline-verde"
+                                        value={editForm.email}
+                                        onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                                        className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                         required
                                     />
-                                    {createErrors.Email &&
-                                        <p className="text-red-500 text-sm mt-1">{createErrors.Email}</p>}
+                                    {editErrors.Email &&
+                                        <p className="text-red-500 text-sm mt-1">{editErrors.Email}</p>}
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t("phone_number")}</label>
                                     <input
                                         type="text"
-                                        value={createForm.phoneNumber}
-                                        onChange={(e) => setCreateForm({...createForm, phoneNumber: e.target.value})}
-                                        className="w-full border rounded-lg px-3 py-2 focus:outline-verde"
+                                        value={editForm.phoneNumber}
+                                        onChange={(e) => setEditForm({...editForm, phoneNumber: e.target.value})}
+                                        className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
-                                    {createErrors.PhoneNumber &&
-                                        <p className="text-red-500 text-sm mt-1">{createErrors.PhoneNumber}</p>}
+                                    {editErrors.PhoneNumber &&
+                                        <p className="text-red-500 text-sm mt-1">{editErrors.PhoneNumber}</p>}
                                 </div>
                             </div>
 
@@ -442,14 +525,14 @@ export default function UsersList() {
                                 <button
                                     type="button"
                                     onClick={handleCloseEditModal}
-                                    className="px-4 py-2 border rounded-lg hover:bg-gray-100 cursor-pointer"
+                                    className="px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 hover:bg-gray-600 cursor-pointer"
                                 >
                                     {t("cancel")}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleUpdateUser}
-                                    className="px-4 py-2 border rounded-lg bg-green-500 text-white hover:bg-green-400 cursor-pointer"
+                                    className="px-4 py-2 border border-gray-700 rounded-lg bg-green-500 text-white hover:bg-green-400 cursor-pointer"
                                 >
                                     {t("save")}
                                 </button>
@@ -462,7 +545,8 @@ export default function UsersList() {
             {/* Create User Modal */}
             {isCreateModalOpen && (
                 <div className="fixed inset-0 bg-slate-700/65 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+                    <div
+                        className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg w-full max-w-md p-6 text-white">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold">{t("user:create_new_user")}</h2>
                             <button
@@ -481,11 +565,11 @@ export default function UsersList() {
                                         type="text"
                                         value={createForm.name}
                                         onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
-                                        className="w-full border rounded-lg px-3 py-2 focus:outline-verde"
+                                        className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                         required
                                     />
                                     {createErrors.Name?.map((msg) => (
-                                        <p className="text-red-500 text-sm mt-1">{msg}</p>
+                                        <p className="text-red-500 text-sm mt-1">{t(`validation:${msg}`)}</p>
                                     ))}
                                 </div>
 
@@ -495,11 +579,11 @@ export default function UsersList() {
                                         type="email"
                                         value={createForm.email}
                                         onChange={(e) => setCreateForm({...createForm, email: e.target.value})}
-                                        className="w-full border rounded-lg px-3 py-2 focus:outline-verde"
+                                        className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                         required
                                     />
                                     {createErrors.Email?.map((msg) => (
-                                        <p className="text-red-500 text-sm mt-1">{msg}</p>
+                                        <p className="text-red-500 text-sm mt-1">{t(`validation:${msg}`)}</p>
                                     ))}
                                 </div>
 
@@ -508,11 +592,14 @@ export default function UsersList() {
                                     <input
                                         type="text"
                                         value={createForm.phoneNumber}
-                                        onChange={(e) => setCreateForm({...createForm, phoneNumber: e.target.value})}
-                                        className="w-full border rounded-lg px-3 py-2 focus:outline-verde"
+                                        onChange={(e) => setCreateForm({
+                                            ...createForm,
+                                            phoneNumber: e.target.value
+                                        })}
+                                        className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                                     />
                                     {createErrors.PhoneNumber?.map((msg) => (
-                                        <p className="text-red-500 text-sm mt-1">{msg}</p>
+                                        <p className="text-red-500 text-sm mt-1">{t(`validation:${msg}`)}</p>
                                     ))}
                                 </div>
 
@@ -526,7 +613,7 @@ export default function UsersList() {
                                             ...createForm,
                                             activateMembership: e.target.checked
                                         })}
-                                        className="w-4 h-4 cursor-pointer"
+                                        className="w-4 h-4 cursor-pointer accent-red-600"
                                     />
                                     <label htmlFor="activateMembership"
                                            className="ml-2 text-sm font-medium cursor-pointer">
@@ -540,7 +627,7 @@ export default function UsersList() {
                                         id="isAdmin"
                                         checked={createForm.isAdmin}
                                         onChange={(e) => setCreateForm({...createForm, isAdmin: e.target.checked})}
-                                        className="w-4 h-4 cursor-pointer"
+                                        className="w-4 h-4 cursor-pointer accent-red-600"
                                     />
                                     <label htmlFor="isAdmin" className="ml-2 text-sm font-medium cursor-pointer">
                                         {t("user:admin_user")}
@@ -552,14 +639,14 @@ export default function UsersList() {
                                 <button
                                     type="button"
                                     onClick={handleCloseCreateModal}
-                                    className="px-4 py-2 border rounded-lg hover:bg-gray-100 cursor-pointer"
+                                    className="px-4 py-2 border border-gray-700 rounded-lg bg-gray-700 hover:bg-gray-600 cursor-pointer"
                                 >
                                     {t("cancel")}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={handleCreateUser}
-                                    className="px-4 py-2 border rounded-lg bg-green-500 text-white hover:bg-green-400 cursor-pointer"
+                                    className="px-4 py-2 border border-gray-700 rounded-lg bg-green-500 text-white hover:bg-green-400 cursor-pointer"
                                 >
                                     {t("create")}
                                 </button>
