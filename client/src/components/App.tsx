@@ -26,7 +26,6 @@ function App() {
             <Route path="/" element={<Home/>}/>
             <Route path="/reset-password" element={<ResetPassword/>}/>
 
-            {/* User-protected routes - only for authenticated non-admin users */}
             {/* Admin protected routes - only for authenticated admin users */}
             {/*<Route element={<AdminProtectedRoute />}>*/}
             <Route path="/admin" element={<SidebarLayout/>}>
@@ -36,27 +35,28 @@ function App() {
                 <Route path="my-profile" element={<MyProfilePage/>}/>
                 <Route path="transactions" element={<TransactionsList/>}/>
                 <Route path="transactions/user/:userId" element={<UserTransactionsList/>}/>
-            {/*<Route element={<UserProtectedRoute />}>*/}
-                <Route path="/user/dashboard" element={<UserDashboard />} />
-                <Route path="/user/my-boards" element={<UserBoards />} />
-               <Route path="/user/deposit" element={<UserDeposit userId="1d49a350-b52a-4c2a-aa4b-8a3d5f04c6aa"/>} />
-                <Route path="/game/current" element={<GameBoard/>} />
-            {/*</Route>*/}
-
-            <Route element={<PlayerLayout />}>
-                <Route path="/player/dashboard" element={<DashboardOverview />} />
-                <Route path="/player/boards" element={<UserBoards />} />
-                <Route path="/player/deposit" element={<UserDeposit userId="123" />} />
-                <Route path="/player/history" element={<GameHistory />} />
-                <Route path="/game/current" element={<GameBoard />} />
-
             </Route>
             {/*</Route>*/}
 
+            <Route element={<UserProtectedRoute/>}>
+                <Route path="/user/dashboard" element={<UserDashboard/>}/>
+                <Route path="/user/my-boards" element={<UserBoards/>}/>
+                <Route path="/user/deposit" element={<UserDeposit userId="1d49a350-b52a-4c2a-aa4b-8a3d5f04c6aa"/>}/>
+                <Route path="/game/current" element={<GameBoard/>}/>
+            </Route>
+
+            <Route element={<PlayerLayout/>}>
+                <Route path="/player/dashboard" element={<DashboardOverview/>}/>
+                <Route path="/player/boards" element={<UserBoards/>}/>
+                <Route path="/player/deposit" element={<UserDeposit userId="123"/>}/>
+                <Route path="/player/history" element={<GameHistory/>}/>
+                <Route path="/game/current" element={<GameBoard/>}/>
+
+            </Route>
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" replace/>}/>
         </Routes>
     )
 }
 
-export default App
+export default App;
