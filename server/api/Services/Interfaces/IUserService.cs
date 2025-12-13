@@ -14,4 +14,5 @@ public interface IUserService
     Task<UserDto> UpdateUser(Guid id, UpdateUserDto updateUserDto);
     Task DeleteUser(Guid id);
     Task<UserDto> RenewMembership(Guid id);
+    Task<int> GetUsersCount();
 }

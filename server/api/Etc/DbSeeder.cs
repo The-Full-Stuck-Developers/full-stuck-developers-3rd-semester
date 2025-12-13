@@ -29,19 +29,25 @@ public class DbSeeder(
             );
         }
 
-        if (!await context.Games.AnyAsync())
+        if (!await context.Transactions.AnyAsync())
         {
-            context.Games.Add(
-                new Game
-                {
-                    StartTime = DateTime.UtcNow,
-                    // IsActive = true,
-                    Revenue = 0,
-                    WinningNumbers = null
-                });
-            await context.SaveChangesAsync();
+            await CreateTransactions(100);
         }
+
+        // if (!await context.Games.AnyAsync())
+        // {
+        //     context.Games.Add(
+        //         new Game
+        //         {
+        //             StartTime = DateTime.UtcNow,
+        //             // IsActive = true,
+        //             Revenue = 0,
+        //             WinningNumbers = null
+        //         });
+        //     await context.SaveChangesAsync();
+        // }
     }
+
     private async Task CreateUsers((string email, string name,string phoneNumber, bool isAdmin)[] users, string defaultPassword)
     {
         foreach (var userData in users)
@@ -57,9 +63,32 @@ public class DbSeeder(
                     UpdatedAt = DateTime.UtcNow,
                     PasswordHash = hasher.HashPassword(null, defaultPassword),
                 };
-                
+
                 context.Users.Add(user);
         }
+        await context.SaveChangesAsync();
+    }
+
+    private async Task CreateTransactions(int count)
+    {
+        var users = await context.Users.ToListAsync();
+        var random = new Random();
+        var statuses = Enum.GetValues<TransactionStatus>();
+
+        for (int i = 0; i < count; i++)
+        {
+            var transaction = new Transaction
+            {
+                UserId = users[random.Next(users.Count)].Id,
+                Amount = random.Next(500, 1500),
+                MobilePayTransactionNumber = random.Next(100000, 999999),
+                Status = statuses[random.Next(statuses.Length)],
+                CreatedAt = DateTime.UtcNow.AddDays(-random.Next(0, 30))
+            };
+
+            context.Transactions.Add(transaction);
+        }
+
         await context.SaveChangesAsync();
     }
 }

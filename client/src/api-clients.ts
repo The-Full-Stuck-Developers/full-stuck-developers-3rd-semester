@@ -1,5 +1,6 @@
 import {TOKEN_KEY, tokenStorage} from "./atoms/token";
 import{AuthClient} from "./core/generated-client";
+import { baseUrl } from "@core/baseUrl";
 
 
 const customFetch = async (url: RequestInfo, init?: RequestInit) => {
@@ -19,5 +20,4 @@ const customFetch = async (url: RequestInfo, init?: RequestInit) => {
     return await fetch(url, init);
 };
 
-const baseUrl = undefined;
 export const authClient = new AuthClient(baseUrl, { fetch: customFetch });

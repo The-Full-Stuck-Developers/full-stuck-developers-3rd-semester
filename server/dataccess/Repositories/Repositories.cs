@@ -10,16 +10,20 @@ using dataccess.Entities;
 using dataccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-public class GameRepository(MyDbContext context) : BaseRepository<Game>(context)
+public class Repository<T> : BaseRepository<T>
+    where T : class
 {
-    protected override DbSet<Game> Set => Context.Games;
+    public Repository(MyDbContext context) : base(context)
+    {
+    }
 }
 
 public abstract class BaseRepository<T>(MyDbContext context) : IRepository<T>
     where T : class
 {
     protected MyDbContext Context => context;
-    protected abstract DbSet<T> Set { get; }
+
+    protected virtual DbSet<T> Set => context.Set<T>();
 
     public async Task AddAsync(T entity)
     {
