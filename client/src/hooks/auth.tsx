@@ -24,7 +24,7 @@ export const useAuth = () => {
 
     // Redirect based on admin status
     if (userInfo.isAdmin) {
-      navigate("/admin/users");
+      navigate("/admin/dashboard");
     } else {
       navigate("/user/dashboard");
     }

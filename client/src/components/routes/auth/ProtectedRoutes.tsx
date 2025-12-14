@@ -52,7 +52,7 @@ export function UserProtectedRoute() {
   }
 
   if (user.data.isAdmin) {
-    return <Navigate to="/admin/users" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return <Outlet />;

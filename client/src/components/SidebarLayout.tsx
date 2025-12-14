@@ -11,6 +11,7 @@ import {
 import { ThemeToggle } from "@components/ThemeToggle.tsx";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/auth.tsx";
+import { useAuthInfo } from "../hooks/authInfo.tsx";
 
 interface MenuItem {
   label: string;
@@ -28,7 +29,8 @@ export const SidebarLayout: React.FC = () => {
   const [lang, setLang] = useState<"en" | "dk">(
     i18n.language.startsWith("dk") ? "dk" : "en",
   );
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { user } = useAuthInfo();
 
   // load saved language
   useEffect(() => {
