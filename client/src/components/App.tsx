@@ -53,15 +53,19 @@ function App() {
           }
         />
         <Route path="/game/current" element={<GameBoard />} />
+
+        <Route element={<PlayerLayout />}>
+          <Route path="/player/dashboard" element={<DashboardOverview />} />
+          <Route path="/player/boards" element={<UserBoards />} />
+          <Route
+            path="/player/deposit"
+            element={<UserDeposit userId="123" />}
+          />
+          <Route path="/player/history" element={<GameHistory />} />
+          <Route path="/game/current" element={<GameBoard />} />
+        </Route>
       </Route>
 
-      <Route element={<PlayerLayout />}>
-        <Route path="/player/dashboard" element={<DashboardOverview />} />
-        <Route path="/player/boards" element={<UserBoards />} />
-        <Route path="/player/deposit" element={<UserDeposit userId="123" />} />
-        <Route path="/player/history" element={<GameHistory />} />
-        <Route path="/game/current" element={<GameBoard />} />
-      </Route>
       {/* Catch all - redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
