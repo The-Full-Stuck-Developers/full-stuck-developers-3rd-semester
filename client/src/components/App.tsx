@@ -10,7 +10,10 @@ import GameList from "@components/admin/GameList.tsx";
 import "./../../node_modules/flag-icons/css/flag-icons.min.css";
 import MyProfilePage from "@components/admin/MyProfilePage.tsx";
 import { UserDeposit } from "@components/sections/userSection/UserDeposit.tsx";
-import { UserProtectedRoute } from "@components/routes/auth/ProtectedRoutes.tsx";
+import {
+  AdminProtectedRoute,
+  UserProtectedRoute,
+} from "@components/routes/auth/ProtectedRoutes.tsx";
 import TransactionsList from "@components/admin/TransactionsList.tsx";
 import UserTransactionsList from "@components/admin/UserTransactionsList.tsx";
 import Dashboard from "./admin/Dashboard";
@@ -26,19 +29,19 @@ function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Admin protected routes - only for authenticated admin users */}
-      {/*<Route element={<AdminProtectedRoute />}>*/}
-      <Route path="/admin" element={<SidebarLayout />}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="users" element={<UsersList />} />
-        <Route path="games" element={<GameList />} />
-        <Route path="my-profile" element={<MyProfilePage />} />
-        <Route path="transactions" element={<TransactionsList />} />
-        <Route
-          path="transactions/user/:userId"
-          element={<UserTransactionsList />}
-        />
+      <Route element={<AdminProtectedRoute />}>
+        <Route path="/admin" element={<SidebarLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="users" element={<UsersList />} />
+          <Route path="games" element={<GameList />} />
+          <Route path="my-profile" element={<MyProfilePage />} />
+          <Route path="transactions" element={<TransactionsList />} />
+          <Route
+            path="transactions/user/:userId"
+            element={<UserTransactionsList />}
+          />
+        </Route>
       </Route>
-      {/*</Route>*/}
 
       <Route element={<UserProtectedRoute />}>
         <Route path="/user/dashboard" element={<UserDashboard />} />

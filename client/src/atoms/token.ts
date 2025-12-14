@@ -19,6 +19,5 @@ export const userInfoAtom = atom(async (get) => {
   const token = get(tokenAtom);
   if (!token) return null;
   // Fetch user-info
-  const userInfo = await authClient.userInfo();
-  return userInfo;
+  return await authClient.userInfo();
 });
