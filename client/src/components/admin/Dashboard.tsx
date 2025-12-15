@@ -32,8 +32,6 @@ export default function Dashboard() {
 
       // Update state once
       setHealthStatus({ app: appJson, db: dbJson });
-
-      console.log({ app: appJson, db: dbJson });
     } catch (err) {
       console.error("Health check error:", err);
     }

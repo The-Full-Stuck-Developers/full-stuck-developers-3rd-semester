@@ -1,4 +1,4 @@
-import { TOKEN_KEY, tokenStorage } from "./atoms/token";
+import { TOKEN_KEY, tokenAtom, tokenStorage } from "./atoms/token";
 import { AuthClient } from "./core/generated-client";
 import { baseUrl } from "@core/baseUrl";
 
