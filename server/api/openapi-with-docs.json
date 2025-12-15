@@ -1085,6 +1085,12 @@
             "type": "string",
             "format": "guid"
           },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },

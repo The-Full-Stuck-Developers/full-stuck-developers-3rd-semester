@@ -48,7 +48,7 @@ public class AuthService(
 
             if (result == PasswordVerificationResult.Success)
             {
-                return new AuthUserInfo(user.Id, user.Name, user.IsAdmin, user.Balance);
+                return new AuthUserInfo(user.Id, user.Email, user.PhoneNumber, user.Name, user.IsAdmin, user.Balance);
             }
     
             logger.LogWarning("Authentication failed: invalid password for user {Email}", request.Email);
@@ -81,7 +81,7 @@ public class AuthService(
              await userRepository.AddAsync(user);
 
 
-             return new AuthUserInfo(user.Id, user.Name, user.IsAdmin, user.Balance);
+             return new AuthUserInfo(user.Id, user.Email, user.PhoneNumber, user.Name, user.IsAdmin, user.Balance);
 
         }
         public AuthUserInfo? GetUserInfo(ClaimsPrincipal principal)

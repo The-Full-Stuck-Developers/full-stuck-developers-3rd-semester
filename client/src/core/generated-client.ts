@@ -1731,6 +1731,8 @@ export interface ResetPasswordRequestDto {
 
 export interface AuthUserInfo {
   id: string;
+  email: string;
+  phoneNumber: string;
   name: string;
   isAdmin: boolean;
   balance: number;
