@@ -34,7 +34,7 @@ export default function UserDashboard() {
         <div className="max-w-7xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <Link
-              to="/user/dashboard"
+              to="/player/dashboard"
               className="flex items-center gap-4 group"
             >
               <div className="w-12 h-12 rounded-full bg-white/10 border-2 border-dashed border-white/30 flex items-center justify-center overflow-hidden">

@@ -46,12 +46,7 @@ function App() {
       <Route element={<UserProtectedRoute />}>
         <Route path="/user/dashboard" element={<UserDashboard />} />
         <Route path="/user/my-boards" element={<UserBoards />} />
-        <Route
-          path="/user/deposit"
-          element={
-            <UserDeposit userId="1d49a350-b52a-4c2a-aa4b-8a3d5f04c6aa" />
-          }
-        />
+
         <Route path="/game/current" element={<GameBoard />} />
 
         <Route element={<PlayerLayout />}>
@@ -59,7 +54,7 @@ function App() {
           <Route path="/player/boards" element={<UserBoards />} />
           <Route
             path="/player/deposit"
-            element={<UserDeposit userId="123" />}
+            element={<UserDeposit />}
           />
           <Route path="/player/history" element={<GameHistory />} />
           <Route path="/game/current" element={<GameBoard />} />
