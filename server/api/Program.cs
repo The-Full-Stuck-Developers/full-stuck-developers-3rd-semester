@@ -129,11 +129,11 @@ public class Program
         
         app.UseCors("FrontendCors");
 
-        app.UseAuthentication();
-        app.UseAuthorization();
-
         app.UseOpenApi();
         app.UseSwaggerUi();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllers();
 
