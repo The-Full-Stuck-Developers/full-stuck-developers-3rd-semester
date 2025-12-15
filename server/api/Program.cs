@@ -101,11 +101,16 @@ public class Program
                     JwtService.CreateValidationParams(builder.Configuration);
             });
 
+        builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
+
         services.AddAuthorization(options =>
         {
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build();
+
+            options.AddPolicy("IsAdmin", policy =>
+                policy.Requirements.Add(new IsAdmin()));
         });
 
         services.Configure<SieveOptions>(options =>

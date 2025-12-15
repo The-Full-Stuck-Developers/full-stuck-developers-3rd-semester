@@ -5,6 +5,7 @@ import Pagination from "../Pagination";
 import { CircleSlash, SquarePen, Trash2 } from "lucide-react";
 import { ActionMenu } from "@components/ActionMenu";
 import { useTranslation } from "react-i18next";
+import getGameClient from "@core/clients/gameClient.ts";
 
 export default function GamesList() {
   const { t } = useTranslation();
@@ -15,16 +16,7 @@ export default function GamesList() {
   const pageSize = 10;
 
   const fetchGames = (page: number) => {
-    const client = new GamesClient(baseUrl, {
-      fetch: async (url, init) => {
-        init = init ?? {};
-        init.headers = {
-          ...(init.headers ?? {}),
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        };
-        return fetch(url, init);
-      },
-    });
+    const client = getGameClient();
 
     client
       .getAllGames(null, null, page, pageSize)

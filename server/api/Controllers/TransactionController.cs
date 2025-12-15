@@ -11,12 +11,11 @@ namespace api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[AllowAnonymous]
-// [Authorize]
+[Authorize]
 public class TransactionsController(ITransactionService transactionService) : ControllerBase
 {
     [HttpGet]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<PagedResult<TransactionDto>>> GetAllTransactions([FromQuery] SieveModel sieveModel)
     {
         var result = await transactionService.GetAllTransactions(sieveModel);
@@ -34,7 +33,7 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpGet("{id}")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<TransactionDto>> GetTransactionById(Guid id)
     {
         var transaction = await transactionService.GetTransactionById(id);
@@ -45,7 +44,6 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpPost]
-    // [Authorize(Policy = "IsAdmin")]
     [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TransactionDto>> CreateTransaction(
@@ -78,7 +76,7 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpPatch("{id}")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     [ProducesResponseType(typeof(TransactionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TransactionDto>> UpdateTransactionStatus(
@@ -106,7 +104,7 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpDelete("{id}")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<IActionResult> DeleteTransaction(Guid id)
     {
         try
@@ -121,7 +119,7 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpPatch("{id}/approve")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<PagedResult<TransactionDto>>> ApproveTransaction(Guid id)
     {
         var transaction = await transactionService.ApproveTransaction(id);
@@ -130,7 +128,7 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpPatch("{id}/reject")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<IActionResult> RejectTransaction(Guid id)
     {
         await transactionService.RejectTransaction(id);
@@ -139,11 +137,20 @@ public class TransactionsController(ITransactionService transactionService) : Co
     }
 
     [HttpGet("GetPendingTransactionsCount")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<int>> GetPendingTransactionsCount()
     {
         var count = await transactionService.GetPendingTransactionsCount();
 
         return Ok(new { count = count });
+    }
+
+    [HttpGet("GetUserBalance")]
+    // [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<int>> GetUserBalance(Guid userId)
+    {
+        var balance = await transactionService.GetUserBalance(userId);
+
+        return Ok(new { balance = balance });
     }
 }

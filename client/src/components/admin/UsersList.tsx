@@ -22,6 +22,7 @@ import { ActionMenu } from "@components/ActionMenu.tsx";
 import toast, { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import getUserClient from "@core/clients/userClient.ts";
 
 export default function UsersList() {
   const { t } = useTranslation();
@@ -81,21 +82,8 @@ export default function UsersList() {
     return filters.length > 0 ? filters.join(",") : null;
   };
 
-  const getClient = () => {
-    return new UsersClient(baseUrl, {
-      fetch: async (url, init) => {
-        init = init ?? {};
-        init.headers = {
-          ...(init.headers ?? {}),
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        };
-        return fetch(url, init);
-      },
-    });
-  };
-
   const fetchUsers = (page: number) => {
-    const client = getClient();
+    const client = getUserClient();
     const filterString = buildFilterString();
 
     client
@@ -121,7 +109,7 @@ export default function UsersList() {
   }, [currentPage]);
 
   const handleDelete = (user: UserDto) => {
-    const client = getClient();
+    const client = getUserClient();
 
     client
       .deleteUser(user.id!)
@@ -154,7 +142,7 @@ export default function UsersList() {
 
     if (!selectedUser?.id) return;
 
-    const client = getClient();
+    const client = getUserClient();
     const updateDto: UpdateUserDto = {
       name: editForm.name,
       email: editForm.email,
@@ -203,7 +191,7 @@ export default function UsersList() {
   const handleCreateUser = async (e: React.MouseEvent) => {
     e.preventDefault();
 
-    const client = getClient();
+    const client = getUserClient();
     const createDto: CreateUserDto = {
       name: createForm.name,
       email: createForm.email,
@@ -235,7 +223,7 @@ export default function UsersList() {
   };
 
   const handleRenewMembership = (user: UserDto) => {
-    const client = getClient();
+    const client = getUserClient();
 
     client
       .renewMembership(user.id!)

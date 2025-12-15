@@ -6,10 +6,11 @@ import {
 } from "@core/generated-client.ts";
 import { baseUrl } from "@core/baseUrl.ts";
 import Pagination from "../Pagination";
-import { Mail, Wallet } from "lucide-react";
-import { Toaster } from "react-hot-toast";
+import { GamepadIcon, Mail, Wallet } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
+import getTransactionsClient from "@core/clients/transactionClient.ts";
 
 export default function UserTransactionsList() {
   const { t } = useTranslation();
@@ -18,10 +19,10 @@ export default function UserTransactionsList() {
   const [transactions, setTransactions] = useState<TransactionDto[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  // Filter states
   const [statusFilter, setStatusFilter] = useState("");
   const [pageSize, setPageSize] = useState(10);
+
+  const [userBalance, setUserBalance] = useState(0);
 
   const buildFilterString = () => {
     const filters: string[] = [];
@@ -33,21 +34,8 @@ export default function UserTransactionsList() {
     return filters.length > 0 ? filters.join(",") : null;
   };
 
-  const getClient = () => {
-    return new TransactionsClient(baseUrl, {
-      fetch: async (url, init) => {
-        init = init ?? {};
-        init.headers = {
-          ...(init.headers ?? {}),
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        };
-        return fetch(url, init);
-      },
-    });
-  };
-
   const fetchTransactions = (page: number) => {
-    const client = getClient();
+    const client = getTransactionsClient();
     const filterString = buildFilterString();
 
     client
@@ -59,10 +47,24 @@ export default function UserTransactionsList() {
       .catch(console.error);
   };
 
+  const fetchUserBalance = () => {
+    const client = getTransactionsClient();
+
+    client
+      .getUserBalance(userId!)
+      .then((res) => {
+        setUserBalance(res.balance);
+      })
+      .catch((err) => {
+        toast.error("Failed to fetch user balance.");
+      });
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setCurrentPage(1);
       fetchTransactions(1);
+      fetchUserBalance();
     }, 500);
 
     return () => clearTimeout(timer);
@@ -94,6 +96,19 @@ export default function UserTransactionsList() {
   return (
     <div>
       <Toaster position="top-center" />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-white">
+        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-4xl font-bold">{userBalance}</div>
+            <div className="p-3 rounded-xl bg-purple-900/30">
+              <Wallet className="w-6 h-6 text-purple-400" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-400">{t("user_balance")}</p>
+        </div>
+      </div>
+
       <div className={"flex flex-row items-center justify-between w-full pb-8"}>
         <p className={"text-white text-3xl mb-2 mx-0 p-0"}>
           {t("transactions")}

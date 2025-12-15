@@ -17,4 +17,6 @@ public interface ITransactionService
     Task<TransactionDto> ApproveTransaction(Guid id);
     Task RejectTransaction(Guid id);
     Task<int> GetPendingTransactionsCount();
+
+    Task<int> GetUserBalance(Guid userId);
 }

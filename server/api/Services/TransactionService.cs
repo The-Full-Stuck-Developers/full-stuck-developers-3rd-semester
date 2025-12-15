@@ -139,4 +139,12 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
             .Where(t => t.Status == TransactionStatus.Pending)
             .CountAsync();
     }
+
+    public async Task<int> GetUserBalance(Guid userId)
+    {
+        return await  dbContext.Transactions
+            .Where(t => t.UserId == userId)
+            .Where(t => t.Status == TransactionStatus.Accepted)
+            .SumAsync(t => t.Amount);
+    }
 }

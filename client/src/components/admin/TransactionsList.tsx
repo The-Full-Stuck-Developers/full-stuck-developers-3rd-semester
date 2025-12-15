@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   type TransactionDto,
-  TransactionsClient,
   TransactionStatus,
 } from "@core/generated-client.ts";
 import { baseUrl } from "@core/baseUrl.ts";
@@ -11,6 +10,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { ActionMenu } from "@components/ActionMenu.tsx";
 import { useNavigate } from "react-router-dom";
+import getTransactionsClient from "@core/clients/transactionClient.ts";
 
 export default function TransactionsList() {
   const { t } = useTranslation();
@@ -40,21 +40,8 @@ export default function TransactionsList() {
     return filters.length > 0 ? filters.join(",") : null;
   };
 
-  const getClient = () => {
-    return new TransactionsClient(baseUrl, {
-      fetch: async (url, init) => {
-        init = init ?? {};
-        init.headers = {
-          ...(init.headers ?? {}),
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        };
-        return fetch(url, init);
-      },
-    });
-  };
-
   const fetchTransactions = (page: number) => {
-    const client = getClient();
+    const client = getTransactionsClient();
     const filterString = buildFilterString();
 
     client
@@ -80,7 +67,7 @@ export default function TransactionsList() {
   }, [currentPage]);
 
   const handleApproveTransaction = (transaction: TransactionDto) => {
-    const client = getClient();
+    const client = getTransactionsClient();
 
     client
       .approveTransaction(transaction.id!)

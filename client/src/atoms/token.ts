@@ -1,6 +1,8 @@
 import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { authClient } from "../api-clients";
+import { AuthClient } from "../core/generated-client";
+import { useAtom } from "jotai";
 
 // Storage key for JWT
 export const TOKEN_KEY = "token";
@@ -21,3 +23,11 @@ export const userInfoAtom = atom(async (get) => {
   // Fetch user-info
   return await authClient.userInfo();
 });
+
+export const useToken = () => {
+  const [token, setToken] = useAtom(tokenAtom);
+
+  const clearToken = () => setToken(null);
+
+  return { token, setToken, clearToken };
+};
