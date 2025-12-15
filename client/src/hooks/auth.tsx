@@ -12,22 +12,18 @@ type AuthHook = {
 };
 
 export const useAuth = () => {
-  const [_, setJwt] = useAtom(tokenAtom);
+  const [jwt, setJwt] = useAtom(tokenAtom);
   const [user] = useAtom(userInfoAtom);
   const navigate = useNavigate();
 
   const login = async (request: LoginRequestDto) => {
     const response = await authClient.login(request);
     setJwt(response.jwt!);
-    // Fetch user info to check if admin
+
     const userInfo = await authClient.userInfo();
 
-    // Redirect based on admin status
-    if (userInfo.isAdmin) {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/user/dashboard");
-    }
+    if (userInfo.isAdmin) navigate("/admin/dashboard");
+    else navigate("/player/dashboard");
   };
 
   const logout = async () => {
