@@ -1,12 +1,17 @@
 import { Gamepad2, DollarSign, Clock, TrendingUp, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../hooks/auth.tsx"; // Import the hook to get user data
 
 export function DashboardOverview() {
+  const { user } = useAuth(); // Get the logged-in user from the hook
+
   return (
     <>
       <div className="flex justify-between items-start mb-10">
         <div>
-          <h1 className="text-4xl font-black mb-2">Welcome back, Jens!</h1>
+          <h1 className="text-4xl font-black mb-2">
+            Welcome back, {user?.name ?? "Loading..."}!
+          </h1>
           <p className="text-xl text-gray-400">
             Week 24 ends in{" "}
             <span className="text-red-400 font-bold">3 days</span>

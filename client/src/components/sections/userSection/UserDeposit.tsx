@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
+import getTransactionsClient from "@core/clients/transactionClient.ts";
+import { useAuth } from "../../../hooks/auth.tsx";
 
 const QUICK_AMOUNTS = [20, 40, 80, 160];
 
-export function UserDeposit({ userId }: { userId: string }) {
+export function UserDeposit() {
+  const { user } = useAuth(); // ✅ get logged in user (contains id)
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{
@@ -18,28 +21,39 @@ export function UserDeposit({ userId }: { userId: string }) {
 
   const handleSubmit = async () => {
     const num = Number(amount);
-    if (!num || num <= 0)
-      return setStatus({ type: "error", message: "Enter valid amount" });
+
+    if (!num || num <= 0) {
+      setStatus({ type: "error", message: "Enter valid amount" });
+      return;
+    }
+
+    // ✅ userInfoAtom is async, so user can be null for a moment
+    if (!user?.id) {
+      toast.error("User not loaded yet, try again.");
+      setStatus({ type: "error", message: "User not loaded yet" });
+      return;
+    }
 
     const ref = Math.floor(100000000 + Math.random() * 900000000);
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:5284/api/Transactions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          amount: num,
-          mobilePayTransactionNumber: ref,
-        }),
+
+      const client = getTransactionsClient();
+
+      // ✅ IMPORTANT: method name depends on generated-client
+      // If your method name is different, Ctrl+click TransactionsClient and replace it here.
+      await client.createTransaction({
+        userId: user.id,
+        amount: num,
+        mobilePayTransactionNumber: ref,
       });
-      if (!res.ok) throw new Error("Failed");
 
       toast.success("Deposit created!");
       setStatus({ type: "success", message: `Success! Ref: ${ref}` });
       setAmount("");
-    } catch {
+    } catch (e) {
+      console.error(e);
       toast.error("Failed");
       setStatus({ type: "error", message: "Something went wrong" });
     } finally {
@@ -114,9 +128,9 @@ export function UserDeposit({ userId }: { userId: string }) {
 
         <button
           onClick={handleSubmit}
-          disabled={loading || !amount || Number(amount) <= 0}
+          disabled={loading || !amount || Number(amount) <= 0 || !user?.id}
           className={`w-full py-5 rounded-2xl font-bold text-lg transition-all shadow-lg ${
-            loading || !amount || Number(amount) <= 0
+            loading || !amount || Number(amount) <= 0 || !user?.id
               ? "bg-gray-600 text-gray-400"
               : "bg-red-600 hover:bg-red-700 text-white hover:shadow-red-600/50"
           }`}

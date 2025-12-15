@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
+import { formatDkPhone } from "@utilities/formatDkPhone.ts";
 import {
   Menu,
   X,
@@ -11,8 +12,10 @@ import {
   LogOut,
 } from "lucide-react";
 import Logo from "../../../jerneif-logo.png";
+import { useAuth } from "../../../hooks/auth.tsx"; // ✅ add
 
 export function PlayerLayout() {
+  const { user, logout } = useAuth(); // ✅ add
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
 
@@ -23,6 +26,15 @@ export function PlayerLayout() {
     { to: "/player/history", icon: TrendingUp, label: "Game History" },
   ];
   const isActive = (path: string) => location.pathname === path;
+
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((p) => p[0]!.toUpperCase())
+        .join("")
+    : "U";
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
@@ -86,19 +98,29 @@ export function PlayerLayout() {
           <div className="p-6 border-t border-gray-700">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center font-bold text-lg">
-                JP
+                {initials}
               </div>
-              <div>
-                <div className="font-semibold">Jens Petersen</div>
-                <div className="text-xs text-gray-400">+45 12 34 56 78</div>
+              <div className="min-w-0">
+                <div className="font-semibold truncate">
+                  {user?.name ?? "Loading..."}
+                </div>
+                <div className="text-xs text-gray-400 truncate">
+                  {/* use whichever field exists on AuthUserInfo */}
+                  {formatDkPhone(user?.phoneNumber)}
+                </div>
               </div>
             </div>
+
             <div className="space-y-2">
               <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-700 transition text-left text-sm">
                 <Settings className="w-4 h-4" />
                 Settings
               </button>
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-700 transition text-left text-sm text-red-400">
+
+              <button
+                onClick={logout} // ✅ sign out properly
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-700 transition text-left text-sm text-red-400"
+              >
                 <LogOut className="w-4 h-4" />
                 Sign Out
               </button>
@@ -107,7 +129,7 @@ export function PlayerLayout() {
         </div>
       </aside>
 
-      {/* Main Content Area – Stretches when sidebar closes */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
         <header className="lg:hidden bg-gray-800 border-b border-gray-700 p-4 flex items-center justify-between">
@@ -118,7 +140,7 @@ export function PlayerLayout() {
             <Menu className="w-6 h-6" />
           </button>
           <div className="font-black text-xl">Dead Pigeons</div>
-          <div className="w-10" /> {/* spacer */}
+          <div className="w-10" />
         </header>
 
         {/* Page Content */}

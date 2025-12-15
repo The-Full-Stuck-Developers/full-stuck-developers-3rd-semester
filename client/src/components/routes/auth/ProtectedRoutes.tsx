@@ -33,7 +33,7 @@ export function AdminProtectedRoute() {
   }
 
   if (!user.data.isAdmin) {
-    return <Navigate to="/user/dashboard" replace />;
+    return <Navigate to="/player/dashboard" replace />;
   }
 
   return <Outlet />;
