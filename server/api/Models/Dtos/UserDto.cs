@@ -11,6 +11,7 @@ public class UserDto
         Email = entity.Email;
         PhoneNumber = entity.PhoneNumber;
         IsAdmin = entity.IsAdmin;
+        IsActive = entity.IsActive;
         ExpiresAt = entity.ExpiresAt;
         CreatedAt = entity.CreatedAt;
         UpdatedAt = entity.UpdatedAt;
@@ -23,6 +24,8 @@ public class UserDto
     public string Email { get; set; }
     public string PhoneNumber { get; set; }
     public bool IsAdmin { get; set; }
+
+    public bool IsActive { get; set; }
     public DateTime? ExpiresAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

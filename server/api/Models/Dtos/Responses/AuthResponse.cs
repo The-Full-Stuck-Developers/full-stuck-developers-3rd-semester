@@ -1,6 +1,6 @@
 namespace api.Models.Dtos.Responses;
 
-public record AuthUserInfo(Guid Id, string Email, string PhoneNumber, string Name, bool IsAdmin, int Balance);
+public record AuthUserInfo(Guid Id, string Name, bool IsAdmin);
 
 public record LoginResponse(string Jwt);
 

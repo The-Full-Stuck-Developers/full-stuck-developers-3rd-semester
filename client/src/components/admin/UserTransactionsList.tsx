@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   type TransactionDto,
-  TransactionsClient,
   TransactionStatus,
 } from "@core/generated-client.ts";
-import { baseUrl } from "@core/baseUrl.ts";
 import Pagination from "../Pagination";
-import { GamepadIcon, Mail, Wallet } from "lucide-react";
+import { CheckCheck, GamepadIcon, Mail, Plus, Wallet } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import getTransactionsClient from "@core/clients/transactionClient.ts";
+import { ActionMenu } from "@components/ActionMenu.tsx";
 
 export default function UserTransactionsList() {
   const { t } = useTranslation();
@@ -23,6 +22,8 @@ export default function UserTransactionsList() {
   const [pageSize, setPageSize] = useState(10);
 
   const [userBalance, setUserBalance] = useState(0);
+  const [userDepositTotal, setUserDepositTotal] = useState(0);
+  const [userPurchaseTotal, setUserPurchaseTotal] = useState(0);
 
   const buildFilterString = () => {
     const filters: string[] = [];
@@ -53,10 +54,58 @@ export default function UserTransactionsList() {
     client
       .getUserBalance(userId!)
       .then((res) => {
-        setUserBalance(res.balance);
+        setUserBalance(res);
       })
       .catch((err) => {
         toast.error("Failed to fetch user balance.");
+      });
+  };
+
+  const fetchUserDepositTotal = () => {
+    const client = getTransactionsClient();
+    client
+      .getUserDepositTotal(userId!)
+      .then((res) => {
+        setUserDepositTotal(res);
+      })
+      .catch((err) => {
+        toast.error("Failed to fetch user deposit total.");
+      });
+  };
+
+  const fetchUserPurchaseTotal = () => {
+    const client = getTransactionsClient();
+    client
+      .getUserPurchaseTotal(userId!)
+      .then((res) => {
+        setUserPurchaseTotal(res);
+      })
+      .catch((err) => {
+        toast.error("Failed to fetch user purchase total.");
+      });
+  };
+
+  const handleApproveTransaction = (transaction: TransactionDto) => {
+    const client = getTransactionsClient();
+
+    client
+      .approveTransaction(transaction.id!)
+      .then((res) => {
+        console.log(res);
+        fetchTransactions(currentPage);
+        toast.success("Transaction approved successfully.");
+        return;
+      })
+      .catch((error) => {
+        console.log(error);
+        try {
+          const errorData = JSON.parse(error.response);
+          toast.error(errorData.message);
+          return;
+        } catch {
+          toast.error(error.message || "An error occurred");
+          return;
+        }
       });
   };
 
@@ -65,6 +114,8 @@ export default function UserTransactionsList() {
       setCurrentPage(1);
       fetchTransactions(1);
       fetchUserBalance();
+      fetchUserDepositTotal();
+      fetchUserPurchaseTotal();
     }, 500);
 
     return () => clearTimeout(timer);
@@ -100,12 +151,38 @@ export default function UserTransactionsList() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 text-white">
         <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
           <div className="flex items-start justify-between mb-4">
-            <div className="text-4xl font-bold">{userBalance}</div>
-            <div className="p-3 rounded-xl bg-purple-900/30">
-              <Wallet className="w-6 h-6 text-purple-400" />
+            <div className="text-4xl font-bold">
+              {userBalance} <span className={"text-base"}>dkk</span>
+            </div>
+            <div className="p-3 rounded-xl bg-green-900/30">
+              <Wallet className="w-6 h-6 text-green-400" />
             </div>
           </div>
           <p className="text-sm text-gray-400">{t("user_balance")}</p>
+        </div>
+
+        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-4xl font-bold">
+              {userDepositTotal} <span className={"text-base"}>dkk</span>
+            </div>
+            <div className="p-3 rounded-xl bg-blue-900/30">
+              <Plus className="w-6 h-6 text-blue-400" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-400">{t("user_deposit_total")}</p>
+        </div>
+
+        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-4xl font-bold">
+              {userPurchaseTotal} <span className={"text-base"}>dkk</span>
+            </div>
+            <div className="p-3 rounded-xl bg-purple-900/30">
+              <GamepadIcon className="w-6 h-6 text-purple-400" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-400">{t("user_purchase_total")}</p>
         </div>
       </div>
 
@@ -268,6 +345,26 @@ export default function UserTransactionsList() {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
+                    </td>
+                    <td>
+                      <ActionMenu
+                        dropdown={false}
+                        actions={[
+                          ...(transaction.status == TransactionStatus.Pending ||
+                          transaction.status == TransactionStatus.Rejected
+                            ? [
+                                {
+                                  label: t("approve"),
+                                  color: "#00a63e",
+                                  icon: <CheckCheck color="#00a63e" />,
+                                  onClick: () =>
+                                    handleApproveTransaction(transaction),
+                                  requiresConfirmation: true,
+                                },
+                              ]
+                            : []),
+                        ]}
+                      />
                     </td>
                   </tr>
                 );

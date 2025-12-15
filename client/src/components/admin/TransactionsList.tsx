@@ -18,8 +18,6 @@ export default function TransactionsList() {
   const [transactions, setTransactions] = useState<TransactionDto[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  // Filter states
   const [userSearchFilter, setUserSearchFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [pageSize, setPageSize] = useState(10);

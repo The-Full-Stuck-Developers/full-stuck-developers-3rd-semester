@@ -15,4 +15,6 @@ public interface IUserService
     Task DeleteUser(Guid id);
     Task<UserDto> RenewMembership(Guid id);
     Task<int> GetUsersCount();
+    Task<UserDto> ActivateUser(Guid id);
+    Task<UserDto> DeactivateUser(Guid id);
 }

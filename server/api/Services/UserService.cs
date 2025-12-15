@@ -70,7 +70,7 @@ public class UserService(
             PhoneNumber = createUserDto.PhoneNumber,
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = createUserDto.ActivateMembership ? DateTime.UtcNow.AddYears(1) : null,
-            PasswordHash = hasher.GenerateRandomPassword(new Random().Next(1,64))
+            PasswordHash = hasher.GenerateRandomPassword(new Random().Next(1, 64))
         };
 
         await userRepository.AddAsync(user);
@@ -166,5 +166,31 @@ public class UserService(
             .Where(u => u.DeletedAt == null)
             .Where(u => !u.IsAdmin)
             .CountAsync();
+    }
+
+    public async Task<UserDto> ActivateUser(Guid id)
+    {
+        var user = await userRepository.Query()
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null) throw new KeyNotFoundException("User not found");
+
+        user.IsActive = true;
+        await userRepository.UpdateAsync(user);
+
+        return new UserDto(user);
+    }
+
+    public async Task<UserDto> DeactivateUser(Guid id)
+    {
+        var user = await userRepository.Query()
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null) throw new KeyNotFoundException("User not found");
+
+        user.IsActive = false;
+        await userRepository.UpdateAsync(user);
+
+        return new UserDto(user);
     }
 }

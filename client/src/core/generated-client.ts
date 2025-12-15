@@ -1294,6 +1294,102 @@ export class TransactionsClient {
     }
     return Promise.resolve<number>(null as any);
   }
+
+  getUserDepositTotal(userId: string | undefined): Promise<number> {
+    let url_ = this.baseUrl + "/api/Transactions/GetUserDepositTotal?";
+    if (userId === null)
+      throw new globalThis.Error("The parameter 'userId' cannot be null.");
+    else if (userId !== undefined)
+      url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: RequestInit = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processGetUserDepositTotal(_response);
+    });
+  }
+
+  protected processGetUserDepositTotal(response: Response): Promise<number> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        result200 =
+          _responseText === ""
+            ? null
+            : (JSON.parse(_responseText, this.jsonParseReviver) as number);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<number>(null as any);
+  }
+
+  getUserPurchaseTotal(userId: string | undefined): Promise<number> {
+    let url_ = this.baseUrl + "/api/Transactions/GetUserPurchaseTotal?";
+    if (userId === null)
+      throw new globalThis.Error("The parameter 'userId' cannot be null.");
+    else if (userId !== undefined)
+      url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: RequestInit = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processGetUserPurchaseTotal(_response);
+    });
+  }
+
+  protected processGetUserPurchaseTotal(response: Response): Promise<number> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        result200 =
+          _responseText === ""
+            ? null
+            : (JSON.parse(_responseText, this.jsonParseReviver) as number);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<number>(null as any);
+  }
 }
 
 export class UsersClient {
@@ -1698,6 +1794,100 @@ export class UsersClient {
     }
     return Promise.resolve<number>(null as any);
   }
+
+  activateUser(id: string): Promise<UserDto> {
+    let url_ = this.baseUrl + "/api/Users/{id}/Activate";
+    if (id === undefined || id === null)
+      throw new globalThis.Error("The parameter 'id' must be defined.");
+    url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: RequestInit = {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processActivateUser(_response);
+    });
+  }
+
+  protected processActivateUser(response: Response): Promise<UserDto> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        result200 =
+          _responseText === ""
+            ? null
+            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<UserDto>(null as any);
+  }
+
+  deactivateUser(id: string): Promise<UserDto> {
+    let url_ = this.baseUrl + "/api/Users/{id}/Dectivate";
+    if (id === undefined || id === null)
+      throw new globalThis.Error("The parameter 'id' must be defined.");
+    url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: RequestInit = {
+      method: "PATCH",
+      headers: {
+        Accept: "application/json",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processDeactivateUser(_response);
+    });
+  }
+
+  protected processDeactivateUser(response: Response): Promise<UserDto> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        result200 =
+          _responseText === ""
+            ? null
+            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<UserDto>(null as any);
+  }
 }
 
 export interface LoginResponse {
@@ -1731,11 +1921,8 @@ export interface ResetPasswordRequestDto {
 
 export interface AuthUserInfo {
   id: string;
-  email: string;
-  phoneNumber: string;
   name: string;
   isAdmin: boolean;
-  balance: number;
 }
 
 export interface PagedResultOfGameDto {
@@ -1769,8 +1956,9 @@ export interface TransactionDto {
   id: string;
   userId: string;
   amount: number;
-  mobilePayTransactionNumber: number;
+  mobilePayTransactionNumber: number | undefined;
   status: TransactionStatus;
+  type: TransactionType;
   createdAt: string;
   user: User;
 }
@@ -1780,6 +1968,11 @@ export enum TransactionStatus {
   Accepted = 1,
   Rejected = 2,
   Cancelled = 3,
+}
+
+export enum TransactionType {
+  Deposit = 0,
+  Purchase = 1,
 }
 
 export interface User {
@@ -1793,7 +1986,6 @@ export interface User {
   updatedAt: string | undefined;
   deletedAt: string | undefined;
   isActive: boolean;
-  balance: number;
   bets: Bet[];
   subscriptions: Subscription[];
   transactions: Transaction[];
@@ -1845,8 +2037,9 @@ export interface Transaction {
   userId: string;
   user: User;
   amount: number;
-  mobilePayTransactionNumber: number;
+  mobilePayTransactionNumber: number | undefined;
   status: TransactionStatus;
+  type: TransactionType;
   createdAt: string;
 }
 
@@ -1896,6 +2089,7 @@ export interface UserDto {
   email: string;
   phoneNumber: string;
   isAdmin: boolean;
+  isActive: boolean;
   expiresAt: string | undefined;
   createdAt: string;
   updatedAt: string | undefined;
