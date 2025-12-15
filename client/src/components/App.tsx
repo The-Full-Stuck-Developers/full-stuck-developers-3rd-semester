@@ -52,10 +52,7 @@ function App() {
         <Route element={<PlayerLayout />}>
           <Route path="/player/dashboard" element={<DashboardOverview />} />
           <Route path="/player/boards" element={<UserBoards />} />
-          <Route
-            path="/player/deposit"
-            element={<UserDeposit />}
-          />
+          <Route path="/player/deposit" element={<UserDeposit />} />
           <Route path="/player/history" element={<GameHistory />} />
           <Route path="/game/current" element={<GameBoard />} />
         </Route>
