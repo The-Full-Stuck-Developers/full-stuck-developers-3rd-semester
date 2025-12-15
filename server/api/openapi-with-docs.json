@@ -726,6 +726,70 @@
         }
       }
     },
+    "/api/Transactions/GetUserDepositTotal": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "Transactions_GetUserDepositTotal",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Transactions/GetUserPurchaseTotal": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "operationId": "Transactions_GetUserPurchaseTotal",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Users": {
       "get": {
         "tags": [
@@ -987,6 +1051,70 @@
           }
         }
       }
+    },
+    "/api/Users/{id}/Activate": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_ActivateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/{id}/Dectivate": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "operationId": "Users_DeactivateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1090,10 +1218,6 @@
           },
           "isAdmin": {
             "type": "boolean"
-          },
-          "balance": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },
@@ -1209,10 +1333,14 @@
           },
           "mobilePayTransactionNumber": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "status": {
             "$ref": "#/components/schemas/TransactionStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType"
           },
           "createdAt": {
             "type": "string",
@@ -1237,6 +1365,18 @@
           1,
           2,
           3
+        ]
+      },
+      "TransactionType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Deposit",
+          "Purchase"
+        ],
+        "enum": [
+          0,
+          1
         ]
       },
       "User": {
@@ -1280,10 +1420,6 @@
           },
           "isActive": {
             "type": "boolean"
-          },
-          "balance": {
-            "type": "integer",
-            "format": "int32"
           },
           "bets": {
             "type": "array",
@@ -1471,10 +1607,14 @@
           },
           "mobilePayTransactionNumber": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "status": {
             "$ref": "#/components/schemas/TransactionStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType"
           },
           "createdAt": {
             "type": "string",
@@ -1643,6 +1783,9 @@
             "type": "string"
           },
           "isAdmin": {
+            "type": "boolean"
+          },
+          "isActive": {
             "type": "boolean"
           },
           "expiresAt": {

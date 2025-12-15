@@ -15,6 +15,7 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
     {
         var query = dbContext.Transactions
             .Include(t => t.User)
+            .Where(t => t.Type == TransactionType.Deposit)
             .OrderByDescending(t => t.CreatedAt);
 
         var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
@@ -37,6 +38,7 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
         var query = dbContext.Transactions
             .Include(t => t.User)
             .Where(t => t.UserId == userId)
+            .Where(t => t.Type == TransactionType.Deposit)
             .OrderByDescending(t => t.CreatedAt);
 
         var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
@@ -114,7 +116,6 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
 
         transaction.Status = TransactionStatus.Accepted;
 
-        // Explicitly mark as modified
         dbContext.Entry(transaction).State = EntityState.Modified;
 
         await dbContext.SaveChangesAsync();
@@ -122,7 +123,7 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
         return new TransactionDto(transaction);
     }
 
-    public async Task RejectTransaction(Guid id)
+    public async Task<TransactionDto> RejectTransaction(Guid id)
     {
         var transaction = await dbContext.Transactions
             .FirstOrDefaultAsync(t => t.Id == id);
@@ -131,6 +132,8 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
 
         transaction.Status = TransactionStatus.Rejected;
         await dbContext.SaveChangesAsync();
+
+        return new TransactionDto(transaction);
     }
 
     public async Task<int> GetPendingTransactionsCount()
@@ -142,9 +145,31 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
 
     public async Task<int> GetUserBalance(Guid userId)
     {
-        return await  dbContext.Transactions
+        return await dbContext.Transactions
+            .Where(t => t.UserId == userId)
+            .SumAsync(t =>
+                t.Type == TransactionType.Deposit && t.Status == TransactionStatus.Accepted
+                    ? t.Amount
+                    : t.Type == TransactionType.Purchase
+                        ? -t.Amount
+                        : 0
+            );
+    }
+
+    public async Task<int> GetUserDepositTotal(Guid userId)
+    {
+        return await dbContext.Transactions
             .Where(t => t.UserId == userId)
             .Where(t => t.Status == TransactionStatus.Accepted)
-            .SumAsync(t => t.Amount);
+            .Where(t => t.Type == TransactionType.Deposit)
+            .SumAsync(t => (int?)t.Amount) ?? 0;
+    }
+
+    public async Task<int> GetUserPurchaseTotal(Guid userId)
+    {
+        return await dbContext.Transactions
+            .Where(t => t.UserId == userId)
+            .Where(t => t.Type == TransactionType.Purchase)
+            .SumAsync(t => (int?)t.Amount) ?? 0;
     }
 }

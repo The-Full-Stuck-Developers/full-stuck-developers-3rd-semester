@@ -142,7 +142,7 @@ public class TransactionsController(ITransactionService transactionService) : Co
     {
         var count = await transactionService.GetPendingTransactionsCount();
 
-        return Ok(new { count = count });
+        return Ok(count);
     }
 
     [HttpGet("GetUserBalance")]
@@ -151,6 +151,22 @@ public class TransactionsController(ITransactionService transactionService) : Co
     {
         var balance = await transactionService.GetUserBalance(userId);
 
-        return Ok(new { balance = balance });
+        return Ok(balance);
+    }
+
+    [HttpGet("GetUserDepositTotal")]
+    public async Task<ActionResult<int>> GetUserDepositTotal(Guid userId)
+    {
+        var total = await transactionService.GetUserDepositTotal(userId);
+
+        return Ok(total);
+    }
+
+    [HttpGet("GetUserPurchaseTotal")]
+    public async Task<ActionResult<int>> GetUserPurchaseTotal(Guid userId)
+    {
+        var total = await transactionService.GetUserPurchaseTotal(userId);
+
+        return Ok(total);
     }
 }

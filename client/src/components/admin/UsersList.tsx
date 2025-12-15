@@ -8,6 +8,8 @@ import {
 import { baseUrl } from "@core/baseUrl.ts";
 import Pagination from "../Pagination";
 import {
+  Check,
+  Cross,
   Mail,
   Phone,
   SquarePen,
@@ -244,6 +246,38 @@ export default function UsersList() {
       });
   };
 
+  const handleActivateUser = (user: UserDto) => {
+    const client = getUserClient();
+
+    client
+      .activateUser(user.id!)
+      .then(() => {
+        fetchUsers(currentPage);
+        toast.success("User activated successfully.");
+        return;
+      })
+      .catch((error) => {
+        const errorData = JSON.parse(error.response);
+        toast.error(errorData.message);
+      });
+  };
+
+  const handleDeactivateUser = (user: UserDto) => {
+    const client = getUserClient();
+
+    client
+      .deactivateUser(user.id!)
+      .then(() => {
+        fetchUsers(currentPage);
+        toast.success("User activated successfully.");
+        return;
+      })
+      .catch((error) => {
+        const errorData = JSON.parse(error.response);
+        toast.error(errorData.message);
+      });
+  };
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && (isEditModalOpen || isCreateModalOpen)) {
@@ -374,6 +408,14 @@ export default function UsersList() {
                 >
                   {t("membership")}
                 </th>
+                <th
+                  scope="col"
+                  className={
+                    "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  }
+                >
+                  {t("active")}
+                </th>
                 <th scope="col" className={"py-3 rounded-tr-xl"}></th>
               </tr>
             </thead>
@@ -440,6 +482,16 @@ export default function UsersList() {
                     </td>
 
                     <td
+                      className={`px-3 py-2 overflow-hidden text-ellipsis whitespace-nowrap flex flex-row items-center-safe align-middle h-max`}
+                    >
+                      {user.isActive ? (
+                        <Check size={27} color={"#48ff00"} />
+                      ) : (
+                        <X size={27} color={"#ff0000"} />
+                      )}
+                    </td>
+
+                    <td
                       className={`w-12 px-3 py-2 ${isLast ? "rounded-br-xl" : ""}`}
                     >
                       <div className="py-2">
@@ -476,7 +528,31 @@ export default function UsersList() {
                                   },
                                 ]
                               : []),
-
+                            ...(!user.isAdmin && !user.isActive
+                              ? [
+                                  {
+                                    label: t("activate_user"),
+                                    color: "#00a63e",
+                                    icon: <Check color="#00a63e" />,
+                                    requiresConfirmation: true,
+                                    onClick: () => handleActivateUser(user),
+                                  },
+                                ]
+                              : []),
+                            {
+                              separator: true,
+                            },
+                            ...(!user.isAdmin && user.isActive
+                              ? [
+                                  {
+                                    label: t("deactivate_user"),
+                                    color: "#ff0000",
+                                    icon: <X color="#ff0000" />,
+                                    requiresConfirmation: true,
+                                    onClick: () => handleDeactivateUser(user),
+                                  },
+                                ]
+                              : []),
                             {
                               separator: true,
                             },

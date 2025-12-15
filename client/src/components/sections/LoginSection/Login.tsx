@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import type { LoginRequestDto } from "@core/generated-client.ts";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "../../../hooks/auth.tsx";
 import { authClient } from "../../../api-clients.ts";
 
@@ -27,13 +27,15 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
   } = useForm<LoginRequestDto>();
 
   const onSubmit: SubmitHandler<LoginRequestDto> = async (data) => {
-    console.log("Form data being sent:", data);
-    await toast.promise(login(data), {
-      loading: "Checking credentials...",
-      success: "Welcome back!",
-      error: "Invalid email or password",
-    });
-    onClose(); // Close modal on success
+    login(data)
+      .then((res) => {
+        toast.success("Welcome back!");
+        onClose();
+      })
+      .catch((err) => {
+        toast.error("Invalid email or password");
+        return;
+      });
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
@@ -64,11 +66,10 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
 
   return (
     <>
+      <Toaster position="top-center" />
+
       {/* BACKDROP */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={handleClose}
-      />
+      <div className="fixed inset-0 bg-black/65 z-40" onClick={handleClose} />
 
       {/* MODAL */}
       <div className="fixed inset-0 flex justify-center items-center z-50 px-6">
@@ -136,6 +137,7 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
               {/* EMAIL INPUT */}
               <div>
                 <input
+                  autoFocus={true}
                   type="email"
                   placeholder="Enter your email"
                   value={resetEmail}
@@ -170,6 +172,7 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
               <div>
                 <label className="font-medium block mb-2">Email</label>
                 <input
+                  autoFocus={true}
                   type="email"
                   placeholder="Enter email"
                   {...register("email", { required: "Email is required" })}

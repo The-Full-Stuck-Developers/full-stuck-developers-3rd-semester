@@ -6,13 +6,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace dataccess.Migrations
 {
     /// <inheritdoc />
-    public partial class newmigrationname : Migration
+    public partial class NewMigration123 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:transaction_status", "pending,accepted,rejected,cancelled");
+                .Annotation("Npgsql:Enum:transaction_status", "pending,accepted,rejected,cancelled")
+                .Annotation("Npgsql:Enum:transaction_type", "deposit,purchase");
 
             migrationBuilder.CreateTable(
                 name: "games",
@@ -47,7 +48,6 @@ namespace dataccess.Migrations
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true, defaultValueSql: "now()"),
                     deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    balance = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     PasswordResetToken = table.Column<string>(type: "text", nullable: true),
                     PasswordResetTokenExpiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -130,6 +130,7 @@ namespace dataccess.Migrations
                     amount = table.Column<int>(type: "integer", nullable: false),
                     mobile_pay_transaction_number = table.Column<int>(type: "integer", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
+                    type = table.Column<string>(type: "text", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>

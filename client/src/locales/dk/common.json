@@ -37,5 +37,9 @@
   "total_players": "Antal spillere",
   "total_games": "Antal spil",
   "transactions_pending_approval": "Transaktioner afventer godkendelse",
-  "requires_action": "Kræver handling"
+  "requires_action": "Kræver handling",
+  "deactivate_user": "Deaktiver bruger",
+  "user_balance": "Brugerens saldo",
+  "user_deposit_total": "Brugerindskud total",
+  "user_purchase_total": "Brugerkøb total"
 }

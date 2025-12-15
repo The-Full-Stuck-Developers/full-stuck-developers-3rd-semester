@@ -45,7 +45,7 @@ export default function Dashboard() {
     client
       .getPlayersCount()
       .then((res) => {
-        setUsersCount(res.count);
+        setUsersCount(res);
       })
       .catch(console.error);
   };
@@ -55,7 +55,7 @@ export default function Dashboard() {
     client
       .getPendingTransactionsCount()
       .then((res) => {
-        setPendingTransactionsCount(res.count);
+        setPendingTransactionsCount(res);
       })
       .catch(console.error);
   };

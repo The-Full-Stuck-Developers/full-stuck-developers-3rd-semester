@@ -31,9 +31,7 @@ public class User
     public DateTime? DeletedAt { get; set; }
 
     public bool IsActive { get; set; }
-    
-    public int Balance { get; set; }
-    
+
     public ICollection<Bet> Bets { get; set; } = new List<Bet>();
     public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();

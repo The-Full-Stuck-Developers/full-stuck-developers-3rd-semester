@@ -113,6 +113,24 @@ public class UsersController(IUserService userService) : ControllerBase
     {
         var count = await userService.GetUsersCount();
 
-        return Ok(new { count = count });
+        return Ok(count);
+    }
+
+    [HttpPatch("{id}/Activate")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<UserDto>> ActivateUser(Guid id)
+    {
+        var updatedUser = await userService.ActivateUser(id);
+
+        return Ok(updatedUser);
+    }
+
+    [HttpPatch("{id}/Dectivate")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<UserDto>> DeactivateUser(Guid id)
+    {
+        var updatedUser = await userService.DeactivateUser(id);
+
+        return Ok(updatedUser);
     }
 }

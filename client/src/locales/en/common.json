@@ -37,5 +37,9 @@
   "total_players": "Total Players",
   "total_games": "Total Games",
   "transactions_pending_approval": "Transactions pending approval",
-  "requires_action": "Requires action"
+  "requires_action": "Requires action",
+  "deactivate_user": "Deactivate user",
+  "user_balance": "User balance",
+  "user_deposit_total": "User deposit total",
+  "user_purchase_total": "User purchase total"
 }
