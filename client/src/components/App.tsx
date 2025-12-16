@@ -6,7 +6,6 @@ import { GameBoard } from "@components/sections/userSection/GameBoard.tsx";
 import UsersList from "@components/admin/UsersList.tsx";
 import { SidebarLayout } from "@components/SidebarLayout.tsx";
 import ResetPassword from "@components/sections/LoginSection/ResetPassword.tsx";
-import GameList from "@components/admin/GameList.tsx";
 import "./../../node_modules/flag-icons/css/flag-icons.min.css";
 import MyProfilePage from "@components/admin/MyProfilePage.tsx";
 import { UserDeposit } from "@components/sections/userSection/UserDeposit.tsx";
@@ -20,6 +19,8 @@ import Dashboard from "./admin/Dashboard";
 import { DashboardOverview } from "@components/sections/userSection/DashboardOverview.tsx";
 import { PlayerLayout } from "@components/sections/userSection/PlayerLayout.tsx";
 import { GameHistory } from "@components/sections/userSection/GameHistory.tsx";
+import UpcomingGamesList from "@components/admin/UpcomingGamesList.tsx";
+import PastGamesList from "@components/admin/PastGamesList.tsx";
 
 function App() {
   return (
@@ -33,7 +34,8 @@ function App() {
         <Route path="/admin" element={<SidebarLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<UsersList />} />
-          <Route path="games" element={<GameList />} />
+          <Route path="upcoming-games" element={<UpcomingGamesList />} />
+          <Route path="past-games" element={<PastGamesList />} />
           <Route path="my-profile" element={<MyProfilePage />} />
           <Route path="transactions" element={<TransactionsList />} />
           <Route

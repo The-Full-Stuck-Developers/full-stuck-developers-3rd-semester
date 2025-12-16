@@ -1,4 +1,5 @@
 using api.Models;
+using api.Services;
 using dataccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,46 +14,35 @@ namespace api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-// [Authorize]
-[AllowAnonymous]
+[Authorize]
 public class GamesController(
-    IRepository<Game> gameRepository,
-    ISieveProcessor sieveProcessor)
+    IGameService gameService)
     : ControllerBase
 {
-    [HttpGet]
-    // [Authorize(Policy = "IsAdmin")]
-    public async Task<ActionResult<PagedResult<GameDto>>> GetAllGames([FromQuery] SieveModel sieveModel)
+    [HttpGet("GetAllUpcomingGames")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<PagedResult<GameDto>>> GetAllUpcomingGames([FromQuery] SieveModel sieveModel)
     {
-        var query = gameRepository.Query();
-        var filteredQuery = sieveProcessor.Apply(sieveModel, query);
+        var games = await gameService.GetAllUpcomingGames(sieveModel);
 
-        var total = await query.CountAsync();
-        var items = await filteredQuery.ToListAsync();
-        var games = items.Select(g => new GameDto(g)).ToList();
+        return Ok(games);
+    }
 
-        return Ok(new PagedResult<GameDto>
-        {
-            Items = games,
-            Total = total,
-            PageSize = sieveModel.PageSize ?? 10,
-            PageNumber = sieveModel.Page ?? 1
-        });
+    [HttpGet("GetAllPastGames")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<PagedResult<GameDto>>> GetAllPastGames([FromQuery] SieveModel sieveModel)
+    {
+        var games = await gameService.GetAllPastGames(sieveModel);
+
+        return Ok(games);
     }
 
     [HttpGet("{id:guid}")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<GameDto>> GetGameById(Guid id)
     {
-        var game = await gameRepository
-            .Query()
-            .FirstOrDefaultAsync(g => g.Id == id);
+        var game = await gameService.GetGameById(id);
 
-        if (game == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(new GameDto(game));
+        return Ok(game);
     }
 }

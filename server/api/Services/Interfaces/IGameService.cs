@@ -1,10 +1,16 @@
+using api.Models;
 using dataccess;
 using DefaultNamespace;
+using Dtos;
+using Sieve.Models;
 
 namespace api.Services;
 
 public interface IGameService
 {
+    Task<PagedResult<GameDto>> GetAllUpcomingGames(SieveModel sieveModel);
+    Task<PagedResult<GameDto>> GetAllPastGames(SieveModel sieveModel);
+    Task<GameDto?> GetGameById(Guid id);
     Task<Game> GetCurrentGameAsync(Guid gameId);                    
     Task<Game> GetOrCreateCurrentGameAsync();           
     Task<Game> DrawWinningNumbersAsync(Guid gameId, string winningNumbersCsv, Guid adminId);

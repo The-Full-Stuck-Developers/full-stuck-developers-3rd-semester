@@ -61,8 +61,13 @@ export const SidebarLayout: React.FC = () => {
       icon: <Users size={26} />,
     },
     {
-      label: t("games"),
-      path: "/admin/games",
+      label: t("upcoming_games"),
+      path: "/admin/upcoming-games",
+      icon: <GamepadIcon size={26} />,
+    },
+    {
+      label: t("past_games"),
+      path: "/admin/past-games",
       icon: <GamepadIcon size={26} />,
     },
     {

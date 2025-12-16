@@ -10,7 +10,7 @@ const getGameClient = () => {
       init = init ?? {};
       init.headers = {
         ...(init.headers ?? {}),
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       };
       return fetch(url, init);
     },
