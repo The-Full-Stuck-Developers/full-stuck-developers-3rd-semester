@@ -737,9 +737,11 @@ export class TransactionsClient {
     return Promise.resolve<PagedResultOfTransactionDto>(null as any);
   }
 
-  createTransaction(
-      createTransactionDto: { amount: number; mobilePayTransactionNumber: number; userId: string },
-  ): Promise<TransactionDto> {
+  createTransaction(createTransactionDto: {
+    amount: number;
+    mobilePayTransactionNumber: number;
+    userId: string;
+  }): Promise<TransactionDto> {
     let url_ = this.baseUrl + "/api/Transactions";
     url_ = url_.replace(/[?&]$/, "");
 
