@@ -398,13 +398,13 @@ export class GamesClient {
     this.baseUrl = baseUrl ?? "";
   }
 
-  getAllGames(
+  getAllUpcomingGames(
     filters: string | null | undefined,
     sorts: string | null | undefined,
     page: number | null | undefined,
     pageSize: number | null | undefined,
   ): Promise<PagedResultOfGameDto> {
-    let url_ = this.baseUrl + "/api/Games?";
+    let url_ = this.baseUrl + "/api/Games/GetAllUpcomingGames?";
     if (filters !== undefined && filters !== null)
       url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
     if (sorts !== undefined && sorts !== null)
@@ -423,11 +423,73 @@ export class GamesClient {
     };
 
     return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetAllGames(_response);
+      return this.processGetAllUpcomingGames(_response);
     });
   }
 
-  protected processGetAllGames(
+  protected processGetAllUpcomingGames(
+    response: Response,
+  ): Promise<PagedResultOfGameDto> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        result200 =
+          _responseText === ""
+            ? null
+            : (JSON.parse(
+                _responseText,
+                this.jsonParseReviver,
+              ) as PagedResultOfGameDto);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<PagedResultOfGameDto>(null as any);
+  }
+
+  getAllPastGames(
+    filters: string | null | undefined,
+    sorts: string | null | undefined,
+    page: number | null | undefined,
+    pageSize: number | null | undefined,
+  ): Promise<PagedResultOfGameDto> {
+    let url_ = this.baseUrl + "/api/Games/GetAllPastGames?";
+    if (filters !== undefined && filters !== null)
+      url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
+    if (sorts !== undefined && sorts !== null)
+      url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
+    if (page !== undefined && page !== null)
+      url_ += "Page=" + encodeURIComponent("" + page) + "&";
+    if (pageSize !== undefined && pageSize !== null)
+      url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: RequestInit = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processGetAllPastGames(_response);
+    });
+  }
+
+  protected processGetAllPastGames(
     response: Response,
   ): Promise<PagedResultOfGameDto> {
     const status = response.status;

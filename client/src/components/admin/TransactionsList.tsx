@@ -19,6 +19,7 @@ export default function TransactionsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [userSearchFilter, setUserSearchFilter] = useState("");
+  const [mobilePayNumberFilter, setMobilePayNumberFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [pageSize, setPageSize] = useState(10);
 
@@ -29,6 +30,10 @@ export default function TransactionsList() {
       filters.push(
         `User.Name@=*${userSearchFilter}|User.Email@=*${userSearchFilter}`,
       );
+    }
+
+    if (mobilePayNumberFilter) {
+      filters.push(`MobilePayTransactionNumber==${mobilePayNumberFilter}`);
     }
 
     if (statusFilter) {
@@ -58,7 +63,7 @@ export default function TransactionsList() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [userSearchFilter, statusFilter, pageSize]);
+  }, [userSearchFilter, mobilePayNumberFilter, statusFilter, pageSize]);
 
   useEffect(() => {
     fetchTransactions(currentPage);
@@ -132,6 +137,17 @@ export default function TransactionsList() {
               className="w-69 pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
           </div>
+          <div className={""}>
+            <input
+              type="text"
+              placeholder={t("placeholders:mobile_pay_number")}
+              value={mobilePayNumberFilter}
+              required={true}
+              onChange={(e) => setMobilePayNumberFilter(e.target.value)}
+              className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+          </div>
+
           <div>
             <select
               value={statusFilter}
@@ -260,7 +276,7 @@ export default function TransactionsList() {
                     </td>
                     <td className="px-3 py-3">
                       <span className="font-mono text-sm">
-                        #{transaction.mobilePayTransactionNumber}
+                        # {transaction.mobilePayTransactionNumber}
                       </span>
                     </td>
                     <td className="px-3 py-3">
