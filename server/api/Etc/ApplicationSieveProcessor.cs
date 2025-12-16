@@ -34,6 +34,21 @@ public class ApplicationSieveProcessor : SieveProcessor
             .CanFilter()
             .CanSort();
 
+        mapper.Property<User>(u => u.IsAdmin)
+            .CanFilter()
+            .CanSort();
+
+        mapper.Property<Transaction>(t => t.User.Name)
+            .CanFilter()
+            .HasName("User.Name");
+
+        mapper.Property<Transaction>(t => t.User.Email)
+            .CanFilter()
+            .HasName("User.Email");
+
+        mapper.Property<Transaction>(t => t.Status)
+            .CanFilter();
+
         return mapper;
     }
 }

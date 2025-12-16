@@ -10,6 +10,6 @@ public class NotFoundError(string type, object Properties)
 
 public class UnauthorizedError(string type) : AppError($"Operation not authorized for {type}!") { }
 
-public class ForbiddenError() : AppError("Forbiddden!") { }
+public class ForbiddenError() : AppError("forbidden") { }
 
-public class AuthenticationError() : AppError("Unable to authenticate!") { }
+public class AuthenticationError() : AppError("wrong_email_or_password") { }

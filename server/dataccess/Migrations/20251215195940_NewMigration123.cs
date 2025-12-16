@@ -6,13 +6,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace dataccess.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class NewMigration123 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:transaction_status", "pending,accepted,rejected");
+                .Annotation("Npgsql:Enum:transaction_status", "pending,accepted,rejected,cancelled")
+                .Annotation("Npgsql:Enum:transaction_type", "deposit,purchase");
 
             migrationBuilder.CreateTable(
                 name: "games",
@@ -47,7 +48,8 @@ namespace dataccess.Migrations
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true, defaultValueSql: "now()"),
                     deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     is_active = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    balance = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
+                    PasswordResetToken = table.Column<string>(type: "text", nullable: true),
+                    PasswordResetTokenExpiry = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -128,17 +130,12 @@ namespace dataccess.Migrations
                     amount = table.Column<int>(type: "integer", nullable: false),
                     mobile_pay_transaction_number = table.Column<int>(type: "integer", nullable: false),
                     status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    UserId1 = table.Column<Guid>(type: "uuid", nullable: true)
+                    type = table.Column<string>(type: "text", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("transactions_primary_key", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_transactions_users_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "users",
-                        principalColumn: "id");
                     table.ForeignKey(
                         name: "transactions_user_id_users_id_foreign_key",
                         column: x => x.user_id,
@@ -182,11 +179,6 @@ namespace dataccess.Migrations
                 name: "IX_transactions_user_id",
                 table: "transactions",
                 column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_transactions_UserId1",
-                table: "transactions",
-                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "transactions_mobile_pay_transaction_number_unique",

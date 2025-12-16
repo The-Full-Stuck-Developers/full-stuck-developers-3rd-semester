@@ -21,6 +21,7 @@ namespace dataccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_status", new[] { "pending", "accepted", "rejected", "cancelled" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_type", new[] { "deposit", "purchase" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DefaultNamespace.Bet", b =>
@@ -126,12 +127,6 @@ namespace dataccess.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<int>("Balance")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("balance");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -279,7 +274,7 @@ namespace dataccess.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<int>("MobilePayTransactionNumber")
+                    b.Property<int?>("MobilePayTransactionNumber")
                         .HasColumnType("integer")
                         .HasColumnName("mobile_pay_transaction_number");
 
@@ -289,6 +284,11 @@ namespace dataccess.Migrations
                         .HasColumnType("text")
                         .HasDefaultValue("Pending")
                         .HasColumnName("status");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")

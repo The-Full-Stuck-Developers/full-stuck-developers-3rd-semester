@@ -17,7 +17,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Services;
 
-
 public class AuthService(
     ILogger<AuthService> logger,
     IPasswordHasher<User> passwordHasher,
@@ -26,6 +25,7 @@ public class AuthService(
     AppOptions appOptions)
     : IAuthService
 {
+   
     public AuthUserInfo Authenticate(LoginRequestDto request)
         {
             // Null checks
@@ -48,7 +48,7 @@ public class AuthService(
 
             if (result == PasswordVerificationResult.Success)
             {
-                return new AuthUserInfo(user.Id, user.Name, user.IsAdmin, user.Balance);
+                return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
             }
     
             logger.LogWarning("Authentication failed: invalid password for user {Email}", request.Email);
@@ -71,7 +71,6 @@ public class AuthService(
                  Email = request.Email,
                  Name = request.Name,
                  IsAdmin = false,
-                 Balance = 0,
                  CreatedAt = DateTime.UtcNow,
                  UpdatedAt = DateTime.UtcNow
              };
@@ -81,7 +80,7 @@ public class AuthService(
              await userRepository.AddAsync(user);
 
 
-             return new AuthUserInfo(user.Id, user.Name, user.IsAdmin, user.Balance);
+             return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
 
         }
         public AuthUserInfo? GetUserInfo(ClaimsPrincipal principal)

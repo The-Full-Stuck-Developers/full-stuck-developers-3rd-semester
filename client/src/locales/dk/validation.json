@@ -1,3 +1,6 @@
 {
-  "email_field_required": "The email field is required"
+  "email_field_required": "E-mail-feltet er påkrævet",
+  "required": "Dette felt er påkrævet",
+  "min_length_3": "Feltet skal være mindst 3 tegn langt",
+  "email_address": "E-mailadressen er ugyldig"
 }

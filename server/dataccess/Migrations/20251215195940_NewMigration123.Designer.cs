@@ -12,8 +12,8 @@ using dataccess;
 namespace dataccess.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20251203022418_AddPasswordResetFields")]
-    partial class AddPasswordResetFields
+    [Migration("20251215195940_NewMigration123")]
+    partial class NewMigration123
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,7 +23,8 @@ namespace dataccess.Migrations
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_status", new[] { "pending", "accepted", "rejected" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_status", new[] { "pending", "accepted", "rejected", "cancelled" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_type", new[] { "deposit", "purchase" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DefaultNamespace.Bet", b =>
@@ -129,12 +130,6 @@ namespace dataccess.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id")
                         .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<int>("Balance")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("balance");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -293,12 +288,14 @@ namespace dataccess.Migrations
                         .HasDefaultValue("Pending")
                         .HasColumnName("status");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("type");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
-
-                    b.Property<Guid?>("UserId1")
-                        .HasColumnType("uuid");
 
                     b.HasKey("Id")
                         .HasName("transactions_primary_key");
@@ -308,8 +305,6 @@ namespace dataccess.Migrations
                         .HasDatabaseName("transactions_mobile_pay_transaction_number_unique");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId1");
 
                     b.ToTable("transactions", (string)null);
                 });
@@ -365,15 +360,11 @@ namespace dataccess.Migrations
             modelBuilder.Entity("dataccess.Transaction", b =>
                 {
                     b.HasOne("dataccess.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("transactions_user_id_users_id_foreign_key");
-
-                    b.HasOne("dataccess.Entities.User", null)
-                        .WithMany("Transactions")
-                        .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });

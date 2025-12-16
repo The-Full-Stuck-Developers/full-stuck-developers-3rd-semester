@@ -16,12 +16,15 @@ export default defineConfig({
     plugins: [react(),
         tailwindcss()
     ],
+    define: {
+        'process.env': {}
+    },
     resolve: {
         alias: {
             '@core': path.resolve(__dirname, './src/core'),
             '@utilities': path.resolve(__dirname, './src/utilities'),
-            '@components': path.resolve(__dirname, './src/components')
+            '@components': path.resolve(__dirname, './src/components'),
+            process: "process/browser"
         }
     }
 })
-

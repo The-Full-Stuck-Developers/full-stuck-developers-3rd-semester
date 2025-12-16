@@ -63,10 +63,6 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.IsActive)
                 .HasColumnName("is_active")
                 .HasDefaultValue(false);
-            
-            entity.Property(e => e.Balance)
-                .HasColumnName("balance")
-                .HasDefaultValue(0);
 
             entity.Property(e => e.ExpiresAt)
                 .HasColumnName("expires_at");
@@ -81,9 +77,7 @@ public partial class MyDbContext : DbContext
             
             entity.Property(e => e.DeletedAt)
                 .HasColumnName("deleted_at");
-            
-            
-            // NO IDEA IF SOFT DELETE IS OK LIKE THIS I READ IT ONLINE
+
             entity.HasIndex(e => e.DeletedAt)
                 .HasFilter("\"deleted_at\" IS NULL")
                 .HasDatabaseName("users_deleted_at_idx");
@@ -160,6 +154,7 @@ public partial class MyDbContext : DbContext
         });
 
         modelBuilder.HasPostgresEnum<TransactionStatus>();
+        modelBuilder.HasPostgresEnum<TransactionType>();
 
         modelBuilder.Entity<Transaction>(entity =>
         {
@@ -181,7 +176,8 @@ public partial class MyDbContext : DbContext
 
             entity.Property(e => e.MobilePayTransactionNumber)
                 .HasColumnName("mobile_pay_transaction_number")
-                .IsRequired();
+                .IsRequired(false)
+                .ValueGeneratedNever();
 
             entity.HasIndex(e => e.MobilePayTransactionNumber)
                 .IsUnique()
@@ -190,6 +186,11 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.Status)
                 .HasColumnName("status")
                 .HasDefaultValue(TransactionStatus.Pending)
+                .HasConversion<string>();
+
+            entity.Property(e => e.Type)
+                .HasColumnName("type")
+                .IsRequired()
                 .HasConversion<string>();
 
             entity.Property(e => e.CreatedAt)

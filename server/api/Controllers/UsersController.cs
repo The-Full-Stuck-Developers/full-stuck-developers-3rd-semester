@@ -10,12 +10,11 @@ namespace api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[AllowAnonymous]
-// [Authorize]
+[Authorize]
 public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpGet]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<PagedResult<UserDto>>> GetAllUsers([FromQuery] SieveModel sieveModel)
     {
         var result = await userService.GetAllUsers(sieveModel);
@@ -23,7 +22,7 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpGet("{id}")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<UserDto>> GetUserById(Guid id)
     {
         var user = await userService.GetUserById(id);
@@ -34,7 +33,7 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost]
-// [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)
@@ -60,7 +59,7 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPatch("{id}")]
-// [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<UserDto>> UpdateUser(Guid id, [FromBody] UpdateUserDto updateUserDto)
     {
         try
@@ -75,7 +74,7 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
         try
@@ -90,7 +89,7 @@ public class UsersController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("{id}/renew-membership")]
-// [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<UserDto>> RenewMembership(Guid id)
     {
         try
@@ -106,5 +105,32 @@ public class UsersController(IUserService userService) : ControllerBase
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    [HttpGet("GetPlayerCount")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<int>> GetPlayersCount()
+    {
+        var count = await userService.GetUsersCount();
+
+        return Ok(count);
+    }
+
+    [HttpPatch("{id}/Activate")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<UserDto>> ActivateUser(Guid id)
+    {
+        var updatedUser = await userService.ActivateUser(id);
+
+        return Ok(updatedUser);
+    }
+
+    [HttpPatch("{id}/Dectivate")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<UserDto>> DeactivateUser(Guid id)
+    {
+        var updatedUser = await userService.DeactivateUser(id);
+
+        return Ok(updatedUser);
     }
 }

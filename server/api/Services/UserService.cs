@@ -70,7 +70,7 @@ public class UserService(
             PhoneNumber = createUserDto.PhoneNumber,
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = createUserDto.ActivateMembership ? DateTime.UtcNow.AddYears(1) : null,
-            PasswordHash = hasher.GenerateRandomPassword(new Random().Next(1,64))
+            PasswordHash = hasher.GenerateRandomPassword(new Random().Next(1, 64))
         };
 
         await userRepository.AddAsync(user);
@@ -126,12 +126,12 @@ public class UserService(
 
         if (user == null)
         {
-            throw new KeyNotFoundException($"User with id {id} not found");
+            throw new KeyNotFoundException("User not found");
         }
 
-        if (user.ExpiresAt == null)
+        if (user.IsAdmin)
         {
-            throw new InvalidOperationException("User does not have an active membership to renew");
+            throw new InvalidOperationException("Admin users cannot be renewed");
         }
 
         var now = DateTime.UtcNow;
@@ -151,10 +151,44 @@ public class UserService(
             // Too early to renew
             var daysUntilRenewal = (renewalWindowStart - now).TotalDays;
             throw new InvalidOperationException(
-                $"Membership can only be renewed within 48 hours of expiration. " +
+                $"Membership can only be renewed within 7 days of expiration. " +
                 $"Renewal available in {Math.Ceiling(daysUntilRenewal)} days");
         }
 
+        await userRepository.UpdateAsync(user);
+
+        return new UserDto(user);
+    }
+
+    public async Task<int> GetUsersCount()
+    {
+        return await userRepository.Query()
+            .Where(u => u.DeletedAt == null)
+            .Where(u => !u.IsAdmin)
+            .CountAsync();
+    }
+
+    public async Task<UserDto> ActivateUser(Guid id)
+    {
+        var user = await userRepository.Query()
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null) throw new KeyNotFoundException("User not found");
+
+        user.IsActive = true;
+        await userRepository.UpdateAsync(user);
+
+        return new UserDto(user);
+    }
+
+    public async Task<UserDto> DeactivateUser(Guid id)
+    {
+        var user = await userRepository.Query()
+            .FirstOrDefaultAsync(u => u.Id == id);
+
+        if (user == null) throw new KeyNotFoundException("User not found");
+
+        user.IsActive = false;
         await userRepository.UpdateAsync(user);
 
         return new UserDto(user);

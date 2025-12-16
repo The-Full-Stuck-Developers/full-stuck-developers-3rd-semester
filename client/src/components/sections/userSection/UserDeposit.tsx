@@ -1,207 +1,148 @@
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
-import { Navbar } from "@components/sections/NavBar.tsx";
+import getTransactionsClient from "@core/clients/transactionClient.ts";
+import { useAuth } from "../../../hooks/auth.tsx";
 
 const QUICK_AMOUNTS = [20, 40, 80, 160];
 
-type UserDepositProps = {
-    userId: string;
-};
-
-type StatusState =
-    | null
-    | {
+export function UserDeposit() {
+  const { user } = useAuth(); // ✅ get logged in user (contains id)
+  const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{
     type: "success" | "error";
     message: string;
-};
+  } | null>(null);
 
-export function UserDeposit({ userId }: UserDepositProps) {
-    const [amount, setAmount] = useState<string>("");
-    const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState<StatusState>(null);
+  const handleQuick = (val: number) => {
+    setAmount(String(val));
+    setStatus(null);
+  };
 
-    const handleQuickAmountClick = (value: number) => {
-        setAmount(String(value));
-        setStatus(null);
-    };
+  const handleSubmit = async () => {
+    const num = Number(amount);
 
-    const handleAddBalance = async () => {
-        const parsedAmount = Number(amount);
+    if (!num || num <= 0) {
+      setStatus({ type: "error", message: "Enter valid amount" });
+      return;
+    }
 
-        if (!parsedAmount || parsedAmount <= 0) {
-            const msg = "Please enter a valid amount.";
-            toast.error(msg);
-            setStatus({ type: "error", message: msg });
-            return;
-        }
+    // ✅ userInfoAtom is async, so user can be null for a moment
+    if (!user?.id) {
+      toast.error("User not loaded yet, try again.");
+      setStatus({ type: "error", message: "User not loaded yet" });
+      return;
+    }
 
-        if (!userId) {
-            const msg = "No user id – are you logged in?";
-            toast.error(msg);
-            setStatus({ type: "error", message: msg });
-            return;
-        }
+    const ref = Math.floor(100000000 + Math.random() * 900000000);
 
-        // generate fake MobilePay transaction number
-        const generatedMobilePayNumber =
-            Math.floor(100000000 + Math.random() * 900000000);
+    try {
+      setLoading(true);
 
-        try {
-            setLoading(true);
-            setStatus(null);
+      const client = getTransactionsClient();
 
-            const res = await fetch("http://localhost:5284/api/Transactions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    userId,
-                    amount: parsedAmount,
-                    mobilePayTransactionNumber: generatedMobilePayNumber,
-                }),
-            });
+      // ✅ IMPORTANT: method name depends on generated-client
+      // If your method name is different, Ctrl+click TransactionsClient and replace it here.
+      await client.createTransaction({
+        userId: user.id,
+        amount: num,
+        mobilePayTransactionNumber: ref,
+      });
 
-            if (!res.ok) {
-                let message = "Failed to create deposit.";
-                try {
-                    const data = await res.json();
-                    if (data?.message) message = data.message;
-                } catch {
-                    // ignore
-                }
-                throw new Error(message);
-            }
+      toast.success("Deposit created!");
+      setStatus({ type: "success", message: `Success! Ref: ${ref}` });
+      setAmount("");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed");
+      setStatus({ type: "error", message: "Something went wrong" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            const successMessage = `Deposit of ${parsedAmount} kr was created successfully. Reference: ${generatedMobilePayNumber}`;
-            toast.success(successMessage);
-            setStatus({
-                type: "success",
-                message: successMessage,
-            });
-            setAmount("");
-        } catch (err: any) {
-            const errorMessage = err?.message ?? "Something went wrong while creating your deposit.";
-            toast.error(errorMessage);
-            setStatus({
-                type: "error",
-                message: errorMessage,
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+  return (
+    <div>
+      <Toaster
+        position="top-center"
+        toastOptions={{ style: { background: "#1f2937", color: "#fff" } }}
+      />
 
-    const isDisabled = loading || !amount.trim() || Number(amount) <= 0;
+      <h1 className="text-4xl font-black mb-10">Add Balance</h1>
 
-    return (
-        <div className="min-h-screen bg-white flex justify-center items-start py-16 px-4">
-            <Navbar onLoginClick={console.log} />
-
-            <Toaster position="top-center" />
-
-            <div className="w-full max-w-xl mt-20">
-                <h1 className="text-center text-[#213965] text-3xl md:text-4xl font-extrabold mb-6">
-                    Add Balance
-                </h1>
-
-                <div className="bg-white border border-[#213965] rounded-3xl shadow-xl px-6 sm:px-8 py-8">
-                    <div className="mb-6">
-                        <label className="block text-sm font-semibold text-[#0C244B] mb-1">
-                            Amount (kr)
-                        </label>
-                        <input
-                            type="number"
-                            min={1}
-                            value={amount}
-                            onChange={(e) => {
-                                setAmount(e.target.value);
-                                setStatus(null);
-                            }}
-                            className="w-full rounded-2xl border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF2B3A]/30 focus:border-[#FF2B3A]"
-                            placeholder="Enter amount in kr"
-                        />
-                    </div>
-
-                    <div className="mb-6">
-                        <p className="text-xs font-semibold text-[#6071A0] mb-2">
-                            Quick amounts
-                        </p>
-                        <div className="flex flex-wrap gap-3">
-                            {QUICK_AMOUNTS.map((value) => {
-                                const isActive = Number(amount) === value;
-                                return (
-                                    <button
-                                        key={value}
-                                        type="button"
-                                        onClick={() => handleQuickAmountClick(value)}
-                                        className={[
-                                            "px-4 py-2 rounded-full text-sm font-semibold transition-all border",
-                                            isActive
-                                                ? "bg-[#FF2B3A] text-white border-[#FF2B3A] shadow-md"
-                                                : "bg-[#F5F7FB] text-[#04153A] border-[#FF2B3A]/40 hover:bg-[#E3EBFF]",
-                                        ].join(" ")}
-                                    >
-                                        {value} kr
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    {/* Big status message box */}
-                    {status && (
-                        <div
-                            className={[
-                                "mb-6 rounded-2xl border px-4 py-3 text-sm leading-relaxed flex gap-3",
-                                status.type === "success"
-                                    ? "bg-[#E8FFF2] border-emerald-400 text-emerald-800"
-                                    : "bg-[#FFECEC] border-[#FF2B3A]/70 text-[#4B0C0C]",
-                            ].join(" ")}
-                        >
-                            <span className="mt-0.5 text-lg">
-                                {status.type === "success" ? "✅" : "⚠️"}
-                            </span>
-                            <div>
-                                <p className="font-semibold mb-1">
-                                    {status.type === "success"
-                                        ? "Deposit created"
-                                        : "Something went wrong"}
-                                </p>
-                                <p>{status.message}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <button
-                        type="button"
-                        onClick={handleAddBalance}
-                        disabled={isDisabled}
-                        className={[
-                            "w-full rounded-full py-3 text-sm font-semibold transition-all shadow-md",
-                            isDisabled
-                                ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                                : "bg-[#FF2B3A] text-white hover:-translate-y-0.5 hover:shadow-lg",
-                        ].join(" ")}
-                    >
-                        {loading ? "Processing..." : "Add Balance"}
-                    </button>
-
-                    <p className="mt-4 text-center text-xs text-slate-500">
-                        70% to prizes · 30% supports{" "}
-                        <span className="font-semibold">Jerne IF</span>
-                    </p>
-
-                    {/* Back button */}
-                    <button
-                        type="button"
-                        onClick={() => window.history.back()}
-                        className="mt-6 w-full rounded-full border border-[#213965] py-2.5 text-sm font-semibold text-[#213965] hover:bg-[#213965] hover:text-white transition-all"
-                    >
-                        Back to user page
-                    </button>
-                </div>
-            </div>
+      <div className="bg-gray-800 rounded-3xl border border-gray-700 shadow-2xl p-8 max-w-2xl">
+        <div className="mb-8">
+          <label className="block text-sm font-bold text-gray-300 mb-3">
+            Amount (kr)
+          </label>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              setStatus(null);
+            }}
+            className="w-full bg-gray-700 border border-gray-600 rounded-2xl px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder="e.g. 200"
+          />
         </div>
-    );
+
+        <div className="mb-8">
+          <p className="text-sm font-bold text-gray-400 mb-4">Quick amounts</p>
+          <div className="grid grid-cols-4 gap-4">
+            {QUICK_AMOUNTS.map((v) => (
+              <button
+                key={v}
+                onClick={() => handleQuick(v)}
+                className={`py-4 rounded-xl font-bold transition-all border ${
+                  Number(amount) === v
+                    ? "bg-red-600 text-white border-red-600 shadow-lg"
+                    : "bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600"
+                }`}
+              >
+                {v} kr
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {status && (
+          <div
+            className={`mb-6 p-5 rounded-2xl border flex gap-4 ${
+              status.type === "success"
+                ? "bg-emerald-900/30 border-emerald-700 text-emerald-300"
+                : "bg-red-900/30 border-red-700 text-red-300"
+            }`}
+          >
+            <span className="text-2xl">
+              {status.type === "success" ? "Success" : "Warning"}
+            </span>
+            <div>
+              <p className="font-bold">
+                {status.type === "success" ? "Success!" : "Error"}
+              </p>
+              <p className="text-sm">{status.message}</p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleSubmit}
+          disabled={loading || !amount || Number(amount) <= 0 || !user?.id}
+          className={`w-full py-5 rounded-2xl font-bold text-lg transition-all shadow-lg ${
+            loading || !amount || Number(amount) <= 0 || !user?.id
+              ? "bg-gray-600 text-gray-400"
+              : "bg-red-600 hover:bg-red-700 text-white hover:shadow-red-600/50"
+          }`}
+        >
+          {loading ? "Processing..." : "Add Balance"}
+        </button>
+
+        <p className="mt-6 text-center text-sm text-gray-400">
+          70% to prizes • 30% supports{" "}
+          <span className="font-bold text-red-400">Jerne IF</span>
+        </p>
+      </div>
+    </div>
+  );
 }

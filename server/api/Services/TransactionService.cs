@@ -1,16 +1,59 @@
 using System.ComponentModel.DataAnnotations;
+using api.Models;
 using api.Models.Dtos.Requests.Transaction;
 using dataccess;
 using Dtos;
 using Microsoft.EntityFrameworkCore;
+using Sieve.Models;
+using Sieve.Services;
 
 namespace api.Services;
 
-public class TransactionService(MyDbContext dbContext) : ITransactionService
+public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProcessor) : ITransactionService
 {
-    public Task<List<TransactionDto>> GetAllTransactions()
+    public async Task<PagedResult<TransactionDto>> GetAllTransactions(SieveModel sieveModel)
     {
-        return dbContext.Transactions.Select(t => new TransactionDto(t)).ToListAsync();
+        var query = dbContext.Transactions
+            .Include(t => t.User)
+            .Where(t => t.Type == TransactionType.Deposit)
+            .OrderByDescending(t => t.CreatedAt);
+
+        var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+        var total = await filteredQuery.CountAsync();
+        var result = sieveProcessor.Apply(sieveModel, query);
+        var items = await result.ToListAsync();
+        var transactions = items.Select(t => new TransactionDto(t)).ToList();
+
+        return new PagedResult<TransactionDto>
+        {
+            Items = transactions,
+            Total = total,
+            PageSize = sieveModel.PageSize ?? 10,
+            PageNumber = sieveModel.Page ?? 1
+        };
+    }
+
+    public async Task<PagedResult<TransactionDto>> GetTransactionsByUser(Guid userId, SieveModel sieveModel)
+    {
+        var query = dbContext.Transactions
+            .Include(t => t.User)
+            .Where(t => t.UserId == userId)
+            .Where(t => t.Type == TransactionType.Deposit)
+            .OrderByDescending(t => t.CreatedAt);
+
+        var filteredQuery = sieveProcessor.Apply(sieveModel, query, applyPagination: false);
+        var total = await filteredQuery.CountAsync();
+        var result = sieveProcessor.Apply(sieveModel, query);
+        var items = await result.ToListAsync();
+        var transactions = items.Select(t => new TransactionDto(t)).ToList();
+
+        return new PagedResult<TransactionDto>
+        {
+            Items = transactions,
+            Total = total,
+            PageSize = sieveModel.PageSize ?? 10,
+            PageNumber = sieveModel.Page ?? 1
+        };
     }
 
     public Task<TransactionDto?> GetTransactionById(Guid id)
@@ -31,7 +74,7 @@ public class TransactionService(MyDbContext dbContext) : ITransactionService
             Status = TransactionStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
-        
+
         dbContext.Transactions.Add(transaction);
         await dbContext.SaveChangesAsync();
         return new TransactionDto(transaction);
@@ -40,12 +83,12 @@ public class TransactionService(MyDbContext dbContext) : ITransactionService
     public async Task<TransactionDto?> UpdateTransactionStatus(Guid id, UpdateTransactionDto dto)
     {
         Validator.ValidateObject(dto, new ValidationContext(dto), true);
-        
+
         var transaction = await dbContext.Transactions.FirstOrDefaultAsync(t => t.Id == id);
-        if(transaction == null) throw new KeyNotFoundException($"Transaction {id} not found");
-        
+        if (transaction == null) throw new KeyNotFoundException($"Transaction {id} not found");
+
         transaction.Status = dto.Status;
-        
+
         await dbContext.SaveChangesAsync();
         return new TransactionDto(transaction);
     }
@@ -57,10 +100,76 @@ public class TransactionService(MyDbContext dbContext) : ITransactionService
 
         if (transaction == null)
             throw new KeyNotFoundException($"Transaction {id} not found");
-        
+
         transaction.Status = TransactionStatus.Cancelled;
 
         await dbContext.SaveChangesAsync();
     }
 
+    public async Task<TransactionDto> ApproveTransaction(Guid id)
+    {
+        var transaction = await dbContext.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (transaction == null)
+            throw new KeyNotFoundException($"Transaction not found");
+
+        transaction.Status = TransactionStatus.Accepted;
+
+        dbContext.Entry(transaction).State = EntityState.Modified;
+
+        await dbContext.SaveChangesAsync();
+
+        return new TransactionDto(transaction);
+    }
+
+    public async Task<TransactionDto> RejectTransaction(Guid id)
+    {
+        var transaction = await dbContext.Transactions
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+        if (transaction == null) throw new KeyNotFoundException($"Transaction not found");
+
+        transaction.Status = TransactionStatus.Rejected;
+        await dbContext.SaveChangesAsync();
+
+        return new TransactionDto(transaction);
+    }
+
+    public async Task<int> GetPendingTransactionsCount()
+    {
+        return await dbContext.Transactions
+            .Where(t => t.Status == TransactionStatus.Pending)
+            .CountAsync();
+    }
+
+    public async Task<int> GetUserBalance(Guid userId)
+    {
+        return await dbContext.Transactions
+            .Where(t => t.UserId == userId)
+            .SumAsync(t =>
+                t.Type == TransactionType.Deposit && t.Status == TransactionStatus.Accepted
+                    ? t.Amount
+                    : t.Type == TransactionType.Purchase
+                        ? -t.Amount
+                        : 0
+            );
+    }
+
+    public async Task<int> GetUserDepositTotal(Guid userId)
+    {
+        return await dbContext.Transactions
+            .Where(t => t.UserId == userId)
+            .Where(t => t.Status == TransactionStatus.Accepted)
+            .Where(t => t.Type == TransactionType.Deposit)
+            .SumAsync(t => (int?)t.Amount) ?? 0;
+    }
+
+    public async Task<int> GetUserPurchaseTotal(Guid userId)
+    {
+        return await dbContext.Transactions
+            .Where(t => t.UserId == userId)
+            .Where(t => t.Type == TransactionType.Purchase)
+            .SumAsync(t => (int?)t.Amount) ?? 0;
+    }
 }
