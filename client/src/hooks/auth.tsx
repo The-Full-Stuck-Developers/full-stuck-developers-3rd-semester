@@ -17,14 +17,20 @@ export const useAuth = () => {
   const navigate = useNavigate();
 
   const login = async (request: LoginRequestDto) => {
-    const response = await authClient.login(request);
-    setJwt(response.jwt!);
+    try {
+      const response = await authClient.login(request);
+      setJwt(response.jwt!);
 
-    const userInfo = await authClient.userInfo();
+      const userInfo = await authClient.userInfo();
 
-    if (userInfo.isAdmin) navigate("/admin/dashboard");
-    else navigate("/player/dashboard");
+      if (userInfo.isAdmin) navigate("/admin/dashboard");
+      else navigate("/player/dashboard");
+    } catch (err) {
+      console.log("login error (raw):", err);
+      throw err;
+    }
   };
+
 
   const logout = async () => {
     setJwt(null);
