@@ -27,33 +27,29 @@ public class AuthService(
 {
    
     public AuthUserInfo Authenticate(LoginRequestDto request)
-        {
-            // Null checks
-            if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
-            {
-                logger.LogWarning("Authentication failed: email or password is empty");
-                throw new AuthenticationError();
-            }
-
-            var user = userRepository.Query()
-                .FirstOrDefault(u => u.Email == request.Email);
-
-            if (user == null)
-            {
-                logger.LogWarning("Authentication failed: user with email {Email} not found", request.Email);
-                throw new AuthenticationError();
-            }
-
-            var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
-
-            if (result == PasswordVerificationResult.Success)
-            {
-                return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
-            }
-    
-            logger.LogWarning("Authentication failed: invalid password for user {Email}", request.Email);
+    {
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             throw new AuthenticationError();
-        }
+
+        var user = userRepository.Query().FirstOrDefault(u => u.Email == request.Email);
+
+        if (user == null)
+            throw new AuthenticationError();
+
+        if (user.DeletedAt != null)
+            throw new AuthenticationError("Your account is inactive, contact admin for more info");
+
+        if (user.ExpiresAt != null && user.ExpiresAt <= DateTime.UtcNow)
+            throw new AuthenticationError("Your membership has expired, contact admin for renewal");
+
+        var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+        if (result != PasswordVerificationResult.Success)
+            throw new AuthenticationError();
+
+        return new AuthUserInfo(user.Id, user.Name, user.IsAdmin, user.ExpiresAt, user.DeletedAt);
+    }
+
+
 
         public async Task<AuthUserInfo> Register(RegisterRequestDto request)
         {
@@ -80,7 +76,7 @@ public class AuthService(
              await userRepository.AddAsync(user);
 
 
-             return new AuthUserInfo(user.Id, user.Name, user.IsAdmin);
+             return new AuthUserInfo(user.Id, user.Name, user.IsAdmin, user.ExpiresAt, user.DeletedAt);
 
         }
         public AuthUserInfo? GetUserInfo(ClaimsPrincipal principal)
