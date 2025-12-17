@@ -5,7 +5,7 @@ import type { LoginRequestDto } from "@core/generated-client.ts";
 import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "../../../hooks/auth.tsx";
 import { authClient } from "../../../api-clients.ts";
-import {getProblemTitle} from "@utilities/getProblemTitle.ts";
+import { getProblemTitle } from "@utilities/getProblemTitle.ts";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -35,13 +35,10 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
     } catch (err: any) {
       console.log("LOGIN ERROR RAW:", err);
       const message =
-          (await getProblemTitle(err)) ?? "Invalid email or password";
+        (await getProblemTitle(err)) ?? "Invalid email or password";
       toast.error(message);
     }
   };
-
-
-
 
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
