@@ -1,9 +1,9 @@
 import { ArrowRight, Trophy, Users, TrendingUp, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export function Hero() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <section className="relative w-full bg-gradient-to-br from-[#0f2b5b] via-[#0a1f44] to-[#1e3a6b] overflow-hidden">
@@ -18,11 +18,14 @@ export function Hero() {
             </h1>
 
             <p className="text-2xl md:text-4xl font-bold text-white/90 animate-fade-up animation-delay-400">
-              {t('home:support')} <span className="text-[#e30613]">Jerne IF Esbjerg</span>
+              {t("home:support")}{" "}
+              <span className="text-[#e30613]">Jerne IF Esbjerg</span>
             </p>
 
             <p className="mt-6 text-lg md:text-xl text-white/70 max-w-3xl mx-auto font-medium animate-fade-up animation-delay-600">
-              {t('home:weekly_lottery')} • {t('home:support_your_local_sports_club')} • {t('home:win_exciting_prizes_every_week')}
+              {t("home:weekly_lottery")} •{" "}
+              {t("home:support_your_local_sports_club")} •{" "}
+              {t("home:win_exciting_prizes_every_week")}
             </p>
           </div>
 
@@ -31,7 +34,7 @@ export function Hero() {
               to="/login"
               className="group inline-flex items-center gap-3 px-10 py-5 rounded-full bg-[#e30613] hover:bg-[#ff1a2b] text-white font-bold text-lg shadow-2xl hover:shadow-[#e30613]/60 transition-all duration-300 transform hover:scale-105 animate-fade-up animation-delay-800"
             >
-              {t('home:start_playing_now')}
+              {t("home:start_playing_now")}
               <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition" />
             </Link>
 
@@ -39,7 +42,7 @@ export function Hero() {
               href="#how-it-works"
               className="px-10 py-5 rounded-full border-2 border-white/50 bg-white/5 backdrop-blur-md text-white font-semibold hover:bg-white/10 hover:border-white transition-all animate-fade-up animation-delay-1000"
             >
-              {t('home:how_it_works')}
+              {t("home:how_it_works")}
             </a>
           </div>
 
@@ -47,7 +50,7 @@ export function Hero() {
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-[#e30613]/50 transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-slide-up animation-delay-1200">
               <Trophy className="w-14 h-14 mx-auto mb-4 text-[#e30613]" />
               <p className="text-5xl font-black text-white">70%</p>
-              <p className="text-white/80 mt-2">{t('home:prize_pool')}</p>
+              <p className="text-white/80 mt-2">{t("home:prize_pool")}</p>
             </div>
 
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-[#e30613]/50 transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-slide-up animation-delay-1400">
@@ -58,14 +61,14 @@ export function Hero() {
 
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-[#e30613]/50 transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-slide-up animation-delay-1600">
               <RefreshCw className="w-14 h-14 mx-auto mb-4 text-[#e30613]" />
-              <p className="text-5xl font-black text-white">{t('home:draw')}</p>
-              <p className="text-white/80 mt-2">{t('home:every_sunday')}</p>
+              <p className="text-5xl font-black text-white">{t("home:draw")}</p>
+              <p className="text-white/80 mt-2">{t("home:every_sunday")}</p>
             </div>
 
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 hover:bg-white/15 hover:border-[#e30613]/50 transition-all duration-500 hover:scale-105 hover:-translate-y-2 animate-slide-up animation-delay-1800">
               <TrendingUp className="w-14 h-14 mx-auto mb-4 text-[#e30613]" />
               <p className="text-5xl font-black text-white">3</p>
-              <p className="text-white/80 mt-2">{t('home:winning_numbers')}</p>
+              <p className="text-white/80 mt-2">{t("home:winning_numbers")}</p>
             </div>
           </div>
         </div>

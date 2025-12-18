@@ -25,7 +25,7 @@ i18n.use(initReactI18next).init({
       user: enUser,
       validation: enValidation,
       game: enGame,
-      home: enHome
+      home: enHome,
     },
     dk: {
       common: dkCommon,
@@ -34,7 +34,7 @@ i18n.use(initReactI18next).init({
       user: dkUser,
       validation: dkValidation,
       game: dkGame,
-      home: dkHome
+      home: dkHome,
     },
   },
   lng: "en",

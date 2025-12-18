@@ -6,7 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useAuth } from "../../../hooks/auth.tsx";
 import { authClient } from "../../../api-clients.ts";
 import { getProblemTitle } from "@utilities/getProblemTitle.ts";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -14,7 +14,7 @@ interface LoginModalProps {
 }
 
 export default function Login({ isOpen, onClose }: LoginModalProps) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   // const [email, setEmail] = useState("");
   //const [password, setPassword] = useState("");
@@ -126,16 +126,16 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
                     d="M15 19l-7-7 7-7"
                   />
                 </svg>
-                <span className="font-medium">{t('home:reset_password')}</span>
+                <span className="font-medium">{t("home:reset_password")}</span>
               </button>
 
               {/* HEADER */}
               <div className="text-center">
                 <h2 className="text-3xl font-bold mb-2">
-                  {t('home:forgot_your_password')}
+                  {t("home:forgot_your_password")}
                 </h2>
                 <p className="text-gray-600">
-                  {t('home:you_will_receive_email_after_filling_the_form')}
+                  {t("home:you_will_receive_email_after_filling_the_form")}
                 </p>
               </div>
 
@@ -153,7 +153,7 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
               </div>
 
               <p className="text-sm text-gray-500 text-center">
-                {t('home:fields_marked_required')}
+                {t("home:fields_marked_required")}
               </p>
 
               {/* RECOVER BUTTON */}
@@ -161,7 +161,7 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
                 type="submit"
                 className="bg-gray-800 hover:bg-gray-900 transition text-white py-4 rounded-xl text-lg font-semibold mt-4"
               >
-                {t('home:recover_password')}
+                {t("home:recover_password")}
               </button>
             </form>
           ) : (
@@ -171,16 +171,20 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
               className="flex flex-col gap-5"
             >
               {/* HEADER */}
-              <h1 className="text-4xl font-bold mb-2">{t('home:login')}</h1>
+              <h1 className="text-4xl font-bold mb-2">{t("home:login")}</h1>
 
               {/* EMAIL */}
               <div>
-                <label className="font-medium block mb-2">{t('home:email')}</label>
+                <label className="font-medium block mb-2">
+                  {t("home:email")}
+                </label>
                 <input
                   autoFocus={true}
                   type="email"
-                  placeholder={t('home:enter_email')}
-                  {...register("email", { required: t('home:email_is_required') })}
+                  placeholder={t("home:enter_email")}
+                  {...register("email", {
+                    required: t("home:email_is_required"),
+                  })}
                   className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
                 />
                 {errors.email && (
@@ -192,13 +196,15 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
 
               {/* PASSWORD FIELD */}
               <div>
-                <label className="font-medium block mb-2">{t('home:password')}</label>
+                <label className="font-medium block mb-2">
+                  {t("home:password")}
+                </label>
                 <div className="relative">
                   <input
                     type={showPass ? "text" : "password"}
-                    placeholder={t('home:enter_password')}
+                    placeholder={t("home:enter_password")}
                     {...register("password", {
-                      required: t('home:password_is_required'),
+                      required: t("home:password_is_required"),
                     })}
                     className="border rounded-xl px-4 py-3 text-lg w-full focus:outline-verde"
                   />
@@ -223,7 +229,7 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
                 onClick={() => setIsForgotPassword(true)}
                 className="text-sm underline font-medium hover:text-red-700 transition text-left"
               >
-                {t('home:forgot_password')}
+                {t("home:forgot_password")}
               </button>
 
               {/* LOGIN BUTTON */}
@@ -231,7 +237,7 @@ export default function Login({ isOpen, onClose }: LoginModalProps) {
                 type="submit"
                 className="bg-red-700 hover:bg-red-800 transition text-white py-3 rounded-xl text-lg font-semibold"
               >
-                {t('home:login')}
+                {t("home:login")}
               </button>
             </form>
           )}
