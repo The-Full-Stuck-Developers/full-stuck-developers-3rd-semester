@@ -22,12 +22,14 @@ public class User
 
     public bool IsAdmin { get; set; }
 
+    [Column("expires_at")]
     public DateTime? ExpiresAt { get; set; }
     
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 
+    [Column("deleted_at")]
     public DateTime? DeletedAt { get; set; }
 
     public bool IsActive { get; set; }

@@ -118,23 +118,18 @@ public class GameService(
 
     public async Task<Game> GetOrCreateCurrentGameAsync()
     {
-        var currentGame = await gameRepository
+        var now = DateTime.UtcNow;
+
+        var game = await gameRepository
             .Query()
             .Include(g => g.Bets)
-            .FirstOrDefaultAsync(g => g.CanBet);
-
-        if (currentGame != null)
-            return currentGame;
-
-        var now = DateTime.UtcNow;
-        var nextGame = await gameRepository
-            .Query()
             .Where(g => g.WinningNumbers == null && g.BetDeadline > now)
             .OrderBy(g => g.StartTime)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(g => g.WinningNumbers == null && g.BetDeadline > now);
 
-        return nextGame ?? throw new InvalidOperationException("No future games available. Please seed more games.");
+        return game ?? throw new InvalidOperationException("No future games available. Please seed more games.");
     }
+
 
     public async Task<GameDto> UpdateWinningNumbers(Guid gameId, WinningNumbersDto winningNumbersDto)
     {

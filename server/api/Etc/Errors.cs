@@ -12,4 +12,5 @@ public class UnauthorizedError(string type) : AppError($"Operation not authorize
 
 public class ForbiddenError() : AppError("forbidden") { }
 
-public class AuthenticationError() : AppError("wrong_email_or_password") { }
+public class AuthenticationError(string message = "Wrong email or password")
+    : AppError(message) { }

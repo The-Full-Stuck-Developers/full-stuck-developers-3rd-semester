@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run",
+    "test:run": "vitest run --passWithNoTests",
     "graph": "npx depcruise src --include-only \"^src\" --output-type dot | dot -T svg > dependency-graph.svg",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "lint": "eslint src --ext .ts,.tsx"
@@ -44,6 +44,9 @@
     "ts-sieve-query-builder": "0.2.3"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.0.1",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
@@ -57,9 +60,12 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-unused-imports": "^4.3.0",
     "globals": "^16.5.0",
+    "happy-dom": "^20.0.11",
+    "jsdom": "^27.3.0",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.49.0",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^4.0.16"
   }
 }
