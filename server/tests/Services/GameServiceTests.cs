@@ -20,7 +20,7 @@ public class GameServiceTests
 
         return new MyDbContext(options);
     }
-
+    
     private static GameService CreateEfBackedService(MyDbContext db)
     {
         var repo = new Mock<IRepository<Game>>();
@@ -34,9 +34,17 @@ public class GameServiceTests
                 await db.SaveChangesAsync();
             });
 
+        repo.Setup(r => r.AddAsync(It.IsAny<Game>()))
+            .Returns<Game>(async g =>
+            {
+                await db.Set<Game>().AddAsync(g);
+                await db.SaveChangesAsync();
+            });
+
         return new GameService(repo.Object, Mock.Of<ISieveProcessor>());
     }
 
+    
     // -------------------------
     // Seed helpers
     // -------------------------
