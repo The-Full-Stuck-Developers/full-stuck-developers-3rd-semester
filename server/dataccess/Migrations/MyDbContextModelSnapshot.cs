@@ -66,7 +66,7 @@ namespace dataccess.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id")
-                        .HasName("bets_pkey");
+                        .HasName("Bet_pkey");
 
                     b.HasIndex("GameId");
 
@@ -75,7 +75,7 @@ namespace dataccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("bets", (string)null);
+                    b.ToTable("Bet", (string)null);
                 });
 
             modelBuilder.Entity("dataccess.Entities.User", b =>
@@ -271,7 +271,7 @@ namespace dataccess.Migrations
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("bets_game_id_fkey");
+                        .HasConstraintName("Bet_game_id_fkey");
 
                     b.HasOne("dataccess.Transaction", "Transaction")
                         .WithOne("Bet")
@@ -285,7 +285,7 @@ namespace dataccess.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("bets_user_id_fkey");
+                        .HasConstraintName("Bet_user_id_fkey");
 
                     b.Navigation("Game");
 

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Gamepad2, Edit2, Trash2, Copy, Plus } from "lucide-react";
+import getBetsClient from "@core/clients/betsClient.ts";
+import { toast } from "react-hot-toast";
 
 type Draft = {
   selected: number[];
@@ -8,6 +10,7 @@ type Draft = {
 };
 
 type SubmittedBoard = {
+  id: string;
   numbers: number[];
   fieldCount: 5 | 6 | 7 | 8;
   price: number;
@@ -18,6 +21,7 @@ type SubmittedBoard = {
 export function UserBoards() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [submittedBoards, setSubmittedBoards] = useState<SubmittedBoard[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Load draft
@@ -26,11 +30,31 @@ export function UserBoards() {
       setDraft(JSON.parse(draftData));
     }
 
-    // Load submitted boards
-    const boards = localStorage.getItem("deadPigeonBoards");
-    if (boards) {
-      setSubmittedBoards(JSON.parse(boards));
-    }
+    // Load submitted boards from API
+    const loadBoards = async () => {
+      try {
+        const client = getBetsClient();
+        const response = await client.getUserHistory(1, 100);
+        
+        const boards: SubmittedBoard[] = response.bets.map((bet) => ({
+          id: bet.id,
+          numbers: bet.numbers.split(",").map((n) => parseInt(n.trim(), 10)),
+          fieldCount: bet.count as 5 | 6 | 7 | 8,
+          price: bet.price,
+          repeatWeeks: 1, // This isn't stored in the bet history, defaulting to 1
+          submittedAt: bet.date,
+        }));
+        
+        setSubmittedBoards(boards);
+      } catch (error) {
+        console.error("Failed to load boards:", error);
+        // Don't show error toast for empty boards - it's normal for new users
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBoards();
   }, []);
 
   const clearDraft = () => {
@@ -101,11 +125,15 @@ export function UserBoards() {
       )}
 
       {/* SUBMITTED BOARDS */}
-      {submittedBoards.length > 0 ? (
+      {loading ? (
+        <div className="text-center py-20">
+          <p className="text-gray-400">Loading your boards...</p>
+        </div>
+      ) : submittedBoards.length > 0 ? (
         <div className="space-y-6">
           {submittedBoards.map((board, i) => (
             <div
-              key={i}
+              key={board.id}
               className="bg-gray-800 rounded-2xl p-6 border border-gray-700"
             >
               <div className="flex items-center justify-between mb-4">
@@ -116,18 +144,20 @@ export function UserBoards() {
                   <div>
                     <div className="font-bold text-lg">Board #{i + 1}</div>
                     <div className="text-sm text-gray-400">
-                      {board.fieldCount} numbers • {board.repeatWeeks} week
-                      {board.repeatWeeks > 1 && "s"} •{" "}
-                      {board.price * board.repeatWeeks} kr
+                      {board.fieldCount} numbers • {board.price} kr •{" "}
+                      {new Date(board.submittedAt).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="p-2 hover:bg-gray-700 rounded-lg">
+                  <button 
+                    className="p-2 hover:bg-gray-700 rounded-lg"
+                    onClick={() => {
+                      navigator.clipboard.writeText(board.numbers.join(", "));
+                      toast.success("Numbers copied to clipboard");
+                    }}
+                  >
                     <Copy className="w-5 h-5 text-gray-400" />
-                  </button>
-                  <button className="p-2 hover:bg-red-900/50 rounded-lg">
-                    <Trash2 className="w-5 h-5 text-red-400" />
                   </button>
                 </div>
               </div>

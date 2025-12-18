@@ -88,7 +88,7 @@ public partial class MyDbContext : DbContext
             entity.HasMany(u => u.Bets)
                 .WithOne(b => b.User)
                 .HasForeignKey(b => b.UserId)
-                .HasConstraintName("bets_user_id_fkey")
+                .HasConstraintName("Bet_user_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(u => u.Transactions)
@@ -146,6 +146,16 @@ public partial class MyDbContext : DbContext
                 .HasForeignKey(b => b.GameId)
                 .HasConstraintName("bets_game_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
+    entity.Property(e => e.WinningNumbers)
+        .HasColumnName("winning_numbers")
+        .HasMaxLength(64); 
+    
+    entity.HasMany(g => g.Bets)
+        .WithOne(b => b.Game)
+        .HasForeignKey(b => b.GameId)
+        .HasConstraintName("Bet_game_id_fkey")
+        .OnDelete(DeleteBehavior.Cascade);
+    
         });
 
         modelBuilder.HasPostgresEnum<TransactionStatus>();
@@ -201,9 +211,9 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Bet>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("bets_pkey");
+            entity.HasKey(e => e.Id).HasName("Bet_pkey");
 
-            entity.ToTable("bets");
+            entity.ToTable("Bet");
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
@@ -238,13 +248,13 @@ public partial class MyDbContext : DbContext
             entity.HasOne(e => e.User)
                 .WithMany(u => u.Bets)
                 .HasForeignKey(e => e.UserId)
-                .HasConstraintName("bets_user_id_fkey")
+                .HasConstraintName("Bet_user_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(e => e.Game)
                 .WithMany(g => g.Bets)
                 .HasForeignKey(e => e.GameId)
-                .HasConstraintName("bets_game_id_fkey")
+                .HasConstraintName("Bet_game_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(b => b.Transaction)

@@ -103,9 +103,9 @@ export function PlayerDashboard() {
                   <div className="font-medium truncate">
                     {user?.name ?? "Loading..."}
                   </div>
-                  <div className="text-xs text-gray-400 truncate">
-                    {user?.email ?? ""}
-                  </div>
+                  {/*<div className="text-xs text-gray-400 truncate">*/}
+                  {/*  {user?.email ?? ""}*/}
+                  {/*</div>*/}
                 </div>
 
                 <button className="p-2 hover:bg-gray-600 rounded-lg transition">

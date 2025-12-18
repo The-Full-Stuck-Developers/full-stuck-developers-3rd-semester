@@ -1,9 +1,50 @@
+import { useState, useEffect } from "react";
 import { Gamepad2, DollarSign, Clock, TrendingUp, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../../hooks/auth.tsx"; // Import the hook to get user data
+import { useAuth } from "../../../hooks/auth.tsx";
+import getTransactionsClient from "@core/clients/transactionClient.ts";
+import getBetsClient from "@core/clients/betsClient.ts";
 
 export function DashboardOverview() {
-  const { user } = useAuth(); // Get the logged-in user from the hook
+  const { user } = useAuth();
+  const [balance, setBalance] = useState<number | null>(null);
+  const [activeBoards, setActiveBoards] = useState<number>(0);
+  const [totalDeposits, setTotalDeposits] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      if (!user?.id) return;
+
+      try {
+        const transactionsClient = getTransactionsClient();
+        const betsClient = getBetsClient();
+
+        // Fetch balance
+        const userBalance = await transactionsClient.getUserBalance(user.id);
+        setBalance(userBalance);
+
+        // Fetch total deposits
+        const deposits = await transactionsClient.getUserDepositTotal(user.id);
+        setTotalDeposits(deposits);
+
+        // Fetch boards count
+        const betsResponse = await betsClient.getUserHistory(1, 100);
+        setActiveBoards(betsResponse.totalCount);
+      } catch (error) {
+        console.error("Failed to load dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [user?.id]);
+
+  const formatCurrency = (amount: number | null) => {
+    if (amount === null) return "...";
+    return `${amount.toLocaleString("da-DK")} kr`;
+  };
 
   return (
     <>
@@ -13,68 +54,74 @@ export function DashboardOverview() {
             Welcome back, {user?.name ?? "Loading..."}!
           </h1>
           <p className="text-xl text-gray-400">
-            Week 24 ends in{" "}
-            <span className="text-red-400 font-bold">3 days</span>
+            Ready to play?
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {[
-          {
-            value: "3",
-            title: "Active Boards",
-            subtitle: "Week 24",
-            icon: Gamepad2,
-            color: "blue",
-          },
-          {
-            value: "285,00 kr.",
-            title: "Balance",
-            subtitle: "Available",
-            icon: DollarSign,
-            color: "green",
-          },
-          {
-            value: "2",
-            title: "Pending",
-            subtitle: "Deposits & boards",
-            icon: Clock,
-            color: "yellow",
-          },
-          {
-            value: "2.150,00 kr.",
-            title: "Total Won",
-            subtitle: "This season",
-            icon: TrendingUp,
-            color: "purple",
-          },
-        ].map((stat, i) => (
-          <div
-            key={i}
-            className="bg-gray-800 rounded-2xl p-6 border border-gray-700"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="text-4xl font-bold">{stat.value}</div>
-              <div className={`p-3 rounded-xl bg-${stat.color}-900/30`}>
-                <stat.icon className={`w-6 h-6 text-${stat.color}-400`} />
-              </div>
+        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-4xl font-bold">
+              {loading ? "..." : activeBoards}
             </div>
-            <p className="text-sm text-gray-400">{stat.title}</p>
-            <p className="text-xs text-gray-500 mt-1">{stat.subtitle}</p>
+            <div className="p-3 rounded-xl bg-blue-900/30">
+              <Gamepad2 className="w-6 h-6 text-blue-400" />
+            </div>
           </div>
-        ))}
+          <p className="text-sm text-gray-400">Active Boards</p>
+          <p className="text-xs text-gray-500 mt-1">Total bets placed</p>
+        </div>
+
+        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-4xl font-bold">
+              {loading ? "..." : formatCurrency(balance)}
+            </div>
+            <div className="p-3 rounded-xl bg-green-900/30">
+              <DollarSign className="w-6 h-6 text-green-400" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-400">Balance</p>
+          <p className="text-xs text-gray-500 mt-1">Available</p>
+        </div>
+
+        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-4xl font-bold">
+              {loading ? "..." : formatCurrency(totalDeposits)}
+            </div>
+            <div className="p-3 rounded-xl bg-yellow-900/30">
+              <Clock className="w-6 h-6 text-yellow-400" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-400">Total Deposits</p>
+          <p className="text-xs text-gray-500 mt-1">All time</p>
+        </div>
+
+        <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+          <div className="flex items-start justify-between mb-4">
+            <div className="text-4xl font-bold">
+              {loading ? "..." : "0 kr"}
+            </div>
+            <div className="p-3 rounded-xl bg-purple-900/30">
+              <TrendingUp className="w-6 h-6 text-purple-400" />
+            </div>
+          </div>
+          <p className="text-sm text-gray-400">Total Won</p>
+          <p className="text-xs text-gray-500 mt-1">This season</p>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8">
         <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
-          <h2 className="text-2xl font-bold mb-6">Current Game – Week 24</h2>
+          <h2 className="text-2xl font-bold mb-6">Current Game</h2>
           <div className="text-center mb-8">
             <div className="inline-block p-6 bg-red-900/20 rounded-full mb-4">
               <Gamepad2 className="w-12 h-12 text-red-400" />
             </div>
-            <div className="text-3xl font-black">2.850,00 kr. Pot</div>
-            <p className="text-gray-400">Ends Saturday 17:00</p>
+            <div className="text-3xl font-black">Place Your Bet</div>
+            <p className="text-gray-400">Pick 5-8 numbers to play</p>
           </div>
           <Link
             to="/game/current"
@@ -101,7 +148,7 @@ export function DashboardOverview() {
             >
               <div className="font-semibold">Manage Boards</div>
               <div className="text-sm text-gray-400">
-                Repeat or cancel subscriptions
+                View your submitted boards
               </div>
             </Link>
           </div>

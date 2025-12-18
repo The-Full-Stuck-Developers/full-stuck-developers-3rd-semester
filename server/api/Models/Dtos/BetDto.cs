@@ -1,7 +1,6 @@
 namespace Dtos;
 
-public record PlaceBetRequest(List<int> Numbers);
-
+public record BoardDto(List<int> Numbers);
 
 public record PlaceBetResponse(
     bool Success,
@@ -21,7 +20,6 @@ public record BetHistoryDto(
     DateTime Date
 );
 
-// for admin
 public record BetHistoryResponse(
     IReadOnlyList<BetHistoryDto> Bets,
     int TotalCount,
@@ -29,10 +27,9 @@ public record BetHistoryResponse(
     int PageSize
 );
 
-public record CurrentGameDto(
-    Guid Id,
-    bool IsActive,
-    DateTime? StartTime,
-    int Revenue,
-    string? WinningNumbers = null
+public record CreateBetDto(
+    List<int> Numbers,
+    int Count,
+    int Price,
+    int RepeatWeeks = 1
 );

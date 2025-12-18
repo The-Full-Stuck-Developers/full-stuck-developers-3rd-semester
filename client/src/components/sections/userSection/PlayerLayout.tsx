@@ -12,7 +12,8 @@ import {
   LogOut,
 } from "lucide-react";
 import Logo from "../../../jerneif-logo.png";
-import { useAuth } from "../../../hooks/auth.tsx"; // ✅ add
+import { useAuth } from "../../../hooks/auth.tsx";
+import { Toaster } from "react-hot-toast";
 
 export function PlayerLayout() {
   const { user, logout } = useAuth(); // ✅ add
@@ -38,6 +39,10 @@ export function PlayerLayout() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
+      <Toaster
+        position="top-center"
+        toastOptions={{ style: { background: "#1f2937", color: "#fff" } }}
+      />
       {/* Mobile  */}
       {sidebarOpen && (
         <div

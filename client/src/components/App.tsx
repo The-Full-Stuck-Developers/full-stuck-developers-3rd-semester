@@ -1,6 +1,5 @@
 import { Home } from "@components/Home.tsx";
 import { Routes, Route, Navigate } from "react-router-dom";
-import UserDashboard from "@components/sections/userSection/UserDashboard.tsx";
 import { UserBoards } from "@components/sections/userSection/UserBoards.tsx";
 import { GameBoard } from "@components/sections/userSection/GameBoard.tsx";
 import UsersList from "@components/admin/UsersList.tsx";
@@ -48,11 +47,6 @@ function App() {
       </Route>
 
       <Route element={<UserProtectedRoute />}>
-        <Route path="/user/dashboard" element={<UserDashboard />} />
-        <Route path="/user/my-boards" element={<UserBoards />} />
-
-        <Route path="/game/current" element={<GameBoard />} />
-
         <Route element={<PlayerLayout />}>
           <Route path="/player/dashboard" element={<DashboardOverview />} />
           <Route path="/player/boards" element={<UserBoards />} />
