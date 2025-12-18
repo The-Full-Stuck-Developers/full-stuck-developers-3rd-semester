@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import getBetsClient from "@core/clients/betsClient.ts";
+import { useTranslation } from "react-i18next";
 
 const MAX_SELECTION = 8;
 const COST_MAP: Record<number, number> = {
@@ -24,13 +25,13 @@ interface PlaceBetResponse {
 }
 
 export function GameBoard() {
+  const { t } = useTranslation("player");
   const [selected, setSelected] = useState<number[]>([]);
   const [repeatWeeks, setRepeatWeeks] = useState(1);
   const navigate = useNavigate();
 
   const DRAFT_KEY = "deadPigeonDraft";
 
-  // Load draft (silently - no toast)
   useEffect(() => {
     const draft = localStorage.getItem(DRAFT_KEY);
     if (draft) {
@@ -46,7 +47,6 @@ export function GameBoard() {
     }
   }, []);
 
-  // Auto save
   useEffect(() => {
     if (selected.length === 0) {
       localStorage.removeItem(DRAFT_KEY);
@@ -65,7 +65,7 @@ export function GameBoard() {
     if (selected.includes(num)) {
       setSelected((prev) => prev.filter((x) => x !== num));
     } else if (selected.length >= MAX_SELECTION) {
-      toast.error(`Maximum is ${MAX_SELECTION}!`);
+      toast.error(t("maximum_selection", { max: MAX_SELECTION }));
     } else {
       setSelected((prev) => [...prev, num].sort((a, b) => a - b));
     }
@@ -76,6 +76,11 @@ export function GameBoard() {
 
   const submitBoard = async () => {
     if (!isNextButtonEnabled) return;
+
+    const totalCost = cost * repeatWeeks;
+    if (!confirm(t("submit_board_confirm", { cost: totalCost }))) {
+      return;
+    }
 
     const payload = {
       numbers: selected,
@@ -88,15 +93,13 @@ export function GameBoard() {
       const client = getBetsClient();
       const result = await client.placeBet(payload);
 
-      // Check if result exists and has success property
       if (result && !result.success) {
-        toast.error(result.message || "Not enough money. Top up your account");
+        toast.error(result.message || t("not_enough_money"));
         return;
       }
 
       if (result && result.success) {
         toast.success(result.message);
-        // Clear
         localStorage.removeItem(DRAFT_KEY);
         setSelected([]);
         setRepeatWeeks(1);
@@ -104,8 +107,7 @@ export function GameBoard() {
       }
     } catch (err: any) {
       console.error("Error placing bet:", err);
-      // Try to extract message from error response
-      let errorMessage = "Failed to submit board. Please try again.";
+      let errorMessage = t("not_enough_money");
       if (err?.response) {
         try {
           const errorData =
@@ -124,11 +126,11 @@ export function GameBoard() {
   };
 
   const clearDraft = () => {
-    if (confirm("Are you sure you want to clear your board?")) {
+    if (confirm(t("clear_board_confirm"))) {
       setSelected([]);
       setRepeatWeeks(1);
       localStorage.removeItem(DRAFT_KEY);
-      toast("Draft cleared");
+      toast(t("draft_cleared"));
     }
   };
 
@@ -140,12 +142,12 @@ export function GameBoard() {
           className="flex items-center gap-3 text-white hover:text-red-400 transition"
         >
           <ArrowLeft className="w-6 h-6" />
-          <span className="font-bold">Back to My Boards</span>
+          <span className="font-bold">{t("back_to_my_boards")}</span>
         </Link>
       </div>
 
       <h1 className="text-center text-4xl font-black mb-8 text-white">
-        Pick Your Numbers
+        {t("pick_your_numbers")}
       </h1>
 
       <div className="gameboard-grid">
@@ -175,18 +177,18 @@ export function GameBoard() {
 
       <div className="mt-8 space-y-6">
         <div className="gameboard-pris text-center">
-          Price:{" "}
+          {t("price")}:{" "}
           <strong className="text-3xl text-red-400">
             {cost * repeatWeeks} kr
           </strong>
           {selected.length > 0 &&
-            ` (${selected.length} numbers × ${repeatWeeks} week${repeatWeeks > 1 ? "s" : ""})`}
+            ` (${selected.length} ${t("numbers")} × ${repeatWeeks} ${repeatWeeks > 1 ? t("weeks") : t("week")})`}
         </div>
 
         <div className="max-w-xs mx-auto">
           <label className="block text-sm text-gray-400 mb-2 text-center">
-            Repeat for <strong>{repeatWeeks}</strong> week
-            {repeatWeeks > 1 && "s"}
+            {t("repeat_for")} <strong>{repeatWeeks}</strong>{" "}
+            {repeatWeeks > 1 ? t("weeks") : t("week")}
           </label>
           <input
             type="range"
@@ -197,8 +199,8 @@ export function GameBoard() {
             className="w-full h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>1 week</span>
-            <span>20 weeks</span>
+            <span>1 {t("week")}</span>
+            <span>20 {t("weeks")}</span>
           </div>
         </div>
       </div>
@@ -211,9 +213,11 @@ export function GameBoard() {
           onClick={submitBoard}
         >
           {isNextButtonEnabled ? (
-            <>Submit Board ({cost * repeatWeeks} kr)</>
+            <>
+              {t("submit_board")} ({cost * repeatWeeks} kr)
+            </>
           ) : (
-            "Pick at least 5 numbers"
+            t("pick_at_least_5")
           )}
         </button>
 
@@ -222,13 +226,11 @@ export function GameBoard() {
             onClick={clearDraft}
             className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl font-bold transition"
           >
-            Clear Board
+            {t("clear_board")}
           </button>
         )}
 
-        <p className="text-center text-sm text-gray-400">
-          Your board is <strong>automatically saved</strong> as you play
-        </p>
+        <p className="text-center text-sm text-gray-400">{t("auto_saved")}</p>
       </div>
     </div>
   );

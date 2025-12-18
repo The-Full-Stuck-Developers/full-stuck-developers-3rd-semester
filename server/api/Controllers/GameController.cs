@@ -56,6 +56,22 @@ public class GamesController(
         return Ok(game);
     }
 
+    [HttpGet("player/current")]
+    [Authorize]
+    public async Task<ActionResult<GameDto>> GetCurrentGameForPlayer()
+    {
+        try
+        {
+            var game = await gameService.GetCurrentGame();
+            return Ok(game);
+        }
+        catch (KeyNotFoundException)
+        {
+            // No current game exists yet
+            return NotFound();
+        }
+    }
+
     [HttpPatch("{id:guid}/UpdateWinningNumbers")]
     [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<GameDto>> UpdateWinningNumbers(Guid id,

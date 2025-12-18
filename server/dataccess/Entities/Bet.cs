@@ -22,4 +22,7 @@ public class Bet
     
     [Column("deleted_at")]
     public DateTime? DeletedAt { get; set; }
+    
+    [Column("bet_series_id")]
+    public Guid? BetSeriesId { get; set; }
 }

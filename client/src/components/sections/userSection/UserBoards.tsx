@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Gamepad2, Edit2, Trash2, Plus } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Gamepad2, Trash2, Plus, FileEdit } from "lucide-react";
 import getBetsClient from "@core/clients/betsClient.ts";
 import { toast } from "react-hot-toast";
 import Pagination from "../../Pagination";
+import { useTranslation } from "react-i18next";
 
 type Draft = {
   selected: number[];
@@ -17,9 +18,17 @@ type SubmittedBoard = {
   price: number;
   repeatWeeks: number;
   submittedAt: string;
+  betSeriesId?: string | null;
+  seriesTotal?: number | null;
+  seriesIndex?: number | null;
+  gameWeek?: number | null;
+  gameYear?: number | null;
+  gameStartTime?: string | null;
 };
 
 export function UserBoards() {
+  const { t } = useTranslation("player");
+  const location = useLocation();
   const [draft, setDraft] = useState<Draft | null>(null);
   const [submittedBoards, setSubmittedBoards] = useState<SubmittedBoard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,41 +36,46 @@ export function UserBoards() {
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 3;
 
+  const loadBoards = async () => {
+    try {
+      setLoading(true);
+      const client = getBetsClient();
+      const response = await client.getUserActiveBoards(currentPage, pageSize);
+
+      const boards: SubmittedBoard[] = response.bets.map((bet: any) => ({
+        id: bet.id,
+        numbers: bet.numbers
+          .split(",")
+          .map((n: string) => parseInt(n.trim(), 10)),
+        fieldCount: bet.count as 5 | 6 | 7 | 8,
+        price: bet.price,
+        repeatWeeks: bet.seriesTotal || 1,
+        submittedAt: bet.date,
+        betSeriesId: bet.betSeriesId,
+        seriesTotal: bet.seriesTotal,
+        seriesIndex: bet.seriesIndex,
+        gameWeek: bet.gameWeek,
+        gameYear: bet.gameYear,
+        gameStartTime: bet.gameStartTime,
+      }));
+
+      setSubmittedBoards(boards);
+      setTotalCount(response.totalCount);
+    } catch (error) {
+      console.error("Failed to load boards:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    // Load draft
     const draftData = localStorage.getItem("deadPigeonDraft");
     if (draftData) {
       setDraft(JSON.parse(draftData));
     }
 
-    // Load submitted boards from API
-    const loadBoards = async () => {
-      try {
-        setLoading(true);
-        const client = getBetsClient();
-        const response = await client.getUserHistory(currentPage, pageSize);
-
-        const boards: SubmittedBoard[] = response.bets.map((bet) => ({
-          id: bet.id,
-          numbers: bet.numbers.split(",").map((n) => parseInt(n.trim(), 10)),
-          fieldCount: bet.count as 5 | 6 | 7 | 8,
-          price: bet.price,
-          repeatWeeks: 1, // This isn't stored in the bet history, defaulting to 1
-          submittedAt: bet.date,
-        }));
-
-        setSubmittedBoards(boards);
-        setTotalCount(response.totalCount);
-      } catch (error) {
-        console.error("Failed to load boards:", error);
-        // Don't show error toast for empty boards - it's normal for new users
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadBoards();
-  }, [currentPage]);
+  }, [currentPage, location.pathname]);
 
   const clearDraft = () => {
     localStorage.removeItem("deadPigeonDraft");
@@ -69,11 +83,7 @@ export function UserBoards() {
   };
 
   const handleDeleteBoard = async (boardId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this board? The money will be refunded to your account.",
-      )
-    ) {
+    if (!confirm(t("delete_board_confirm"))) {
       return;
     }
 
@@ -81,25 +91,9 @@ export function UserBoards() {
       const client = getBetsClient();
       await client.deleteBet(boardId);
 
-      toast.success(
-        "Board deleted successfully. Money has been refunded to your account.",
-      );
+      toast.success(t("board_deleted"));
 
-      // Reload boards
-      const historyResponse = await client.getUserHistory(
-        currentPage,
-        pageSize,
-      );
-      const boards: SubmittedBoard[] = historyResponse.bets.map((bet) => ({
-        id: bet.id,
-        numbers: bet.numbers.split(",").map((n) => parseInt(n.trim(), 10)),
-        fieldCount: bet.count as 5 | 6 | 7 | 8,
-        price: bet.price,
-        repeatWeeks: 1,
-        submittedAt: bet.date,
-      }));
-      setSubmittedBoards(boards);
-      setTotalCount(historyResponse.totalCount);
+      await loadBoards();
     } catch (error: any) {
       console.error("Error deleting board:", error);
       const errorMessage =
@@ -114,18 +108,17 @@ export function UserBoards() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-black bg-gradient-to-r from-white to-red-400 bg-clip-text text-transparent">
-          My Boards
+          {t("my_boards")}
         </h1>
         <Link
           to="/game/current"
           className="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-xl font-bold flex items-center gap-2 transition"
         >
           <Plus className="w-5 h-5" />
-          New Board
+          {t("new_board")}
         </Link>
       </div>
 
-      {/* DRAFT BOARD – appears first */}
       {draft && (
         <Link
           to="/game/current"
@@ -134,15 +127,16 @@ export function UserBoards() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-yellow-900/40 rounded-xl">
-                <Edit2 className="w-7 h-7 text-yellow-400" />
+                <FileEdit className="w-7 h-7 text-yellow-400" />
               </div>
               <div>
                 <div className="font-bold text-xl text-yellow-300">
-                  Continue Your Board
+                  {t("continue_your_board")}
                 </div>
                 <div className="text-sm text-gray-300">
-                  {draft.selected.length} numbers selected • {draft.repeatWeeks}{" "}
-                  week{draft.repeatWeeks > 1 && "s"}
+                  {t("numbers_selected", { count: draft.selected.length })} •{" "}
+                  {draft.repeatWeeks}{" "}
+                  {draft.repeatWeeks > 1 ? t("weeks") : t("week")}
                 </div>
               </div>
             </div>
@@ -172,10 +166,9 @@ export function UserBoards() {
         </Link>
       )}
 
-      {/* SUBMITTED BOARDS */}
       {loading ? (
         <div className="text-center py-20">
-          <p className="text-gray-400">Loading your boards...</p>
+          <p className="text-gray-400">{t("loading_boards")}</p>
         </div>
       ) : submittedBoards.length > 0 ? (
         <>
@@ -192,10 +185,35 @@ export function UserBoards() {
                     </div>
                     <div>
                       <div className="font-bold text-lg">
-                        {board.fieldCount} numbers • {board.price} kr
+                        {board.fieldCount} {t("numbers")} • {board.price} kr
+                        {board.seriesTotal &&
+                          board.seriesTotal > 1 &&
+                          board.seriesIndex && (
+                            <span className="ml-2 text-sm font-normal text-blue-400">
+                              ({t("week")} {board.seriesIndex} {t("of")}{" "}
+                              {board.seriesTotal})
+                            </span>
+                          )}
                       </div>
                       <div className="text-sm text-gray-400">
-                        {new Date(board.submittedAt).toLocaleDateString()}
+                        {board.gameWeek && board.gameYear ? (
+                          <>
+                            {t("week")} {board.gameWeek}, {board.gameYear}
+                            {board.gameStartTime && (
+                              <span className="ml-2">
+                                •{" "}
+                                {new Date(
+                                  board.gameStartTime,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          new Date(board.submittedAt).toLocaleDateString()
+                        )}
                       </div>
                     </div>
                   </div>
@@ -203,6 +221,7 @@ export function UserBoards() {
                     <button
                       className="p-2 hover:bg-red-900/50 rounded-lg transition"
                       onClick={() => handleDeleteBoard(board.id)}
+                      title={t("delete_board")}
                     >
                       <Trash2 className="w-5 h-5 text-red-400" />
                     </button>
@@ -238,12 +257,14 @@ export function UserBoards() {
       ) : !draft ? (
         <div className="text-center py-20">
           <Gamepad2 className="w-24 h-24 text-gray-600 mx-auto mb-6" />
-          <p className="text-2xl font-bold text-gray-400 mb-4">No boards yet</p>
+          <p className="text-2xl font-bold text-gray-400 mb-4">
+            {t("no_boards_yet")}
+          </p>
           <Link
             to="/game/current"
             className="inline-block px-10 py-5 bg-red-600 hover:bg-red-700 text-white font-black text-xl rounded-full"
           >
-            Play Now
+            {t("play_now")}
           </Link>
         </div>
       ) : null}

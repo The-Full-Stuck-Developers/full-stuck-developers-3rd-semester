@@ -251,6 +251,9 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.DeletedAt)
                 .HasColumnName("deleted_at");
 
+            entity.Property(e => e.BetSeriesId)
+                .HasColumnName("bet_series_id");
+
             entity.HasIndex(e => e.DeletedAt)
                 .HasFilter("\"deleted_at\" IS NULL")
                 .HasDatabaseName("bets_deleted_at_idx");

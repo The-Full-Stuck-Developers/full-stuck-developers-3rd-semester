@@ -203,6 +203,140 @@ export class BetsClient {
     }
     return Promise.resolve<FileResponse>(null as any);
   }
+
+  updateBet(id: string, dto: UpdateBetDto): Promise<FileResponse> {
+    let url_ = this.baseUrl + "/api/Bets/{id}";
+    if (id === undefined || id === null)
+      throw new globalThis.Error("The parameter 'id' must be defined.");
+    url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    url_ = url_.replace(/[?&]$/, "");
+
+    const content_ = JSON.stringify(dto);
+
+    let options_: RequestInit = {
+      body: content_,
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/octet-stream",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processUpdateBet(_response);
+    });
+  }
+
+  protected processUpdateBet(response: Response): Promise<FileResponse> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200 || status === 206) {
+      const contentDisposition = response.headers
+        ? response.headers.get("content-disposition")
+        : undefined;
+      let fileNameMatch = contentDisposition
+        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
+            contentDisposition,
+          )
+        : undefined;
+      let fileName =
+        fileNameMatch && fileNameMatch.length > 1
+          ? fileNameMatch[3] || fileNameMatch[2]
+          : undefined;
+      if (fileName) {
+        fileName = decodeURIComponent(fileName);
+      } else {
+        fileNameMatch = contentDisposition
+          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
+          : undefined;
+        fileName =
+          fileNameMatch && fileNameMatch.length > 1
+            ? fileNameMatch[1]
+            : undefined;
+      }
+      return response.blob().then((blob) => {
+        return {
+          fileName: fileName,
+          data: blob,
+          status: status,
+          headers: _headers,
+        };
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<FileResponse>(null as any);
+  }
+
+  getUserActiveBoards(
+    page: number | undefined,
+    pageSize: number | undefined,
+  ): Promise<BetHistoryResponse> {
+    let url_ = this.baseUrl + "/api/Bets/player/active?";
+    if (page === null)
+      throw new globalThis.Error("The parameter 'page' cannot be null.");
+    else if (page !== undefined)
+      url_ += "page=" + encodeURIComponent("" + page) + "&";
+    if (pageSize === null)
+      throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+    else if (pageSize !== undefined)
+      url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: RequestInit = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processGetUserActiveBoards(_response);
+    });
+  }
+
+  protected processGetUserActiveBoards(
+    response: Response,
+  ): Promise<BetHistoryResponse> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        result200 =
+          _responseText === ""
+            ? null
+            : (JSON.parse(
+                _responseText,
+                this.jsonParseReviver,
+              ) as BetHistoryResponse);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<BetHistoryResponse>(null as any);
+  }
 }
 
 export class AuthClient {
@@ -784,6 +918,52 @@ export class GamesClient {
   }
 
   protected processGetCurrentGame(response: Response): Promise<GameDto> {
+    const status = response.status;
+    let _headers: any = {};
+    if (response.headers && response.headers.forEach) {
+      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    }
+    if (status === 200) {
+      return response.text().then((_responseText) => {
+        let result200: any = null;
+        result200 =
+          _responseText === ""
+            ? null
+            : (JSON.parse(_responseText, this.jsonParseReviver) as GameDto);
+        return result200;
+      });
+    } else if (status !== 200 && status !== 204) {
+      return response.text().then((_responseText) => {
+        return throwException(
+          "An unexpected server error occurred.",
+          status,
+          _responseText,
+          _headers,
+        );
+      });
+    }
+    return Promise.resolve<GameDto>(null as any);
+  }
+
+  getCurrentGameForPlayer(): Promise<GameDto> {
+    let url_ = this.baseUrl + "/api/Games/player/current";
+    url_ = url_.replace(/[?&]$/, "");
+
+    let options_: RequestInit = {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+    };
+
+    return this.http.fetch(url_, options_).then((_response: Response) => {
+      return this.processGetCurrentGameForPlayer(_response);
+    });
+  }
+
+  protected processGetCurrentGameForPlayer(
+    response: Response,
+  ): Promise<GameDto> {
     const status = response.status;
     let _headers: any = {};
     if (response.headers && response.headers.forEach) {
@@ -2376,6 +2556,17 @@ export interface BetHistoryDto {
   count: number;
   price: number;
   date: string;
+  isWinning: boolean;
+  betSeriesId: string | undefined;
+  seriesTotal: number | undefined;
+  seriesIndex: number | undefined;
+  gameWeek: number | undefined;
+  gameYear: number | undefined;
+  gameStartTime: string | undefined;
+}
+
+export interface UpdateBetDto {
+  numbers: number[];
 }
 
 export interface LoginResponse {
@@ -2451,6 +2642,7 @@ export interface Bet {
   winnings: number;
   createdAt: string;
   deletedAt: string | undefined;
+  betSeriesId: string | undefined;
 }
 
 export interface User {
