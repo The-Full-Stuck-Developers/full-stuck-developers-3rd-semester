@@ -6,18 +6,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace dataccess.Migrations
 {
     /// <inheritdoc />
-<<<<<<<< HEAD:server/dataccess/Migrations/20251215195940_NewMigration123.cs
-    public partial class NewMigration123 : Migration
-========
-    public partial class Migration171220252 : Migration
->>>>>>>> dev:server/dataccess/Migrations/20251217205517_Migration17122025-2.cs
+    public partial class Migration18122025 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:transaction_status", "pending,accepted,rejected,cancelled")
-                .Annotation("Npgsql:Enum:transaction_type", "deposit,purchase");
+                .Annotation("Npgsql:Enum:transaction_type", "deposit,purchase,refund");
 
             migrationBuilder.CreateTable(
                 name: "games",
@@ -29,7 +25,9 @@ namespace dataccess.Migrations
                     start_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     bet_deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     draw_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    winning_numbers = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                    winning_numbers = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    in_person_winners = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    in_person_prize_pool = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -91,10 +89,11 @@ namespace dataccess.Migrations
                     game_id = table.Column<Guid>(type: "uuid", nullable: false),
                     transaction_id = table.Column<Guid>(type: "uuid", nullable: false),
                     selected_numbers = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: false),
-                    numbers_count = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<int>(type: "integer", nullable: false),
                     is_winning = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                    Winnings = table.Column<int>(type: "integer", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    bet_series_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -119,68 +118,12 @@ namespace dataccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-<<<<<<<< HEAD:server/dataccess/Migrations/20251215195940_NewMigration123.cs
-            migrationBuilder.CreateTable(
-                name: "subscriptions",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_by_admin_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    valid_from = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    valid_to = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    revoked_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    revoked_by_admin_id = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("subscriptions_pkey", x => x.id);
-                    table.ForeignKey(
-                        name: "subscriptions_created_by_admin_id_fkey",
-                        column: x => x.created_by_admin_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "subscriptions_revoked_by_admin_id_fkey",
-                        column: x => x.revoked_by_admin_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "subscriptions_user_id_fkey",
-                        column: x => x.user_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "bets_deleted_at_idx",
+                table: "bets",
+                column: "deleted_at",
+                filter: "\"deleted_at\" IS NULL");
 
-            migrationBuilder.CreateTable(
-                name: "transactions",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    amount = table.Column<int>(type: "integer", nullable: false),
-                    mobile_pay_transaction_number = table.Column<int>(type: "integer", nullable: false),
-                    status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("transactions_primary_key", x => x.id);
-                    table.ForeignKey(
-                        name: "transactions_user_id_users_id_foreign_key",
-                        column: x => x.user_id,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-========
->>>>>>>> dev:server/dataccess/Migrations/20251217205517_Migration17122025-2.cs
             migrationBuilder.CreateIndex(
                 name: "IX_bets_game_id",
                 table: "bets",
