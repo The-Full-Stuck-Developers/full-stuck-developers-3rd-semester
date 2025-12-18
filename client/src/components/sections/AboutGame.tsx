@@ -1,5 +1,5 @@
 import { Wallet, Grid, RefreshCw, Trophy } from "lucide-react";
-import {useTranslation} from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export function AboutGame() {
   const { t } = useTranslation();
@@ -9,10 +9,10 @@ export function AboutGame() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black text-[#0f2b5b] tracking-tighter uppercase">
-            {t('home:how_it_works')}
+            {t("home:how_it_works")}
           </h2>
           <p className="mt-4 text-xl sm:text-2xl text-gray-700 font-semibold max-w-3xl mx-auto">
-            {t('home:how_it_works_description')}
+            {t("home:how_it_works_description")}
           </p>
         </div>
 
@@ -26,10 +26,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              {t('home:add_balance')}
+              {t("home:add_balance")}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              {t('home:top_up_account')}
+              {t("home:top_up_account")}
             </p>
           </div>
 
@@ -42,10 +42,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              {t('home:pick_numbers')}
+              {t("home:pick_numbers")}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              {t('home:select_numbers_for_board')}
+              {t("home:select_numbers_for_board")}
             </p>
           </div>
 
@@ -58,10 +58,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              {t('home:play_weekly')}
+              {t("home:play_weekly")}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              {t('home:set_up_boards_or_play_weekly')}
+              {t("home:set_up_boards_or_play_weekly")}
             </p>
           </div>
 
@@ -74,10 +74,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              {t('home:win_prizes')}
+              {t("home:win_prizes")}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              {t('home:match_numbers_and_win')}
+              {t("home:match_numbers_and_win")}
             </p>
           </div>
         </div>
