@@ -36,6 +36,12 @@ public class BetsController : ControllerBase
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
             return Unauthorized();
 
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null || !user.IsActive)
+        {
+            return BadRequest(new PlaceBetResponse(false, "Your account is inactive. Please contact an administrator.", Guid.Empty, "", 0, 0, DateTime.UtcNow));
+        }
+
         int totalCost = dto.Price * dto.RepeatWeeks;
 
         int balance = await _transactionService.GetUserBalance(userId);
@@ -251,6 +257,13 @@ public class BetsController : ControllerBase
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out Guid userId))
             return Unauthorized();
+
+        // Check if user is active
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null || !user.IsActive)
+        {
+            return BadRequest(new { message = "Your account is inactive. Please contact an administrator." });
+        }
 
         var bet = await _db.Bets
             .Include(b => b.Transaction)
