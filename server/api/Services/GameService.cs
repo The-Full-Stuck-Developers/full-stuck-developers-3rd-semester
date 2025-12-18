@@ -29,6 +29,10 @@ public class GameService(
             .Where(g =>
                 g.Year > currentYear ||
                 (g.Year == currentYear && g.WeekNumber >= currentWeek))
+            .Include(g => g.Bets)
+            .ThenInclude(b => b.Transaction)
+            .Include(g => g.Bets)
+            .ThenInclude(b => b.User)
             .OrderBy(g => g.Year)
             .ThenBy(g => g.WeekNumber);
 
@@ -57,6 +61,10 @@ public class GameService(
             .Where(g =>
                 g.Year < currentYear ||
                 (g.Year == currentYear && g.WeekNumber < currentWeek))
+            .Include(g => g.Bets)
+            .ThenInclude(b => b.Transaction)
+            .Include(g => g.Bets)
+            .ThenInclude(b => b.User)
             .OrderByDescending(g => g.Year)
             .ThenByDescending(g => g.WeekNumber);
 
@@ -188,6 +196,7 @@ public class GameService(
         
         return newGame;
     }
+
 
     public async Task<GameDto> UpdateWinningNumbers(Guid gameId, WinningNumbersDto winningNumbersDto)
     {

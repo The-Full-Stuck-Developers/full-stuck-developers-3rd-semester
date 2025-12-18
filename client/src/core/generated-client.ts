@@ -2416,8 +2416,6 @@ export interface AuthUserInfo {
   id: string;
   name: string;
   isAdmin: boolean;
-  expiresAt: string | undefined;
-  deletedAt: string | undefined;
 }
 
 export interface PagedResultOfGameDto {

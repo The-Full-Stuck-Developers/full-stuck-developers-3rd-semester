@@ -168,12 +168,12 @@ export const SidebarLayout: React.FC = () => {
                   </div>
                 </div>
 
-                <Link
-                  to="/admin/my-profile"
-                  className="block px-4 py-2 text-white hover:bg-gray-700"
-                >
-                  {t("my_profile")}
-                </Link>
+                {/*<Link*/}
+                {/*  to="/admin/my-profile"*/}
+                {/*  className="block px-4 py-2 text-white hover:bg-gray-700"*/}
+                {/*>*/}
+                {/*  {t("my_profile")}*/}
+                {/*</Link>*/}
 
                 <button
                   onClick={() => {

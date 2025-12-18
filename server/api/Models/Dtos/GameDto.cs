@@ -17,6 +17,7 @@ public class GameDto
         IsDrawn = game.IsDrawn;
         CanBet = game.CanBet;
         Bets = game.Bets;
+        NumberOfPhysicalPlayers = game.NumberOfPhysicalPlayers;
     }
 
     public Guid Id { get; set; }

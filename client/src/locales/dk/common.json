@@ -46,5 +46,8 @@
   "user_balance": "Brugerens saldo",
   "user_deposit_total": "Brugerindskud total",
   "user_purchase_total": "Brugerkøb total",
-  "users": "Brugere"
+  "users": "Brugere",
+  "year": "År",
+  "week": "Uge",
+  "day": "Dag"
 }
