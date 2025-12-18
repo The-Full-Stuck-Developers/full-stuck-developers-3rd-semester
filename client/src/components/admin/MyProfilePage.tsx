@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
+//deprecated
 export default function MyProfilePage() {
   const navigate = useNavigate();
 

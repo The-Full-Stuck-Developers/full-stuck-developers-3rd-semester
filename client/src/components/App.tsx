@@ -38,7 +38,7 @@ function App() {
                     <Route path="upcoming-games" element={<UpcomingGamesList/>}/>
                     <Route path="past-games" element={<PastGamesList/>}/>
                     <Route path="game-details/:id" element={<GameDetails/>}/>
-                    <Route path="my-profile" element={<MyProfilePage/>}/>
+                    {/*<Route path="my-profile" element={<MyProfilePage/>}/>*/}
                     <Route path="transactions" element={<TransactionsList/>}/>
                     <Route
                         path="transactions/user/:userId"

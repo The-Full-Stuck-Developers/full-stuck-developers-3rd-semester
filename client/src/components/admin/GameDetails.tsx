@@ -51,10 +51,6 @@ export default function GameDetails() {
         }
     };
 
-    useEffect(() => {
-        fetchGame();
-    }, [])
-
     function getIsoWeekRange(year: number, week: number) {
         const jan4 = new Date(Date.UTC(year, 0, 4));
         const day = jan4.getUTCDay() || 7;
@@ -133,33 +129,58 @@ export default function GameDetails() {
     const handleCalculateWinnings = () => {
         const client = gameClient();
         const numberOfPhysicalPlayersDto: NumberOfPhysicalPlayersDto = {numberOfPhysicalPlayers: numberOfPhysicalPlayers};
+
         client.updateNumberOfPhysicalPlayers(game?.id!, numberOfPhysicalPlayersDto)
-            .then(res => console.log(res))
+            .then(res => {
+                fetchGame();
+            })
             .catch(res => console.log(res))
+            .finally(() => {
+                calculateWinningsPerPlayer();
+                handleCloseCalculateWinningsModal()
+            })
     }
 
     const calculateWinningsPerPlayer = () => {
+        const onlineWinningBets = game?.bets.filter((item) => item.isWinning).length ?? 0;
+        const totalWinningBets = onlineWinningBets + numberOfPhysicalPlayers;
 
+        const winningPool: number = game?.revenue! * 0.7;
+        console.log(game?.revenue);
+        const winningsPerPlayer = winningPool / totalWinningBets;
+        setWinningsPerPlayer(winningsPerPlayer);
     }
+
+    useEffect(() => {
+        fetchGame();
+    }, [])
+
+    useEffect(() => {
+        if (game) {
+            calculateWinningsPerPlayer();
+        }
+    }, [game, numberOfPhysicalPlayers])
 
     return (
         <div>
             <Toaster position="top-center"/>
             <div className={"flex flex-row items-center justify-between w-full pb-8"}>
                 <div className={"flex flex-col items-baseline"}>
-                    <p className={"text-white text-3xl mb-2 mx-0 p-0"}>{t("game:game_details")} - {t('week')} {game?.weekNumber} / {game?.year}</p>
+                    <p className={"text-white text-3xl mb-2 mx-0 p-0"}>{t('week')} {game?.weekNumber} / {game?.year}</p>
                     <p className="text-sm text-gray-400 mt-0 pt-0">{weekRange && `${format(weekRange.start)} – ${format(weekRange.end)}`}</p>
                 </div>
                 <div className={"flex flex-row items-center gap-4"}>
-                    <button
-                        onClick={handleOpenDrawGameWinnersModal}
-                        className={
-                            "flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer text-lg"
-                        }
-                    >
-                        <Trophy size={20} className={"me-2"}/>
-                        <span>{t("game:draw_winners")}</span>
-                    </button>
+                    {game?.drawDate == null ? (
+                        <button
+                            onClick={handleOpenDrawGameWinnersModal}
+                            className={
+                                "flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer text-lg"
+                            }
+                        >
+                            <Trophy size={20} className={"me-2"}/>
+                            <span>{t("game:draw_winners")}</span>
+                        </button>
+                    ) : (<span className={"text-white text-xl"}>{t('game:game_is_finished')}</span>)}
                 </div>
             </div>
 
@@ -175,19 +196,32 @@ export default function GameDetails() {
                                 <PartyPopper className="w-6 h-6 text-blue-400"/>
                             </div>
                         </div>
-                        {/*{game?.drawDate == null && (*/}
-                        <div>
-                            <button
-                                onClick={handleOpenUpdateGameWinningNumbersModal}
-                                className={"w-full mt-2 flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"}>
-                                {game?.winningNumbers == null ? t('game:pick_now') : t('game:update_numbers')}
-                            </button>
-                        </div>
-                        {/*)}*/}
+                        {game?.drawDate == null && (
+                            <div>
+                                <button
+                                    onClick={handleOpenUpdateGameWinningNumbersModal}
+                                    className={"w-full mt-2 flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer"}>
+                                    {game?.winningNumbers == null ? t('game:pick_now') : t('game:update_numbers')}
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <p className="text-sm mt-3 text-gray-400">{t("game:winning_numbers")}</p>
                 </div>
+                <div
+                    className="bg-gray-800 rounded-2xl p-5 border border-gray-700 flex flex-col items-baseline justify-between">
+                    <div className="flex items-start justify-between mb-4 w-full">
+                        <div className="text-4xl font-bold">
+                            {t('game:bets')}: {(game?.bets?.length ?? 0) + (game?.numberOfPhysicalPlayers ?? 0)}
+                        </div>
 
+                        <div className="p-3 rounded-xl bg-green-900/30">
+                            <Users className="w-6 h-6 text-green-400"/>
+                        </div>
+                    </div>
+                    <div>{t('game:online')}: {game?.bets.length} / {t('game:in_person')}: {game?.numberOfPhysicalPlayers}</div>
+                    <p className="text-sm mt-3 text-gray-400">{t("total_players")}</p>
+                </div>
                 <div
                     className="bg-gray-800 rounded-2xl p-5 border border-gray-700 flex flex-col items-baseline justify-between">
                     <div className={"w-full"}>
@@ -200,24 +234,9 @@ export default function GameDetails() {
                                 <Wallet className="w-6 h-6 text-purple-400"/>
                             </div>
                         </div>
-                        <div>Jerne IF: {game?.revenue * 0.3} dkk / Players: {game?.revenue * 0.7} dkk</div>
+                        <div>Jerne IF: {game?.revenue * 0.3} dkk / {t('game:players')}: {game?.revenue * 0.7} dkk</div>
                     </div>
                     <p className="text-sm text-gray-400 mt-3">{t("game:total_revenue")}</p>
-                </div>
-
-                <div
-                    className="bg-gray-800 rounded-2xl p-5 border border-gray-700 flex flex-col items-baseline justify-between">
-                    <div className="flex items-start justify-between mb-4 w-full">
-                        <div className="text-4xl font-bold">
-                            {t('game:bets')}: {(game?.bets?.length ?? 0) + (game?.numberOfPhysicalPlayers ?? 0)}
-                        </div>
-
-                        <div className="p-3 rounded-xl bg-green-900/30">
-                            <Users className="w-6 h-6 text-green-400"/>
-                        </div>
-                    </div>
-                    <div>{t('game:online')}: {game?.bets.length} / {t('game:in_person')}: {game?.numberOfPhysicalPlayers ?? 0}</div>
-                    <p className="text-sm mt-3 text-gray-400">{t("total_players")}</p>
                 </div>
 
                 <div
@@ -225,29 +244,30 @@ export default function GameDetails() {
                     <div className={"w-full"}>
                         <div className="flex items-start justify-between mb-4">
                             <div className="text-4xl font-bold">
-                                {10}
+                                {winningsPerPlayer.toFixed(2)}
                                 <span className={"text-base"}> dkk</span>
                             </div>
                             <div className="p-3 rounded-xl bg-blue-900/30">
                                 <Wallet className="w-6 h-6 text-blue-400"/>
                             </div>
                         </div>
-                        {/*{game?.drawDate == null && (*/}
-                        <div>
-                            <button
-                                onClick={handleOpenCalculateWinningsModal}
-                                className={
-                                    "w-full flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer text-lg"
-                                }
-                            >
-                                <span>{t("game:calculate_winnings")}</span>
-                            </button>
-                        </div>
-                        {/*)}*/}
+                        {game?.drawDate == null && (
+                            <div>
+                                <button
+                                    onClick={handleOpenCalculateWinningsModal}
+                                    className={
+                                        "w-full flex flex-row items-center justify-evenly px-3 py-1.5 rounded-lg bg-[#e30613] hover:bg-[#c20510] text-white shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer text-lg"
+                                    }
+                                >
+                                    <span>{t("game:calculate_winnings")}</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <p className="text-sm mt-3 text-gray-400">{t("game:winnings_per_player")}</p>
                 </div>
             </div>
+
 
             {game?.bets?.length ?? 0 > 0 ? (
                 <div>
@@ -275,7 +295,7 @@ export default function GameDetails() {
                                         "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
                                     }
                                 >
-                                    {t("selected_numbers")}
+                                    {t("game:selected_numbers")}
                                 </th>
 
                                 <th
@@ -283,14 +303,14 @@ export default function GameDetails() {
                                         "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
                                     }
                                 >
-                                    {t("price")}
+                                    {t("game:price")}
                                 </th>
                                 <th
                                     className={
                                         "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider rounded-tr-xl"
                                     }
                                 >
-                                    {t("win")}
+                                    {t("game:win")}
                                 </th>
                             </tr>
                             </thead>
@@ -423,7 +443,7 @@ export default function GameDetails() {
                         className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg w-full max-w-md p-6 text-white">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold">
-                                {t("game:draw_winners")}
+                                {t("game:calculate_winnings")}
                             </h2>
                             <button
                                 onClick={handleCloseCalculateWinningsModal}
@@ -432,13 +452,16 @@ export default function GameDetails() {
                                 <X size={24}/>
                             </button>
                         </div>
-                        <div className={"text-lg text-red-400 py-4"}>
+                        <div className={"text-lg  py-4"}>
+                            <label className={"text-white"}
+                                   htmlFor={"numberOfPhysicalPlayersInput"}>{t('game:number_of_physical_player_winners')}</label>
                             <input
+                                id={"numberOfPhysicalPlayersInput"}
                                 type="number"
-                                placeholder={t("game:number_of_physical_players")}
+                                placeholder={t("game:number_of_physical_player_winners")}
                                 value={numberOfPhysicalPlayers}
                                 required={true}
-                                onChange={(e) => setNumberOfPhysicalPlayers(e.target.value)}
+                                onChange={(e) => setNumberOfPhysicalPlayers(Number(e.target.value))}
                                 className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                             />
                         </div>
@@ -463,7 +486,6 @@ export default function GameDetails() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

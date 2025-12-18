@@ -9,7 +9,7 @@ import Pagination from "../Pagination";
 import {
     CheckCheck,
     CircleSlash,
-    Mail,
+    Mail, SquareArrowOutUpRight,
     SquarePen,
     Trash2,
     Wallet,
@@ -107,7 +107,7 @@ export default function UpcomingGamesList() {
                                         "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
                                     }
                                 >
-                                    {t("revenue")}
+                                    {t("game:revenue")}
                                 </th>
                                 <th
                                     scope="col"
@@ -115,13 +115,23 @@ export default function UpcomingGamesList() {
                                         "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
                                     }
                                 >
-                                    {t("winning_numbers")}
+                                    {t("game:bets")}
+                                </th>
+                                <th
+                                    scope="col"
+                                    className={
+                                        "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                                    }
+                                >
+                                    {t("game:winning_numbers")}
                                 </th>
                                 <th
                                     className={
                                         "px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider rounded-tr-xl"
                                     }
-                                ></th>
+                                >
+                                    {t('details')}
+                                </th>
                             </tr>
                             </thead>
                             <tbody className={"divide-y divide-gray-700"}>
@@ -138,18 +148,20 @@ export default function UpcomingGamesList() {
                                             <span className="font-mono text-sm">{game.year}</span>
                                         </td>
 
-                                        <td className="px-3 py-3">{game.revenue}</td>
+                                        <td className="px-3 py-3">{game?.revenue}</td>
+
+                                        <td className="px-3 py-3">{game?.bets.length}</td>
 
                                         <td className="px-3 py-3">
                                             {game.winningNumbers ?? t("not_drawn_yet")}
                                         </td>
 
                                         <td>
-                                            <ActionMenu dropdown={true} actions={[
+                                            <ActionMenu dropdown={false} actions={[
                                                 {
-                                                    label: t("game_details"),
-                                                    color: "#d0d0d0",
-                                                    icon: <Wallet color="#d0d0d0"/>,
+                                                    label: t("game:game_details"),
+                                                    color: "#ffffff",
+                                                    icon: <SquareArrowOutUpRight color="#ffffff"/>,
                                                     onClick: () =>
                                                         navigate(
                                                             `/admin/game-details/${game.id}`,
