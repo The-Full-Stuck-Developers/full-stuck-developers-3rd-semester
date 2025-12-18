@@ -130,13 +130,17 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.DrawDate)
                 .HasColumnName("draw_date");
 
-
             entity.Property(e => e.WinningNumbers)
                 .HasColumnName("winning_numbers")
                 .HasMaxLength(64);
 
-            entity.Property(e=> e.NumberOfPhysicalPlayers)
-                .HasColumnName("number_of_physical_players")
+            entity.Property(e => e.InPersonWinners)
+                .HasColumnName("in_person_winners")
+                .HasDefaultValue(0)
+                .IsRequired();
+
+            entity.Property(e => e.InPersonPrizePool)
+                .HasColumnName("in_person_prize_pool")
                 .HasDefaultValue(0)
                 .IsRequired();
 
@@ -145,16 +149,16 @@ public partial class MyDbContext : DbContext
                 .HasForeignKey(b => b.GameId)
                 .HasConstraintName("bets_game_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
-    entity.Property(e => e.WinningNumbers)
-        .HasColumnName("winning_numbers")
-        .HasMaxLength(64); 
-    
-    entity.HasMany(g => g.Bets)
-        .WithOne(b => b.Game)
-        .HasForeignKey(b => b.GameId)
-        .HasConstraintName("Bet_game_id_fkey")
-        .OnDelete(DeleteBehavior.Cascade);
-    
+
+            entity.Property(e => e.WinningNumbers)
+                .HasColumnName("winning_numbers")
+                .HasMaxLength(64);
+
+            entity.HasMany(g => g.Bets)
+                .WithOne(b => b.Game)
+                .HasForeignKey(b => b.GameId)
+                .HasConstraintName("Bet_game_id_fkey")
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.HasPostgresEnum<TransactionStatus>();

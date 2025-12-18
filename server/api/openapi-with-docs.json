@@ -540,12 +540,12 @@
         }
       }
     },
-    "/api/Games/{id}/UpdateNumberOfPhysicalPlayers": {
+    "/api/Games/{id}/UpdateInPersonData": {
       "patch": {
         "tags": [
           "Games"
         ],
-        "operationId": "Games_UpdateNumberOfPhysicalPlayers",
+        "operationId": "Games_UpdateInPersonData",
         "parameters": [
           {
             "name": "id",
@@ -559,11 +559,11 @@
           }
         ],
         "requestBody": {
-          "x-name": "numberOfPhysicalPlayersDto",
+          "x-name": "dto",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NumberOfPhysicalPlayersDto"
+                "$ref": "#/components/schemas/InPersonDto"
               }
             }
           },
@@ -1310,7 +1310,7 @@
         }
       }
     },
-    "/api/Users/{id}/renew-membership": {
+    "/api/Users/{id}/RenewMembership": {
       "post": {
         "tags": [
           "Users"
@@ -1721,7 +1721,12 @@
               "$ref": "#/components/schemas/Bet"
             }
           },
-          "numberOfPhysicalPlayers": {
+          "inPersonWinners": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "inPersonPrizePool": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -1961,7 +1966,12 @@
           "canBet": {
             "type": "boolean"
           },
-          "numberOfPhysicalPlayers": {
+          "inPersonWinners": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "inPersonPrizePool": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -1982,14 +1992,21 @@
           }
         }
       },
-      "NumberOfPhysicalPlayersDto": {
+      "InPersonDto": {
         "type": "object",
         "additionalProperties": false,
+        "required": [
+          "inPersonWinners",
+          "inPersonPrizePool"
+        ],
         "properties": {
-          "numberOfPhysicalPlayers": {
+          "inPersonWinners": {
             "type": "integer",
-            "format": "int32",
-            "nullable": true
+            "format": "int32"
+          },
+          "inPersonPrizePool": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

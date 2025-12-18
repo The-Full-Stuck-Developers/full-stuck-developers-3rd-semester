@@ -912,17 +912,14 @@ export class GamesClient {
     return Promise.resolve<GameDto>(null as any);
   }
 
-  updateNumberOfPhysicalPlayers(
-    id: string,
-    numberOfPhysicalPlayersDto: NumberOfPhysicalPlayersDto,
-  ): Promise<GameDto> {
-    let url_ = this.baseUrl + "/api/Games/{id}/UpdateNumberOfPhysicalPlayers";
+  updateInPersonData(id: string, dto: InPersonDto): Promise<GameDto> {
+    let url_ = this.baseUrl + "/api/Games/{id}/UpdateInPersonData";
     if (id === undefined || id === null)
       throw new globalThis.Error("The parameter 'id' must be defined.");
     url_ = url_.replace("{id}", encodeURIComponent("" + id));
     url_ = url_.replace(/[?&]$/, "");
 
-    const content_ = JSON.stringify(numberOfPhysicalPlayersDto);
+    const content_ = JSON.stringify(dto);
 
     let options_: RequestInit = {
       body: content_,
@@ -934,13 +931,11 @@ export class GamesClient {
     };
 
     return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processUpdateNumberOfPhysicalPlayers(_response);
+      return this.processUpdateInPersonData(_response);
     });
   }
 
-  protected processUpdateNumberOfPhysicalPlayers(
-    response: Response,
-  ): Promise<GameDto> {
+  protected processUpdateInPersonData(response: Response): Promise<GameDto> {
     const status = response.status;
     let _headers: any = {};
     if (response.headers && response.headers.forEach) {
@@ -2166,7 +2161,7 @@ export class UsersClient {
   }
 
   renewMembership(id: string): Promise<UserDto> {
-    let url_ = this.baseUrl + "/api/Users/{id}/renew-membership";
+    let url_ = this.baseUrl + "/api/Users/{id}/RenewMembership";
     if (id === undefined || id === null)
       throw new globalThis.Error("The parameter 'id' must be defined.");
     url_ = url_.replace("{id}", encodeURIComponent("" + id));
@@ -2439,7 +2434,8 @@ export interface GameDto {
   isDrawn: boolean;
   canBet: boolean;
   bets: Bet[];
-  numberOfPhysicalPlayers: number | undefined;
+  inPersonWinners: number | undefined;
+  inPersonPrizePool: number | undefined;
 }
 
 export interface Bet {
@@ -2511,15 +2507,17 @@ export interface Game {
   bets: Bet[];
   isDrawn: boolean;
   canBet: boolean;
-  numberOfPhysicalPlayers: number | undefined;
+  inPersonWinners: number | undefined;
+  inPersonPrizePool: number | undefined;
 }
 
 export interface WinningNumbersDto {
   winningNumbers: string;
 }
 
-export interface NumberOfPhysicalPlayersDto {
-  numberOfPhysicalPlayers: number | undefined;
+export interface InPersonDto {
+  inPersonWinners: number;
+  inPersonPrizePool: number;
 }
 
 export interface PagedResultOfTransactionDto {

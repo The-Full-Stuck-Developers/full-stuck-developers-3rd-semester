@@ -88,7 +88,7 @@ public class UsersController(IUserService userService) : ControllerBase
         }
     }
 
-    [HttpPost("{id}/renew-membership")]
+    [HttpPost("{id}/RenewMembership")]
     [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<UserDto>> RenewMembership(Guid id)
     {

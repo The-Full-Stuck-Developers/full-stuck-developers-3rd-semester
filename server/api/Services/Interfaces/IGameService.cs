@@ -16,7 +16,7 @@ public interface IGameService
     Task<Game> GetOrCreateCurrentGameAsync();
     Task<GameDto> UpdateWinningNumbers(Guid gameId, WinningNumbersDto winningNumbers);
     Task<GameDto> DrawWinners(Guid id);
-    Task<GameDto> UpdateNumberOfPhysicalPlayers(Guid id, NumberOfPhysicalPlayersDto dto);
+    Task<GameDto> UpdateInPersonData(Guid id, InPersonDto dto);
     Task<List<Bet>> GetDigitalWinningBetsAsync(Guid gameId);
     Task<int> GetAllWinningBetsAsync(Guid gameId);
     Task SeedFutureGamesIfNeededAsync(int yearsAhead = 20);

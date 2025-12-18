@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const boards = [
   { numbers: 5, price: 20, popular: false },
@@ -9,6 +10,7 @@ const boards = [
 ];
 
 export function BoardsPricing() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSelectBoard = () => {
@@ -19,11 +21,11 @@ export function BoardsPricing() {
     <section id="pricing" className="w-full bg-gray-50 py-20 lg:py-24">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0f2b5b] tracking-tighter">
-            CHOOSE YOUR BOARD
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0f2b5b] tracking-tighter uppercase">
+            {t("home:choose_your_board")}
           </h2>
           <p className="mt-3 text-lg text-gray-700 font-medium">
-            The more numbers you pick — the bigger your chance to win
+            {t("home:more_numbers_bigger_chances")}
           </p>
         </div>
 
@@ -40,7 +42,7 @@ export function BoardsPricing() {
             >
               {board.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#e30613] text-white font-black text-xs px-5 py-1.5 rounded-full shadow-lg uppercase tracking-wider">
-                  Most Popular
+                  {t("home:most_popular")}
                 </div>
               )}
 
@@ -51,7 +53,7 @@ export function BoardsPricing() {
                   {board.numbers}
                 </div>
                 <p className="text-sm uppercase tracking-wider text-gray-600 font-bold mb-6">
-                  Numbers
+                  {t("home:numbers")}
                 </p>
 
                 <div className="mb-8">
@@ -66,15 +68,15 @@ export function BoardsPricing() {
                 <ul className="space-y-3 text-left text-gray-700 text-sm font-medium mb-8">
                   <li className="flex items-center gap-2">
                     <Check size={18} className="text-[#e30613]" />
-                    Pick from 1–16
+                    {t("home:from_1_to_16")}
                   </li>
                   <li className="flex items-center gap-2">
                     <Check size={18} className="text-[#e30613]" />
-                    Weekly drawings
+                    {t("home:weekly_drawings")}
                   </li>
                   <li className="flex items-center gap-2">
                     <Check size={18} className="text-[#e30613]" />
-                    Auto-repeat option
+                    {t("home:auto_repeat_option")}
                   </li>
                 </ul>
 
@@ -88,7 +90,7 @@ export function BoardsPricing() {
                                             : "bg-[#0f2b5b] hover:bg-[#0a1e3f] text-white"
                                         }`}
                 >
-                  Select Board
+                  {t("home:select_board")}
                 </button>
               </div>
             </div>
@@ -97,8 +99,8 @@ export function BoardsPricing() {
 
         <div className="text-center mt-12">
           <p className="text-lg font-semibold text-gray-700">
-            <span className="text-[#e30613]">70%</span> to prizes ·{" "}
-            <span className="text-[#0f2b5b]">30%</span> supports{" "}
+            <span className="text-[#e30613]">70%</span> {t("home:to_prizes")} ·{" "}
+            <span className="text-[#0f2b5b]">30%</span> {t("home:supports")}{" "}
             <span className="text-[#e30613]">Jerne IF</span>
           </p>
         </div>

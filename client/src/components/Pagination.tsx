@@ -37,7 +37,7 @@ const Pagination: React.FC<PaginationProps> = ({
   const handleNext = () => {
     if (currentPage < totalPages) onPageChange(currentPage + 1);
   };
-  console.log(currentPage, totalPages);
+
   return (
     <div className={"flex flex-row items-center justify-between w-full"}>
       <div className={"text-white"}>
