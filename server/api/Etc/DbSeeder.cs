@@ -202,6 +202,21 @@ public class DbSeeder(
         var types = Enum.GetValues<TransactionType>();
         int[] boardPrices = { 20, 40, 80, 160 };
 
+        for (int i = 0; i < 30; i++)
+        {
+            var transaction = new Transaction
+            {
+                UserId = users[random.Next(users.Count)].Id,
+                Amount = random.Next(500, 1500),
+                MobilePayTransactionNumber = random.Next(100000, 999999),
+                Status = TransactionStatus.Accepted,
+                Type = TransactionType.Deposit,
+                CreatedAt = DateTime.UtcNow.AddDays(-random.Next(0, 30))
+            };
+
+            context.Transactions.Add(transaction);
+        }
+
         for (int i = 0; i < count; i++)
         {
             var transaction = new Transaction

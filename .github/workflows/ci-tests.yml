@@ -2,9 +2,9 @@ name: CI Tests
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [ main, dev ]
   push:
-    branches: [main, dev]
+    branches: [ main, dev ]
 
 concurrency:
   group: ci-tests-${{ github.ref }}
@@ -24,8 +24,15 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: Clean
+        run: |
+          dotnet clean server/api/api.csproj
+          dotnet clean server/tests/tests.csproj
+          rm -rf server/api/bin server/api/obj
+          rm -rf server/tests/bin server/tests/obj
+
       - name: Restore
-        run: dotnet restore server/tests/tests.csproj
+        run: dotnet restore server/tests/tests.csproj --no-cache
 
       - name: Build
         run: dotnet build server/tests/tests.csproj -c Release --no-restore

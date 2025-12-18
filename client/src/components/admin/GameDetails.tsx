@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import {
   type GameDto,
-  type NumberOfPhysicalPlayersDto,
+  type InPersonDto,
   type WinningNumbersDto,
 } from "@core/generated-client.ts";
 import gameClient from "@core/clients/gameClient.ts";
@@ -33,8 +33,8 @@ export default function GameDetails() {
     useState(false);
   const [isCalculateWinningsModalOpen, setCalculateWinningsModalOpen] =
     useState(false);
-  const [numberOfPhysicalPlayers, setNumberOfPhysicalPlayers] =
-    useState<number>(0);
+  const [inPersonWinners, setInPersonWinners] = useState<number>(0);
+  const [inPersonPrizePool, setInPersonPrizePool] = useState<number>(0);
   const [winningsPerPlayer, setWinningsPerPlayer] = useState<number>(0);
 
   const fetchGame = () => {
@@ -44,7 +44,8 @@ export default function GameDetails() {
       .getGameById(id!)
       .then((res) => {
         setGame(res);
-        setNumberOfPhysicalPlayers(res.numberOfPhysicalPlayers!);
+        setInPersonWinners(res.inPersonWinners!);
+        setInPersonPrizePool(res.inPersonPrizePool!);
       })
       .catch((res) => toast.error("Something went wrong fetching the game"));
   };
@@ -111,7 +112,11 @@ export default function GameDetails() {
   };
 
   const handleOpenDrawGameWinnersModal = () => {
-    setDrawGameWinnersModalOpen(true);
+    if (game?.winningNumbers == null) {
+      toast.error(t("game:please_set_winning_numbers"));
+    } else {
+      setDrawGameWinnersModalOpen(true);
+    }
   };
 
   const handleCloseDrawGameWinnersModal = () => {
@@ -141,12 +146,13 @@ export default function GameDetails() {
 
   const handleCalculateWinnings = () => {
     const client = gameClient();
-    const numberOfPhysicalPlayersDto: NumberOfPhysicalPlayersDto = {
-      numberOfPhysicalPlayers: numberOfPhysicalPlayers,
+    const inPersonDto: InPersonDto = {
+      inPersonWinners: inPersonWinners,
+      inPersonPrizePool: 12,
     };
 
     client
-      .updateNumberOfPhysicalPlayers(game?.id!, numberOfPhysicalPlayersDto)
+      .updateInPersonData(game?.id!, inPersonDto)
       .then((res) => {
         fetchGame();
       })
@@ -160,12 +166,16 @@ export default function GameDetails() {
   const calculateWinningsPerPlayer = () => {
     const onlineWinningBets =
       game?.bets.filter((item) => item.isWinning).length ?? 0;
-    const totalWinningBets = onlineWinningBets + numberOfPhysicalPlayers;
+    const totalWinningBets = onlineWinningBets + inPersonWinners;
+    const totalWinningPrizePool: number =
+      game?.revenue! * 0.7 + game?.inPersonPrizePool!;
 
-    const winningPool: number = game?.revenue! * 0.7;
-    console.log(game?.revenue);
-    const winningsPerPlayer = winningPool / totalWinningBets;
-    setWinningsPerPlayer(winningsPerPlayer);
+    if (totalWinningBets === 0) {
+      setWinningsPerPlayer(0);
+    } else {
+      const winningsPerPlayer = totalWinningPrizePool / totalWinningBets;
+      setWinningsPerPlayer(winningsPerPlayer);
+    }
   };
 
   useEffect(() => {
@@ -176,7 +186,7 @@ export default function GameDetails() {
     if (game) {
       calculateWinningsPerPlayer();
     }
-  }, [game, numberOfPhysicalPlayers]);
+  }, [game, inPersonWinners]);
 
   return (
     <div>
@@ -244,7 +254,7 @@ export default function GameDetails() {
           <div className="flex items-start justify-between mb-4 w-full">
             <div className="text-4xl font-bold">
               {t("game:bets")}:{" "}
-              {(game?.bets?.length ?? 0) + (game?.numberOfPhysicalPlayers ?? 0)}
+              {(game?.bets?.length ?? 0) + (game?.inPersonWinners ?? 0)}
             </div>
 
             <div className="p-3 rounded-xl bg-green-900/30">
@@ -253,7 +263,7 @@ export default function GameDetails() {
           </div>
           <div>
             {t("game:online")}: {game?.bets.length} / {t("game:in_person")}:{" "}
-            {game?.numberOfPhysicalPlayers}
+            {game?.inPersonWinners}
           </div>
           <p className="text-sm mt-3 text-gray-400">{t("total_players")}</p>
         </div>
@@ -289,7 +299,7 @@ export default function GameDetails() {
                 <Wallet className="w-6 h-6 text-blue-400" />
               </div>
             </div>
-            {game?.drawDate == null && (
+            {game?.drawDate != null ? (
               <div>
                 <button
                   onClick={handleOpenCalculateWinningsModal}
@@ -300,6 +310,8 @@ export default function GameDetails() {
                   <span>{t("game:calculate_winnings")}</span>
                 </button>
               </div>
+            ) : (
+              <div>{t("game:you_can_calculate_after_drawing_winners")}</div>
             )}
           </div>
           <p className="text-sm mt-3 text-gray-400">
@@ -495,24 +507,41 @@ export default function GameDetails() {
                 <X size={24} />
               </button>
             </div>
-            <div className={"text-lg  py-4"}>
-              <label
-                className={"text-white"}
-                htmlFor={"numberOfPhysicalPlayersInput"}
-              >
-                {t("game:number_of_physical_player_winners")}
-              </label>
-              <input
-                id={"numberOfPhysicalPlayersInput"}
-                type="number"
-                placeholder={t("game:number_of_physical_player_winners")}
-                value={numberOfPhysicalPlayers}
-                required={true}
-                onChange={(e) =>
-                  setNumberOfPhysicalPlayers(Number(e.target.value))
-                }
-                className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              />
+            <div className={"text-lg py-4"}>
+              <div>
+                <label
+                  className={"text-white"}
+                  htmlFor={"inPersonWinnersInput"}
+                >
+                  {t("game:number_of_physical_player_winners")}
+                </label>
+                <input
+                  id={"inPersonWinnersInput"}
+                  type="number"
+                  placeholder={t("game:number_of_physical_player_winners")}
+                  value={inPersonWinners}
+                  required={true}
+                  onChange={(e) => setInPersonWinners(Number(e.target.value))}
+                  className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label
+                  className={"text-white"}
+                  htmlFor={"inPersonPrizePoolInput"}
+                >
+                  {t("game:in_person_prize_pool")}
+                </label>
+                <input
+                  id={"inPersonPrizePoolInput"}
+                  type="number"
+                  placeholder={t("game:in_person_prize_pool")}
+                  value={inPersonPrizePool}
+                  required={true}
+                  onChange={(e) => setInPersonPrizePool(Number(e.target.value))}
+                  className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+              </div>
             </div>
             <div>
               <div className="flex justify-between gap-3 mt-6">
