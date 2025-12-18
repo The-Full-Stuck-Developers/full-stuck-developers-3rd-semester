@@ -17,7 +17,8 @@ public class GameDto
         IsDrawn = game.IsDrawn;
         CanBet = game.CanBet;
         Bets = game.Bets;
-        NumberOfPhysicalPlayers = game.NumberOfPhysicalPlayers;
+        InPersonWinners = game.InPersonWinners;
+        InPersonPrizePool = game.InPersonPrizePool;
     }
 
     public Guid Id { get; set; }
@@ -35,5 +36,7 @@ public class GameDto
     public bool CanBet { get; set; }
     public ICollection<Bet> Bets { get; set; }
 
-    public int? NumberOfPhysicalPlayers { get; set; }
+    public int? InPersonWinners { get; set; }
+
+    public int? InPersonPrizePool { get; set; }
 }

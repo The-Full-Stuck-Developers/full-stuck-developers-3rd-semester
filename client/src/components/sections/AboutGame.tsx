@@ -1,15 +1,18 @@
 import { Wallet, Grid, RefreshCw, Trophy } from "lucide-react";
+import {useTranslation} from "react-i18next";
 
 export function AboutGame() {
+  const { t } = useTranslation();
+
   return (
     <section id="about" className="w-full bg-gray-50 py-24 lg:py-32">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black text-[#0f2b5b] tracking-tighter">
-            HOW IT WORKS
+          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black text-[#0f2b5b] tracking-tighter uppercase">
+            {t('home:how_it_works')}
           </h2>
           <p className="mt-4 text-xl sm:text-2xl text-gray-700 font-semibold max-w-3xl mx-auto">
-            Four simple steps to support Jerne IF and win prizes
+            {t('home:how_it_works_description')}
           </p>
         </div>
 
@@ -23,10 +26,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              Add Balance
+              {t('home:add_balance')}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Top up your account balance via MobilePay to get started
+              {t('home:top_up_account')}
             </p>
           </div>
 
@@ -39,10 +42,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              Pick Numbers
+              {t('home:pick_numbers')}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Select 5–8 numbers from 1–16 for your board
+              {t('home:select_numbers_for_board')}
             </p>
           </div>
 
@@ -55,10 +58,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              Play Weekly
+              {t('home:play_weekly')}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Set your boards to repeat or play week by week
+              {t('home:set_up_boards_or_play_weekly')}
             </p>
           </div>
 
@@ -71,10 +74,10 @@ export function AboutGame() {
               className="text-[#e30613] mx-auto mb-6 group-hover:scale-110 transition-transform"
             />
             <h3 className="text-2xl font-bold text-[#0f2b5b] mb-4">
-              Win Prizes
+              {t('home:win_prizes')}
             </h3>
             <p className="text-gray-600 leading-relaxed">
-              Match the 3 winning numbers and share in 70% of the pot
+              {t('home:match_numbers_and_win')}
             </p>
           </div>
         </div>

@@ -75,12 +75,12 @@ public class GamesController(
         return Ok(game);
     }
 
-    [HttpPatch("{id:guid}/UpdateNumberOfPhysicalPlayers")]
+    [HttpPatch("{id:guid}/UpdateInPersonData")]
     [Authorize(Policy = "IsAdmin")]
-    public async Task<ActionResult<GameDto>> UpdateNumberOfPhysicalPlayers(Guid id,
-        [FromBody] NumberOfPhysicalPlayersDto numberOfPhysicalPlayersDto)
+    public async Task<ActionResult<GameDto>> UpdateInPersonData(Guid id,
+        [FromBody] InPersonDto dto)
     {
-        var game = await gameService.UpdateNumberOfPhysicalPlayers(id, numberOfPhysicalPlayersDto);
+        var game = await gameService.UpdateInPersonData(id, dto);
         return Ok(game);
     }
 }

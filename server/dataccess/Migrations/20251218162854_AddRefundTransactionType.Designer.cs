@@ -192,7 +192,7 @@ namespace dataccess.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("draw_date");
 
-                    b.Property<int>("NumberOfPhysicalPlayers")
+                    b.Property<int>("InPersonWinners")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0)

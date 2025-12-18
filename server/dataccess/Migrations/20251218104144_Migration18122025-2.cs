@@ -11,7 +11,7 @@ namespace dataccess.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "NumberOfPhysicalPlayers",
+                name: "InPersonWinners",
                 table: "games",
                 newName: "number_of_physical_players");
 
@@ -32,10 +32,10 @@ namespace dataccess.Migrations
             migrationBuilder.RenameColumn(
                 name: "number_of_physical_players",
                 table: "games",
-                newName: "NumberOfPhysicalPlayers");
+                newName: "InPersonWinners");
 
             migrationBuilder.AlterColumn<int>(
-                name: "NumberOfPhysicalPlayers",
+                name: "InPersonWinners",
                 table: "games",
                 type: "integer",
                 nullable: true,

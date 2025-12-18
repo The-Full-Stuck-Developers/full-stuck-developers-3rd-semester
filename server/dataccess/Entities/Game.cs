@@ -18,5 +18,7 @@ public class Game
     public bool IsDrawn => WinningNumbers != null;
     public bool CanBet => WinningNumbers == null && DateTime.UtcNow < BetDeadline;
 
-    public int? NumberOfPhysicalPlayers { get; set; }
+    public int? InPersonWinners { get; set; }
+
+    public int? InPersonPrizePool { get; set; }
 }
