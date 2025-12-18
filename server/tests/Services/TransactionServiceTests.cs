@@ -1,4 +1,5 @@
 using api.Services;
+using api.Models;
 using api.Models.Dtos.Requests.Transaction;
 using dataccess;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@ public class TransactionServiceTests
 
         _db = new MyDbContext(options);
         
-        
+        // Use real SieveProcessor with default options
         _sieveProcessor = new SieveProcessor(new SieveOptionsAccessor());
         
         _service = new TransactionService(_db, _sieveProcessor);
@@ -30,19 +31,23 @@ public class TransactionServiceTests
     public async Task GetAllTransactions_ReturnsOnlyDeposits()
     {
         // Arrange
-        _db.Transactions.AddRange(
+                _db.Transactions.AddRange(
             new Transaction
             {
                 Id = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Type = TransactionType.Deposit,
                 Amount = 100,
+                Status = TransactionStatus.Accepted,
                 CreatedAt = DateTime.UtcNow
             },
             new Transaction
             {
                 Id = Guid.NewGuid(),
+                UserId = Guid.NewGuid(),
                 Type = TransactionType.Purchase,
                 Amount = 50,
+                Status = TransactionStatus.Accepted,
                 CreatedAt = DateTime.UtcNow
             }
         );

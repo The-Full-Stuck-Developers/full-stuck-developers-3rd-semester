@@ -7,7 +7,7 @@ namespace api.Tests.Services;
 public class EmailServiceTests
 {
     private readonly TestLogger<EmailService> _logger;
-    private readonly EmailService _emailService;
+    //private readonly EmailService _emailService;
 
     public EmailServiceTests()
     {
