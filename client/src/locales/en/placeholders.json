@@ -1,7 +1,8 @@
 {
+  "all_statuses": "All statuses",
   "enter_email": "Enter email",
   "enter_name": "Enter name",
   "enter_phone": "Enter phone",
-  "search_user": "Search by email or name",
-  "all_statuses": "All statuses"
+  "mobile_pay_number": "Mobile Pay Number",
+  "search_user": "Search by email or name"
 }

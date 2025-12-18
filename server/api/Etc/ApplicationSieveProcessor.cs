@@ -46,8 +46,15 @@ public class ApplicationSieveProcessor : SieveProcessor
             .CanFilter()
             .HasName("User.Email");
 
+        mapper.Property<Transaction>(t => t.MobilePayTransactionNumber)
+            .CanFilter();
+
         mapper.Property<Transaction>(t => t.Status)
             .CanFilter();
+
+        mapper.Property<Game>(g => g.StartTime)
+            .CanFilter()
+            .CanSort();
 
         return mapper;
     }

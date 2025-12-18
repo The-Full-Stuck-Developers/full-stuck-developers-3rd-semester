@@ -61,8 +61,13 @@ export const SidebarLayout: React.FC = () => {
       icon: <Users size={26} />,
     },
     {
-      label: t("games"),
-      path: "/admin/games",
+      label: t("upcoming_games"),
+      path: "/admin/upcoming-games",
+      icon: <GamepadIcon size={26} />,
+    },
+    {
+      label: t("past_games"),
+      path: "/admin/past-games",
       icon: <GamepadIcon size={26} />,
     },
     {
@@ -125,16 +130,16 @@ export const SidebarLayout: React.FC = () => {
 
             {userMenu && (
               <div
-                className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg overflow-hidden animate-[fadeInScale_200ms_ease-out_forwards]"
+                className="absolute right-0 mt-2 w-40 bg-gray-800 rounded-lg shadow-lg overflow-hidden animate-[fadeInScale_200ms_ease-out_forwards] border border-gray-500"
                 style={{ transformOrigin: "top right" }}
               >
-                <div className="px-4 space-y-3 py-3 border-b">
+                <div className="px-4 space-y-3 py-3 border-b border-gray-400">
                   <ThemeToggle />
 
                   {/* Language switch */}
-                  <div className="relative bg-gray-200 rounded-full flex items-center px-1 py-1 gap-2 w-24 h-9 mx-auto">
+                  <div className="relative bg-gray-900 rounded-full flex items-center px-1 py-1 gap-2 w-24 h-9 mx-auto">
                     <div
-                      className={`absolute h-7 w-10 bg-white rounded-full shadow transition-all duration-300 ${
+                      className={`absolute h-7 w-10 bg-gray-700 rounded-full shadow transition-all duration-300 ${
                         lang === "en"
                           ? "left-1"
                           : "left-[calc(100%-2.5rem-0.25rem)]"
@@ -163,19 +168,19 @@ export const SidebarLayout: React.FC = () => {
                   </div>
                 </div>
 
-                <Link
-                  to="/my-profile"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                >
-                  {t("my_profile")}
-                </Link>
+                {/*<Link*/}
+                {/*  to="/admin/my-profile"*/}
+                {/*  className="block px-4 py-2 text-white hover:bg-gray-700"*/}
+                {/*>*/}
+                {/*  {t("my_profile")}*/}
+                {/*</Link>*/}
 
                 <button
                   onClick={() => {
                     handleLogout();
                     setUserMenu(false);
                   }}
-                  className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 text-white hover:bg-gray-700 cursor-pointer"
                 >
                   {t("logout")}
                 </button>

@@ -89,6 +89,7 @@ public class Program
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IGameService, GameService>();
+        services.AddScoped<IBoardService, BoardService>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddScoped<DbSeeder>();
@@ -148,10 +149,15 @@ public class Program
         {
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+
             await db.Database.MigrateAsync();
 
-            var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-            await seeder.Seed("hashed_password_here");
+            if (!await db.Users.AnyAsync())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                await seeder.Seed("hashed_password_here");
+            }
         }
+
     }
 }

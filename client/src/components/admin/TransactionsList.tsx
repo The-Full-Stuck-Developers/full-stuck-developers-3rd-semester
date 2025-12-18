@@ -9,18 +9,52 @@ import { CheckCheck, Mail, Wallet } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { ActionMenu } from "@components/ActionMenu.tsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import getTransactionsClient from "@core/clients/transactionClient.ts";
 
 export default function TransactionsList() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState<TransactionDto[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [userSearchFilter, setUserSearchFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+
+  // Initialize state from URL params
+  const [currentPage, setCurrentPage] = useState(
+    Number(searchParams.get("page")) || 1,
+  );
+  const [userSearchFilter, setUserSearchFilter] = useState(
+    searchParams.get("user") || "",
+  );
+  const [mobilePayNumberFilter, setMobilePayNumberFilter] = useState(
+    searchParams.get("mobilePayNumber") || "",
+  );
+  const [statusFilter, setStatusFilter] = useState(
+    searchParams.get("status") || "",
+  );
+  const [pageSize, setPageSize] = useState(
+    Number(searchParams.get("pageSize")) || 10,
+  );
+
+  // Update URL params whenever filters change
+  useEffect(() => {
+    const params: Record<string, string> = {};
+
+    if (currentPage > 1) params.page = currentPage.toString();
+    if (userSearchFilter) params.user = userSearchFilter;
+    if (mobilePayNumberFilter) params.mobilePayNumber = mobilePayNumberFilter;
+    if (statusFilter) params.status = statusFilter;
+    if (pageSize !== 10) params.pageSize = pageSize.toString();
+
+    setSearchParams(params, { replace: true });
+  }, [
+    currentPage,
+    userSearchFilter,
+    mobilePayNumberFilter,
+    statusFilter,
+    pageSize,
+  ]);
 
   const buildFilterString = () => {
     const filters: string[] = [];
@@ -29,6 +63,10 @@ export default function TransactionsList() {
       filters.push(
         `User.Name@=*${userSearchFilter}|User.Email@=*${userSearchFilter}`,
       );
+    }
+
+    if (mobilePayNumberFilter) {
+      filters.push(`MobilePayTransactionNumber==${mobilePayNumberFilter}`);
     }
 
     if (statusFilter) {
@@ -47,6 +85,7 @@ export default function TransactionsList() {
       .then((res) => {
         setTransactions(res.items);
         setTotalPages(Math.ceil(res.total / pageSize));
+        setTotalItems(res.total);
       })
       .catch(console.error);
   };
@@ -58,7 +97,7 @@ export default function TransactionsList() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [userSearchFilter, statusFilter, pageSize]);
+  }, [userSearchFilter, mobilePayNumberFilter, statusFilter, pageSize]);
 
   useEffect(() => {
     fetchTransactions(currentPage);
@@ -132,6 +171,17 @@ export default function TransactionsList() {
               className="w-69 pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
             />
           </div>
+          <div className={""}>
+            <input
+              type="text"
+              placeholder={t("placeholders:mobile_pay_number")}
+              value={mobilePayNumberFilter}
+              required={true}
+              onChange={(e) => setMobilePayNumberFilter(e.target.value)}
+              className="w-full pl-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            />
+          </div>
+
           <div>
             <select
               value={statusFilter}
@@ -159,6 +209,7 @@ export default function TransactionsList() {
             className={
               "px-3 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent w-18 cursor-pointer"
             }
+            value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
           >
             <option value={10}>10</option>
@@ -260,7 +311,7 @@ export default function TransactionsList() {
                     </td>
                     <td className="px-3 py-3">
                       <span className="font-mono text-sm">
-                        #{transaction.mobilePayTransactionNumber}
+                        # {transaction.mobilePayTransactionNumber}
                       </span>
                     </td>
                     <td className="px-3 py-3">
@@ -296,7 +347,6 @@ export default function TransactionsList() {
                                 },
                               ]
                             : []),
-                          // ...(!transaction.user ? [
                           {
                             label: t("user") + " " + t("transactions"),
                             color: "#d0d0d0",
@@ -306,7 +356,6 @@ export default function TransactionsList() {
                                 `/admin/transactions/user/${transaction.user.id}`,
                               ),
                           },
-                          // ] : []),
                         ]}
                       />
                     </td>
@@ -324,15 +373,15 @@ export default function TransactionsList() {
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
-        </div>
-      )}
+      <div className="mt-6 flex justify-center">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          perPage={pageSize}
+          totalItems={totalItems}
+        />
+      </div>
     </div>
   );
 }

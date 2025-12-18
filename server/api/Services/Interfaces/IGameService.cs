@@ -1,15 +1,25 @@
+using api.Models;
+using api.Models.Dtos.Requests.Game;
 using dataccess;
 using DefaultNamespace;
+using Dtos;
+using Sieve.Models;
 
 namespace api.Services;
 
 public interface IGameService
 {
-    Task<Game> GetCurrentGameAsync(Guid gameId);                    
-    Task<Game> GetOrCreateCurrentGameAsync();           
-    Task<Game> DrawWinningNumbersAsync(Guid gameId, string winningNumbersCsv, Guid adminId);
-    Task<List<Bet>> GetDigitalWinningBetsAsync(Guid gameId);    
-    Task<int> GetAllWinningBetsAsync(Guid gameId);     
+    Task<PagedResult<GameDto>> GetAllUpcomingGames(SieveModel sieveModel);
+    Task<PagedResult<GameDto>> GetAllPastGames(SieveModel sieveModel);
+    Task<GameDto?> GetGameById(Guid id);
+    Task<Game> GetCurrentGame();
+    Task<Game> GetOrCreateCurrentGameAsync();
+    Task<List<Game>> GetOrCreateGamesForWeeksAsync(int numberOfWeeks);
+    Task<GameDto> UpdateWinningNumbers(Guid gameId, WinningNumbersDto winningNumbers);
+    Task<GameDto> DrawWinners(Guid id);
+    Task<GameDto> UpdateInPersonData(Guid id, InPersonDto dto);
+    Task<List<Bet>> GetDigitalWinningBetsAsync(Guid gameId);
+    Task<int> GetAllWinningBetsAsync(Guid gameId);
     Task SeedFutureGamesIfNeededAsync(int yearsAhead = 20);
 }
 

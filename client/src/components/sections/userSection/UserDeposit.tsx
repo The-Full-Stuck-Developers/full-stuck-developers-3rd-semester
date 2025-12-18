@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import getTransactionsClient from "@core/clients/transactionClient.ts";
 import { useAuth } from "../../../hooks/auth.tsx";
+import { useTranslation } from "react-i18next";
 
 const QUICK_AMOUNTS = [20, 40, 80, 160];
 
 export function UserDeposit() {
-  const { user } = useAuth(); // ✅ get logged in user (contains id)
+  const { t } = useTranslation("player");
+  const { user } = useAuth();
   const [amount, setAmount] = useState("");
+  const [refNumber, setRefNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{
     type: "success" | "error";
@@ -23,39 +26,46 @@ export function UserDeposit() {
     const num = Number(amount);
 
     if (!num || num <= 0) {
-      setStatus({ type: "error", message: "Enter valid amount" });
+      setStatus({ type: "error", message: t("enter_valid_amount") });
       return;
     }
 
-    // ✅ userInfoAtom is async, so user can be null for a moment
     if (!user?.id) {
       toast.error("User not loaded yet, try again.");
       setStatus({ type: "error", message: "User not loaded yet" });
       return;
     }
 
-    const ref = Math.floor(100000000 + Math.random() * 900000000);
+    const parsedRef = refNumber.trim() ? Number(refNumber) : NaN;
+    const ref =
+      refNumber.trim().length > 0
+        ? parsedRef
+        : Math.floor(100000000 + Math.random() * 900000000);
+
+    if (!Number.isFinite(ref) || ref <= 0) {
+      setStatus({ type: "error", message: t("enter_valid_ref") });
+      return;
+    }
 
     try {
       setLoading(true);
 
       const client = getTransactionsClient();
 
-      // ✅ IMPORTANT: method name depends on generated-client
-      // If your method name is different, Ctrl+click TransactionsClient and replace it here.
       await client.createTransaction({
         userId: user.id,
         amount: num,
         mobilePayTransactionNumber: ref,
       });
 
-      toast.success("Deposit created!");
+      toast.success(t("deposit_created"));
       setStatus({ type: "success", message: `Success! Ref: ${ref}` });
       setAmount("");
+      setRefNumber("");
     } catch (e) {
       console.error(e);
       toast.error("Failed");
-      setStatus({ type: "error", message: "Something went wrong" });
+      setStatus({ type: "error", message: t("something_went_wrong") });
     } finally {
       setLoading(false);
     }
@@ -63,17 +73,12 @@ export function UserDeposit() {
 
   return (
     <div>
-      <Toaster
-        position="top-center"
-        toastOptions={{ style: { background: "#1f2937", color: "#fff" } }}
-      />
-
-      <h1 className="text-4xl font-black mb-10">Add Balance</h1>
+      <h1 className="text-4xl font-black mb-10">{t("add_balance")}</h1>
 
       <div className="bg-gray-800 rounded-3xl border border-gray-700 shadow-2xl p-8 max-w-2xl">
         <div className="mb-8">
           <label className="block text-sm font-bold text-gray-300 mb-3">
-            Amount (kr)
+            {t("amount_kr")}
           </label>
           <input
             type="number"
@@ -88,7 +93,28 @@ export function UserDeposit() {
         </div>
 
         <div className="mb-8">
-          <p className="text-sm font-bold text-gray-400 mb-4">Quick amounts</p>
+          <label className="block text-sm font-bold text-gray-300 mb-3">
+            {t("ref_number")}
+          </label>
+          <input
+            type="number"
+            value={refNumber}
+            onChange={(e) => {
+              setRefNumber(e.target.value);
+              setStatus(null);
+            }}
+            className="w-full bg-gray-700 border border-gray-600 rounded-2xl px-5 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder={t("mobilepay_ref_placeholder")}
+          />
+          <p className="mt-2 text-xs text-gray-400">
+            If empty, we’ll generate a random 9-digit ref.
+          </p>
+        </div>
+
+        <div className="mb-8">
+          <p className="text-sm font-bold text-gray-400 mb-4">
+            {t("quick_amounts")}
+          </p>
           <div className="grid grid-cols-4 gap-4">
             {QUICK_AMOUNTS.map((v) => (
               <button
@@ -135,7 +161,7 @@ export function UserDeposit() {
               : "bg-red-600 hover:bg-red-700 text-white hover:shadow-red-600/50"
           }`}
         >
-          {loading ? "Processing..." : "Add Balance"}
+          {loading ? t("processing") : t("add_balance_button")}
         </button>
 
         <p className="mt-6 text-center text-sm text-gray-400">

@@ -1,8 +1,10 @@
 import "../../../gameBoard.css";
 import { useState, useEffect } from "react";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import getBetsClient from "@core/clients/betsClient.ts";
+import { useTranslation } from "react-i18next";
 
 const MAX_SELECTION = 8;
 const COST_MAP: Record<number, number> = {
@@ -12,39 +14,58 @@ const COST_MAP: Record<number, number> = {
   8: 160,
 };
 
+interface PlaceBetResponse {
+  success: boolean;
+  message: string;
+  betId: string;
+  sortedNumbers: string;
+  count: number;
+  price: number;
+  createdAt: string;
+}
+
 export function GameBoard() {
+  const { t } = useTranslation("player");
   const [selected, setSelected] = useState<number[]>([]);
   const [repeatWeeks, setRepeatWeeks] = useState(1);
   const navigate = useNavigate();
 
-  // load draft
+  const DRAFT_KEY = "deadPigeonDraft";
+
   useEffect(() => {
-    const draft = localStorage.getItem("deadPigeonDraft");
+    const draft = localStorage.getItem(DRAFT_KEY);
     if (draft) {
-      const data = JSON.parse(draft);
-      setSelected(data.selected || []);
-      setRepeatWeeks(data.repeatWeeks || 1);
-      toast.success("Your draft was restored!");
+      try {
+        const data = JSON.parse(draft);
+        if (data.selected?.length > 0) {
+          setSelected(data.selected);
+          setRepeatWeeks(data.repeatWeeks || 1);
+        }
+      } catch (e) {
+        localStorage.removeItem(DRAFT_KEY);
+      }
     }
   }, []);
 
-  // auto save after select
   useEffect(() => {
-    if (selected.length === 0) return;
+    if (selected.length === 0) {
+      localStorage.removeItem(DRAFT_KEY);
+      return;
+    }
 
     const draft = {
       selected,
       repeatWeeks,
       savedAt: new Date().toISOString(),
     };
-    localStorage.setItem("deadPigeonDraft", JSON.stringify(draft));
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
   }, [selected, repeatWeeks]);
 
   const toggle = (num: number) => {
     if (selected.includes(num)) {
       setSelected((prev) => prev.filter((x) => x !== num));
     } else if (selected.length >= MAX_SELECTION) {
-      toast.error(`Maximum is ${MAX_SELECTION}!`);
+      toast.error(t("maximum_selection", { max: MAX_SELECTION }));
     } else {
       setSelected((prev) => [...prev, num].sort((a, b) => a - b));
     }
@@ -56,57 +77,77 @@ export function GameBoard() {
   const submitBoard = async () => {
     if (!isNextButtonEnabled) return;
 
-    // need backend fast
-    const finalBoard = {
+    const totalCost = cost * repeatWeeks;
+    if (!confirm(t("submit_board_confirm", { cost: totalCost }))) {
+      return;
+    }
+
+    const payload = {
       numbers: selected,
-      fieldCount: selected.length as 5 | 6 | 7 | 8,
+      count: selected.length,
       price: cost,
       repeatWeeks,
-      submittedAt: new Date().toISOString(),
     };
 
-    // save
-    const submitted = JSON.parse(
-      localStorage.getItem("deadPigeonBoards") || "[]",
-    );
-    submitted.push(finalBoard);
-    localStorage.setItem("deadPigeonBoards", JSON.stringify(submitted));
+    try {
+      const client = getBetsClient();
+      const result = await client.placeBet(payload);
 
-    // Clear draft
-    localStorage.removeItem("deadPigeonDraft");
+      if (result && !result.success) {
+        toast.error(result.message || t("not_enough_money"));
+        return;
+      }
 
-    toast.success(`Board submitted! ${cost * repeatWeeks} kr deducted`);
-    navigate("/player/boards");
+      if (result && result.success) {
+        toast.success(result.message);
+        localStorage.removeItem(DRAFT_KEY);
+        setSelected([]);
+        setRepeatWeeks(1);
+        navigate("/player/dashboard");
+      }
+    } catch (err: any) {
+      console.error("Error placing bet:", err);
+      let errorMessage = t("not_enough_money");
+      if (err?.response) {
+        try {
+          const errorData =
+            typeof err.response === "string"
+              ? JSON.parse(err.response)
+              : err.response;
+          errorMessage = errorData?.message || errorMessage;
+        } catch {
+          errorMessage = err?.message || errorMessage;
+        }
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      toast.error(errorMessage);
+    }
   };
 
   const clearDraft = () => {
-    if (confirm("Are you sure you want to clear your board?")) {
+    if (confirm(t("clear_board_confirm"))) {
       setSelected([]);
-      localStorage.removeItem("deadPigeonDraft");
-      toast("Draft cleared");
+      setRepeatWeeks(1);
+      localStorage.removeItem(DRAFT_KEY);
+      toast(t("draft_cleared"));
     }
   };
 
   return (
     <div className="gameboard-container">
-      <Toaster position="top-center" />
-
       <div className="flex items-center justify-between mb-6">
         <Link
           to="/player/boards"
           className="flex items-center gap-3 text-white hover:text-red-400 transition"
         >
           <ArrowLeft className="w-6 h-6" />
-          <span className="font-bold">Back to My Boards</span>
+          <span className="font-bold">{t("back_to_my_boards")}</span>
         </Link>
-        <div className="text-right">
-          <div className="text-2xl font-black">Uge 47 2025</div>
-          <div className="text-sm text-gray-400">Pot: 2.850,00 kr</div>
-        </div>
       </div>
 
       <h1 className="text-center text-4xl font-black mb-8 text-white">
-        Pick Your Numbers
+        {t("pick_your_numbers")}
       </h1>
 
       <div className="gameboard-grid">
@@ -136,18 +177,18 @@ export function GameBoard() {
 
       <div className="mt-8 space-y-6">
         <div className="gameboard-pris text-center">
-          Price:{" "}
+          {t("price")}:{" "}
           <strong className="text-3xl text-red-400">
             {cost * repeatWeeks} kr
           </strong>
           {selected.length > 0 &&
-            ` (${selected.length} numbers × ${repeatWeeks} week${repeatWeeks > 1 ? "s" : ""})`}
+            ` (${selected.length} ${t("numbers")} × ${repeatWeeks} ${repeatWeeks > 1 ? t("weeks") : t("week")})`}
         </div>
 
         <div className="max-w-xs mx-auto">
           <label className="block text-sm text-gray-400 mb-2 text-center">
-            Repeat for <strong>{repeatWeeks}</strong> week
-            {repeatWeeks > 1 && "s"}
+            {t("repeat_for")} <strong>{repeatWeeks}</strong>{" "}
+            {repeatWeeks > 1 ? t("weeks") : t("week")}
           </label>
           <input
             type="range"
@@ -158,8 +199,8 @@ export function GameBoard() {
             className="w-full h-3 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>1 week</span>
-            <span>20 weeks</span>
+            <span>1 {t("week")}</span>
+            <span>20 {t("weeks")}</span>
           </div>
         </div>
       </div>
@@ -172,9 +213,11 @@ export function GameBoard() {
           onClick={submitBoard}
         >
           {isNextButtonEnabled ? (
-            <>Submit Board ({cost * repeatWeeks} kr)</>
+            <>
+              {t("submit_board")} ({cost * repeatWeeks} kr)
+            </>
           ) : (
-            "Pick at least 5 numbers"
+            t("pick_at_least_5")
           )}
         </button>
 
@@ -183,13 +226,11 @@ export function GameBoard() {
             onClick={clearDraft}
             className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl font-bold transition"
           >
-            Clear Board
+            {t("clear_board")}
           </button>
         )}
 
-        <p className="text-center text-sm text-gray-400">
-          Your board is <strong>automatically saved</strong> as you play
-        </p>
+        <p className="text-center text-sm text-gray-400">{t("auto_saved")}</p>
       </div>
     </div>
   );

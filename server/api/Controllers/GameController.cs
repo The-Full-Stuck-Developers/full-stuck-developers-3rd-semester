@@ -1,4 +1,6 @@
 using api.Models;
+using api.Models.Dtos.Requests.Game;
+using api.Services;
 using dataccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,46 +15,88 @@ namespace api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-// [Authorize]
-[AllowAnonymous]
+[Authorize]
 public class GamesController(
-    IRepository<Game> gameRepository,
-    ISieveProcessor sieveProcessor)
+    IGameService gameService)
     : ControllerBase
 {
-    [HttpGet]
-    // [Authorize(Policy = "IsAdmin")]
-    public async Task<ActionResult<PagedResult<GameDto>>> GetAllGames([FromQuery] SieveModel sieveModel)
+    [HttpGet("GetAllUpcomingGames")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<PagedResult<GameDto>>> GetAllUpcomingGames([FromQuery] SieveModel sieveModel)
     {
-        var query = gameRepository.Query();
-        var filteredQuery = sieveProcessor.Apply(sieveModel, query);
+        var games = await gameService.GetAllUpcomingGames(sieveModel);
 
-        var total = await query.CountAsync();
-        var items = await filteredQuery.ToListAsync();
-        var games = items.Select(g => new GameDto(g)).ToList();
+        return Ok(games);
+    }
 
-        return Ok(new PagedResult<GameDto>
-        {
-            Items = games,
-            Total = total,
-            PageSize = sieveModel.PageSize ?? 10,
-            PageNumber = sieveModel.Page ?? 1
-        });
+    [HttpGet("GetAllPastGames")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<PagedResult<GameDto>>> GetAllPastGames([FromQuery] SieveModel sieveModel)
+    {
+        var games = await gameService.GetAllPastGames(sieveModel);
+
+        return Ok(games);
     }
 
     [HttpGet("{id:guid}")]
-    // [Authorize(Policy = "IsAdmin")]
+    [Authorize(Policy = "IsAdmin")]
     public async Task<ActionResult<GameDto>> GetGameById(Guid id)
     {
-        var game = await gameRepository
-            .Query()
-            .FirstOrDefaultAsync(g => g.Id == id);
+        var game = await gameService.GetGameById(id);
 
-        if (game == null)
+        return Ok(game);
+    }
+
+    [HttpGet("GetCurrentGame")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> GetCurrentGame()
+    {
+        var game = await gameService.GetCurrentGame();
+
+        return Ok(game);
+    }
+
+    [HttpGet("player/current")]
+    [Authorize]
+    public async Task<ActionResult<GameDto>> GetCurrentGameForPlayer()
+    {
+        try
         {
+            var game = await gameService.GetCurrentGame();
+            return Ok(game);
+        }
+        catch (KeyNotFoundException)
+        {
+            // No current game exists yet
             return NotFound();
         }
+    }
 
-        return Ok(new GameDto(game));
+    [HttpPatch("{id:guid}/UpdateWinningNumbers")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> UpdateWinningNumbers(Guid id,
+        [FromBody] WinningNumbersDto winningNumbersDto)
+    {
+        var game = await gameService.UpdateWinningNumbers(id, winningNumbersDto);
+
+        return Ok(game);
+    }
+
+    [HttpPatch("{id:guid}/DrawWinners")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> DrawWinners(Guid id)
+    {
+        var game = await gameService.DrawWinners(id);
+
+        return Ok(game);
+    }
+
+    [HttpPatch("{id:guid}/UpdateInPersonData")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> UpdateInPersonData(Guid id,
+        [FromBody] InPersonDto dto)
+    {
+        var game = await gameService.UpdateInPersonData(id, dto);
+        return Ok(game);
     }
 }

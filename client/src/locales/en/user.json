@@ -1,8 +1,8 @@
 {
-  "create_new_user": "Create new user",
-  "admin_user": "Admin user",
   "activate_membership": "Activate membership",
-  "edit_user": "Edit user",
   "admin": "Admin",
-  "admins": "Admins"
+  "admin_user": "Admin user",
+  "admins": "Admins",
+  "create_new_user": "Create new user",
+  "edit_user": "Edit user"
 }

@@ -11,5 +11,6 @@ export const useAuthInfo = () => {
     user: user.state === "hasData" ? user.data : null,
     isLoading: user.state === "loading",
     isAuthenticated: user.state === "hasData" && !!user.data,
+    error: user.state === "hasError" ? user.error : null,
   };
 };

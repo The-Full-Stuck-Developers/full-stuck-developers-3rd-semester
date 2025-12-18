@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace dataccess.Migrations
 {
     /// <inheritdoc />
+<<<<<<<< HEAD:server/dataccess/Migrations/20251215195940_NewMigration123.cs
     public partial class NewMigration123 : Migration
+========
+    public partial class Migration171220252 : Migration
+>>>>>>>> dev:server/dataccess/Migrations/20251217205517_Migration17122025-2.cs
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +29,6 @@ namespace dataccess.Migrations
                     start_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     bet_deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     draw_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    revenue = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     winning_numbers = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
@@ -57,15 +60,40 @@ namespace dataccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "transactions",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    user_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    amount = table.Column<int>(type: "integer", nullable: false),
+                    mobile_pay_transaction_number = table.Column<int>(type: "integer", nullable: true),
+                    status = table.Column<string>(type: "text", nullable: false, defaultValue: "Pending"),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("transactions_primary_key", x => x.id);
+                    table.ForeignKey(
+                        name: "transactions_user_id_users_id_foreign_key",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "bets",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     game_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    transaction_id = table.Column<Guid>(type: "uuid", nullable: false),
                     selected_numbers = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: false),
                     numbers_count = table.Column<int>(type: "integer", nullable: false),
-                    price = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<int>(type: "integer", nullable: false),
+                    is_winning = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
@@ -78,6 +106,12 @@ namespace dataccess.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "bets_transaction_id_fkey",
+                        column: x => x.transaction_id,
+                        principalTable: "transactions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "bets_user_id_fkey",
                         column: x => x.user_id,
                         principalTable: "users",
@@ -85,6 +119,7 @@ namespace dataccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+<<<<<<<< HEAD:server/dataccess/Migrations/20251215195940_NewMigration123.cs
             migrationBuilder.CreateTable(
                 name: "subscriptions",
                 columns: table => new
@@ -144,10 +179,18 @@ namespace dataccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+========
+>>>>>>>> dev:server/dataccess/Migrations/20251217205517_Migration17122025-2.cs
             migrationBuilder.CreateIndex(
                 name: "IX_bets_game_id",
                 table: "bets",
                 column: "game_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_bets_transaction_id",
+                table: "bets",
+                column: "transaction_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_bets_user_id",
@@ -159,21 +202,6 @@ namespace dataccess.Migrations
                 table: "games",
                 columns: new[] { "year", "week_number" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_subscriptions_created_by_admin_id",
-                table: "subscriptions",
-                column: "created_by_admin_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_subscriptions_revoked_by_admin_id",
-                table: "subscriptions",
-                column: "revoked_by_admin_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_subscriptions_user_id",
-                table: "subscriptions",
-                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_transactions_user_id",
@@ -211,13 +239,10 @@ namespace dataccess.Migrations
                 name: "bets");
 
             migrationBuilder.DropTable(
-                name: "subscriptions");
+                name: "games");
 
             migrationBuilder.DropTable(
                 name: "transactions");
-
-            migrationBuilder.DropTable(
-                name: "games");
 
             migrationBuilder.DropTable(
                 name: "users");
