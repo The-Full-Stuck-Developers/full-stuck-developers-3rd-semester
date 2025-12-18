@@ -148,10 +148,15 @@ public class Program
         {
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+
             await db.Database.MigrateAsync();
 
-            var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
-            await seeder.Seed("hashed_password_here");
+            if (!await db.Users.AnyAsync())
+            {
+                var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
+                await seeder.Seed("hashed_password_here");
+            }
         }
+
     }
 }
