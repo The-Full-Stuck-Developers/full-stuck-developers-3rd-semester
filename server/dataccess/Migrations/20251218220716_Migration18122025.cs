@@ -6,14 +6,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace dataccess.Migrations
 {
     /// <inheritdoc />
-    public partial class Migration171220252 : Migration
+    public partial class Migration18122025 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:transaction_status", "pending,accepted,rejected,cancelled")
-                .Annotation("Npgsql:Enum:transaction_type", "deposit,purchase");
+                .Annotation("Npgsql:Enum:transaction_type", "deposit,purchase,refund");
 
             migrationBuilder.CreateTable(
                 name: "games",
@@ -25,7 +25,9 @@ namespace dataccess.Migrations
                     start_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     bet_deadline = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     draw_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    winning_numbers = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                    winning_numbers = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    in_person_winners = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    in_person_prize_pool = table.Column<int>(type: "integer", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
                 {
@@ -87,10 +89,11 @@ namespace dataccess.Migrations
                     game_id = table.Column<Guid>(type: "uuid", nullable: false),
                     transaction_id = table.Column<Guid>(type: "uuid", nullable: false),
                     selected_numbers = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: false),
-                    numbers_count = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<int>(type: "integer", nullable: false),
                     is_winning = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                    Winnings = table.Column<int>(type: "integer", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    deleted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    bet_series_id = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -114,6 +117,12 @@ namespace dataccess.Migrations
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "bets_deleted_at_idx",
+                table: "bets",
+                column: "deleted_at",
+                filter: "\"deleted_at\" IS NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_bets_game_id",
