@@ -94,6 +94,47 @@ export class BetsClient {
         }
         return Promise.resolve<BetHistoryResponse>(null as any);
     }
+
+    deleteBet(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Bets/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeleteBet(_response);
+        });
+    }
+
+    protected processDeleteBet(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
 }
 
 export class AuthClient {
@@ -448,6 +489,155 @@ export class GamesClient {
     }
 
     protected processGetGameById(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
+    }
+
+    getCurrentGame(): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/GetCurrentGame";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetCurrentGame(_response);
+        });
+    }
+
+    protected processGetCurrentGame(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
+    }
+
+    updateWinningNumbers(id: string, winningNumbersDto: WinningNumbersDto): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/{id}/UpdateWinningNumbers";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(winningNumbersDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateWinningNumbers(_response);
+        });
+    }
+
+    protected processUpdateWinningNumbers(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
+    }
+
+    drawWinners(id: string): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/{id}/DrawWinners";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDrawWinners(_response);
+        });
+    }
+
+    protected processDrawWinners(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
+    }
+
+    updateNumberOfPhysicalPlayers(id: string, numberOfPhysicalPlayersDto: NumberOfPhysicalPlayersDto): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/{id}/UpdateNumberOfPhysicalPlayers";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(numberOfPhysicalPlayersDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateNumberOfPhysicalPlayers(_response);
+        });
+    }
+
+    protected processUpdateNumberOfPhysicalPlayers(response: Response): Promise<GameDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -1475,6 +1665,88 @@ export interface GameDto {
     winningNumbers: string | undefined;
     isDrawn: boolean;
     canBet: boolean;
+    bets: Bet[];
+    numberOfPhysicalPlayers: number | undefined;
+}
+
+export interface Bet {
+    id: string;
+    userId: string;
+    user: User;
+    gameId: string;
+    game: Game;
+    transactionId: string;
+    transaction: Transaction;
+    selectedNumbers: string;
+    isWinning: boolean;
+    winnings: number;
+    createdAt: string;
+    deletedAt: string | undefined;
+}
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    isAdmin: boolean;
+    expiresAt: string | undefined;
+    createdAt: string;
+    updatedAt: string | undefined;
+    deletedAt: string | undefined;
+    isActive: boolean;
+    bets: Bet[];
+    transactions: Transaction[];
+    passwordResetToken: string | undefined;
+    passwordResetTokenExpiry: string | undefined;
+}
+
+export interface Transaction {
+    id: string;
+    userId: string;
+    user: User;
+    amount: number;
+    mobilePayTransactionNumber: number | undefined;
+    status: TransactionStatus;
+    type: TransactionType;
+    createdAt: string;
+    bet: Bet;
+}
+
+export enum TransactionStatus {
+    Pending = 0,
+    Accepted = 1,
+    Rejected = 2,
+    Cancelled = 3,
+}
+
+export enum TransactionType {
+    Deposit = 0,
+    Purchase = 1,
+    Refund = 2,
+}
+
+export interface Game {
+    id: string;
+    weekNumber: number;
+    year: number;
+    startTime: string;
+    betDeadline: string;
+    drawDate: string | undefined;
+    revenue: number;
+    winningNumbers: string | undefined;
+    bets: Bet[];
+    isDrawn: boolean;
+    canBet: boolean;
+    numberOfPhysicalPlayers: number | undefined;
+}
+
+export interface WinningNumbersDto {
+    winningNumbers: string;
+}
+
+export interface NumberOfPhysicalPlayersDto {
+    numberOfPhysicalPlayers: number | undefined;
 }
 
 export interface PagedResultOfTransactionDto {
@@ -1493,86 +1765,6 @@ export interface TransactionDto {
     type: TransactionType;
     createdAt: string;
     user: User;
-}
-
-export enum TransactionStatus {
-    Pending = 0,
-    Accepted = 1,
-    Rejected = 2,
-    Cancelled = 3,
-}
-
-export enum TransactionType {
-    Deposit = 0,
-    Purchase = 1,
-}
-
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    phoneNumber: string;
-    isAdmin: boolean;
-    expiresAt: string | undefined;
-    createdAt: string;
-    updatedAt: string | undefined;
-    deletedAt: string | undefined;
-    isActive: boolean;
-    bets: Bet[];
-    subscriptions: Subscription[];
-    transactions: Transaction[];
-    passwordResetToken: string | undefined;
-    passwordResetTokenExpiry: string | undefined;
-}
-
-export interface Bet {
-    id: string;
-    userId: string;
-    user: User;
-    gameId: string;
-    game: Game;
-    selectedNumbers: string;
-    numbersCount: number;
-    price: number;
-    createdAt: string;
-}
-
-export interface Game {
-    id: string;
-    weekNumber: number;
-    year: number;
-    startTime: string;
-    betDeadline: string;
-    drawDate: string | undefined;
-    revenue: number;
-    winningNumbers: string | undefined;
-    bets: Bet[];
-    isDrawn: boolean;
-    canBet: boolean;
-}
-
-export interface Subscription {
-    id: string;
-    userId: string;
-    user: User;
-    createdByAdminId: string;
-    createdByAdmin: User;
-    validFrom: string;
-    validTo: string;
-    createdAt: string;
-    revokedAt: string | undefined;
-    revokedByAdminId: string | undefined;
-}
-
-export interface Transaction {
-    id: string;
-    userId: string;
-    user: User;
-    amount: number;
-    mobilePayTransactionNumber: number | undefined;
-    status: TransactionStatus;
-    type: TransactionType;
-    createdAt: string;
 }
 
 export interface ProblemDetails {

@@ -88,22 +88,34 @@ export function GameBoard() {
             const client = getBetsClient();
             const result = await client.placeBet(payload);
 
-            if (!result.success) {
-                toast.error(result.message || "Error placing a bet");
+            // Check if result exists and has success property
+            if (result && !result.success) {
+                toast.error(result.message || "Not enough money. Top up your account");
                 return;
             }
 
-            toast.success(result.message);
-
-            // Clear
-            localStorage.removeItem(DRAFT_KEY);
-            setSelected([]);
-            setRepeatWeeks(1);
-
-            navigate("/player/dashboard");
+            if (result && result.success) {
+                toast.success(result.message);
+                // Clear
+                localStorage.removeItem(DRAFT_KEY);
+                setSelected([]);
+                setRepeatWeeks(1);
+                navigate("/player/dashboard");
+            }
         } catch (err: any) {
             console.error("Error placing bet:", err);
-            const errorMessage = err?.message || err?.response?.data?.message || "Failed to submit board. Please try again.";
+            // Try to extract message from error response
+            let errorMessage = "Failed to submit board. Please try again.";
+            if (err?.response) {
+                try {
+                    const errorData = typeof err.response === 'string' ? JSON.parse(err.response) : err.response;
+                    errorMessage = errorData?.message || errorMessage;
+                } catch {
+                    errorMessage = err?.message || errorMessage;
+                }
+            } else if (err?.message) {
+                errorMessage = err.message;
+            }
             toast.error(errorMessage);
         }
     };

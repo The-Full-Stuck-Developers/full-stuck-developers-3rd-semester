@@ -58,7 +58,7 @@ export function GameHistory() {
                                     {bet.count} numbers • {bet.price} kr
                                 </div>
                                 <div className="text-sm text-gray-400">
-                                    {new Date(bet.date).toLocaleDateString("pl-PL", {
+                                    {new Date(bet.date).toLocaleDateString("en-US", {
                                         day: "2-digit",
                                         month: "long",
                                         year: "numeric",

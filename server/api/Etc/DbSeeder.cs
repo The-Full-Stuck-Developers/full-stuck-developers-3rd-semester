@@ -34,7 +34,9 @@ public class DbSeeder(
 
         if (!await context.Games.AnyAsync())
         {
-            await CreateGames(2026, 50);
+            // Start from current year (or last year for past game history)
+            var startYear = DateTime.UtcNow.Year;
+            await CreateGames(startYear, 50);
         }
 
         if (!await context.Transactions.AnyAsync())

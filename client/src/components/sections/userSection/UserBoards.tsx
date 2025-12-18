@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Gamepad2, Edit2, Trash2, Copy, Plus } from "lucide-react";
+import { Gamepad2, Edit2, Trash2, Plus } from "lucide-react";
 import getBetsClient from "@core/clients/betsClient.ts";
 import { toast } from "react-hot-toast";
+import Pagination from "../../Pagination";
 
 type Draft = {
   selected: number[];
@@ -22,6 +23,9 @@ export function UserBoards() {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [submittedBoards, setSubmittedBoards] = useState<SubmittedBoard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 3;
 
   useEffect(() => {
     // Load draft
@@ -33,8 +37,9 @@ export function UserBoards() {
     // Load submitted boards from API
     const loadBoards = async () => {
       try {
+        setLoading(true);
         const client = getBetsClient();
-        const response = await client.getUserHistory(1, 100);
+        const response = await client.getUserHistory(currentPage, pageSize);
         
         const boards: SubmittedBoard[] = response.bets.map((bet) => ({
           id: bet.id,
@@ -46,6 +51,7 @@ export function UserBoards() {
         }));
         
         setSubmittedBoards(boards);
+        setTotalCount(response.totalCount);
       } catch (error) {
         console.error("Failed to load boards:", error);
         // Don't show error toast for empty boards - it's normal for new users
@@ -55,11 +61,41 @@ export function UserBoards() {
     };
 
     loadBoards();
-  }, []);
+  }, [currentPage]);
 
   const clearDraft = () => {
     localStorage.removeItem("deadPigeonDraft");
     setDraft(null);
+  };
+
+  const handleDeleteBoard = async (boardId: string) => {
+    if (!confirm("Are you sure you want to delete this board? The money will be refunded to your account.")) {
+      return;
+    }
+
+    try {
+      const client = getBetsClient();
+      await client.deleteBet(boardId);
+      
+      toast.success("Board deleted successfully. Money has been refunded to your account.");
+      
+      // Reload boards
+      const historyResponse = await client.getUserHistory(currentPage, pageSize);
+      const boards: SubmittedBoard[] = historyResponse.bets.map((bet) => ({
+        id: bet.id,
+        numbers: bet.numbers.split(",").map((n) => parseInt(n.trim(), 10)),
+        fieldCount: bet.count as 5 | 6 | 7 | 8,
+        price: bet.price,
+        repeatWeeks: 1,
+        submittedAt: bet.date,
+      }));
+      setSubmittedBoards(boards);
+      setTotalCount(historyResponse.totalCount);
+    } catch (error: any) {
+      console.error("Error deleting board:", error);
+      const errorMessage = error?.response || error?.message || "Failed to delete board. Please try again.";
+      toast.error(errorMessage);
+    }
   };
 
   return (
@@ -130,51 +166,63 @@ export function UserBoards() {
           <p className="text-gray-400">Loading your boards...</p>
         </div>
       ) : submittedBoards.length > 0 ? (
-        <div className="space-y-6">
-          {submittedBoards.map((board, i) => (
-            <div
-              key={board.id}
-              className="bg-gray-800 rounded-2xl p-6 border border-gray-700"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-green-900/30 rounded-xl">
-                    <Gamepad2 className="w-6 h-6 text-green-400" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg">Board #{i + 1}</div>
-                    <div className="text-sm text-gray-400">
-                      {board.fieldCount} numbers • {board.price} kr •{" "}
-                      {new Date(board.submittedAt).toLocaleDateString()}
+        <>
+          <div className="space-y-6">
+            {submittedBoards.map((board, i) => (
+              <div
+                key={board.id}
+                className="bg-gray-800 rounded-2xl p-6 border border-gray-700"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-green-900/30 rounded-xl">
+                      <Gamepad2 className="w-6 h-6 text-green-400" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-lg">
+                        {board.fieldCount} numbers • {board.price} kr
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        {new Date(board.submittedAt).toLocaleDateString()}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <button 
-                    className="p-2 hover:bg-gray-700 rounded-lg"
-                    onClick={() => {
-                      navigator.clipboard.writeText(board.numbers.join(", "));
-                      toast.success("Numbers copied to clipboard");
-                    }}
-                  >
-                    <Copy className="w-5 h-5 text-gray-400" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-8 gap-3">
-                {board.numbers.map((n) => (
-                  <div
-                    key={n}
-                    className="aspect-square bg-gray-700 rounded-lg flex items-center justify-center font-mono font-bold text-lg"
-                  >
-                    {n.toString().padStart(2, "0")}
+                  <div className="flex gap-2">
+                    <button 
+                      className="p-2 hover:bg-red-900/50 rounded-lg transition"
+                      onClick={() => handleDeleteBoard(board.id)}
+                    >
+                      <Trash2 className="w-5 h-5 text-red-400" />
+                    </button>
                   </div>
-                ))}
+                </div>
+
+                <div className="grid grid-cols-8 gap-3">
+                  {board.numbers.map((n) => (
+                    <div
+                      key={n}
+                      className="aspect-square bg-gray-700 rounded-lg flex items-center justify-center font-mono font-bold text-lg"
+                    >
+                      {n.toString().padStart(2, "0")}
+                    </div>
+                  ))}
+                </div>
               </div>
+            ))}
+          </div>
+          
+          {Math.ceil(totalCount / pageSize) > 1 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalCount / pageSize)}
+                onPageChange={setCurrentPage}
+                perPage={pageSize}
+                totalItems={totalCount}
+              />
             </div>
-          ))}
-        </div>
+          )}
+        </>
       ) : !draft ? (
         <div className="text-center py-20">
           <Gamepad2 className="w-24 h-24 text-gray-600 mx-auto mb-6" />

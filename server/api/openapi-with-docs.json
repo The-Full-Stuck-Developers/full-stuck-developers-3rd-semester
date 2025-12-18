@@ -80,6 +80,39 @@
         }
       }
     },
+    "/api/Bets/{id}": {
+      "delete": {
+        "tags": [
+          "Bets"
+        ],
+        "operationId": "Bets_DeleteBet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/Login": {
       "post": {
         "tags": [
@@ -1737,6 +1770,11 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
@@ -1865,11 +1903,13 @@
         "description": "",
         "x-enumNames": [
           "Deposit",
-          "Purchase"
+          "Purchase",
+          "Refund"
         ],
         "enum": [
           0,
-          1
+          1,
+          2
         ]
       },
       "Game": {

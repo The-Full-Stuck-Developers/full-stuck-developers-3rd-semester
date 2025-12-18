@@ -1,4 +1,4 @@
-﻿using dataccess.Entities;
+using dataccess.Entities;
 using DefaultNamespace;
 using domain;
 using Microsoft.EntityFrameworkCore;
@@ -88,7 +88,7 @@ public partial class MyDbContext : DbContext
             entity.HasMany(u => u.Bets)
                 .WithOne(b => b.User)
                 .HasForeignKey(b => b.UserId)
-                .HasConstraintName("Bet_user_id_fkey")
+                .HasConstraintName("bets_user_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasMany(u => u.Transactions)
@@ -211,9 +211,9 @@ public partial class MyDbContext : DbContext
 
         modelBuilder.Entity<Bet>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Bet_pkey");
+            entity.HasKey(e => e.Id).HasName("bets_pkey");
 
-            entity.ToTable("Bet");
+            entity.ToTable("bets");
 
             entity.Property(e => e.Id)
                 .HasColumnName("id")
@@ -245,16 +245,23 @@ public partial class MyDbContext : DbContext
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("now()");
 
+            entity.Property(e => e.DeletedAt)
+                .HasColumnName("deleted_at");
+
+            entity.HasIndex(e => e.DeletedAt)
+                .HasFilter("\"deleted_at\" IS NULL")
+                .HasDatabaseName("bets_deleted_at_idx");
+
             entity.HasOne(e => e.User)
                 .WithMany(u => u.Bets)
                 .HasForeignKey(e => e.UserId)
-                .HasConstraintName("Bet_user_id_fkey")
+                .HasConstraintName("bets_user_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(e => e.Game)
                 .WithMany(g => g.Bets)
                 .HasForeignKey(e => e.GameId)
-                .HasConstraintName("Bet_game_id_fkey")
+                .HasConstraintName("bets_game_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(b => b.Transaction)
