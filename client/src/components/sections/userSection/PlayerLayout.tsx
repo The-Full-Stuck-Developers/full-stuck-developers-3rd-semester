@@ -9,21 +9,26 @@ import {
   DollarSign,
   TrendingUp,
   LogOut,
+  Languages,
 } from "lucide-react";
 import Logo from "../../../jerneif-logo.png";
 import { useAuth } from "../../../hooks/auth.tsx";
 import { Toaster } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import { Settings as SettingsComponent } from "./Settings.tsx";
 
 export function PlayerLayout() {
-  const { user, logout } = useAuth(); // ✅ add
+  const { user, logout } = useAuth();
+  const { t } = useTranslation("player");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const location = useLocation();
 
   const navItems = [
-    { to: "/player/dashboard", icon: BarChart3, label: "Dashboard" },
-    { to: "/player/boards", icon: Gamepad2, label: "My Boards" },
-    { to: "/player/deposit", icon: DollarSign, label: "Add Balance" },
-    { to: "/player/history", icon: TrendingUp, label: "Game History" },
+    { to: "/player/dashboard", icon: BarChart3, label: t("overview") },
+    { to: "/player/boards", icon: Gamepad2, label: t("my_boards_nav") },
+    { to: "/player/deposit", icon: DollarSign, label: t("add_balance_nav") },
+    { to: "/player/history", icon: TrendingUp, label: t("game_history_nav") },
   ];
   const isActive = (path: string) => location.pathname === path;
 
@@ -117,11 +122,19 @@ export function PlayerLayout() {
 
             <div className="space-y-2">
               <button
-                onClick={logout} // ✅ sign out properly
+                onClick={() => setSettingsOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-700 transition text-left text-sm"
+                title={t("language")}
+              >
+                <Languages className="w-4 h-4" />
+                {t("language")}
+              </button>
+              <button
+                onClick={logout}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-700 transition text-left text-sm text-red-400"
               >
                 <LogOut className="w-4 h-4" />
-                Sign Out
+                {t("sign_out")}
               </button>
             </div>
           </div>
@@ -149,6 +162,8 @@ export function PlayerLayout() {
           </div>
         </main>
       </div>
+
+      <SettingsComponent isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

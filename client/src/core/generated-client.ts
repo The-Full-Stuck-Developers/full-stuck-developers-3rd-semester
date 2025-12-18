@@ -8,2649 +8,1997 @@
 // ReSharper disable InconsistentNaming
 
 export class BetsClient {
-  private http: {
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-  };
-  private baseUrl: string;
-  protected jsonParseReviver: ((key: string, value: any) => any) | undefined =
-    undefined;
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-  constructor(
-    baseUrl?: string,
-    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> },
-  ) {
-    this.http = http ? http : (window as any);
-    this.baseUrl = baseUrl ?? "";
-  }
-
-  placeBet(dto: CreateBetDto): Promise<PlaceBetResponse> {
-    let url_ = this.baseUrl + "/api/Bets";
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(dto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processPlaceBet(_response);
-    });
-  }
-
-  protected processPlaceBet(response: Response): Promise<PlaceBetResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as PlaceBetResponse);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<PlaceBetResponse>(null as any);
-  }
 
-  getUserHistory(
-    page: number | undefined,
-    pageSize: number | undefined,
-  ): Promise<BetHistoryResponse> {
-    let url_ = this.baseUrl + "/api/Bets/player/history?";
-    if (page === null)
-      throw new globalThis.Error("The parameter 'page' cannot be null.");
-    else if (page !== undefined)
-      url_ += "page=" + encodeURIComponent("" + page) + "&";
-    if (pageSize === null)
-      throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
-    else if (pageSize !== undefined)
-      url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
-    url_ = url_.replace(/[?&]$/, "");
+    placeBet(dto: CreateBetDto): Promise<PlaceBetResponse> {
+        let url_ = this.baseUrl + "/api/Bets";
+        url_ = url_.replace(/[?&]$/, "");
 
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
+        const content_ = JSON.stringify(dto);
 
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetUserHistory(_response);
-    });
-  }
-
-  protected processGetUserHistory(
-    response: Response,
-  ): Promise<BetHistoryResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as BetHistoryResponse);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<BetHistoryResponse>(null as any);
-  }
-
-  deleteBet(id: string): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/Bets/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "DELETE",
-      headers: {
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processDeleteBet(_response);
-    });
-  }
-
-  protected processDeleteBet(response: Response): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processPlaceBet(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
+
+    protected processPlaceBet(response: Response): Promise<PlaceBetResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PlaceBetResponse;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PlaceBetResponse>(null as any);
+    }
+
+    getUserHistory(page: number | undefined, pageSize: number | undefined): Promise<BetHistoryResponse> {
+        let url_ = this.baseUrl + "/api/Bets/player/history?";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserHistory(_response);
+        });
+    }
+
+    protected processGetUserHistory(response: Response): Promise<BetHistoryResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BetHistoryResponse;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BetHistoryResponse>(null as any);
+    }
+
+    deleteBet(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Bets/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeleteBet(_response);
+        });
+    }
+
+    protected processDeleteBet(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    updateBet(id: string, dto: UpdateBetDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Bets/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateBet(_response);
+        });
+    }
+
+    protected processUpdateBet(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    getUserActiveBoards(page: number | undefined, pageSize: number | undefined): Promise<BetHistoryResponse> {
+        let url_ = this.baseUrl + "/api/Bets/player/active?";
+        if (page === null)
+            throw new globalThis.Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new globalThis.Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserActiveBoards(_response);
+        });
+    }
+
+    protected processGetUserActiveBoards(response: Response): Promise<BetHistoryResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as BetHistoryResponse;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<BetHistoryResponse>(null as any);
+    }
 }
 
 export class AuthClient {
-  private http: {
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-  };
-  private baseUrl: string;
-  protected jsonParseReviver: ((key: string, value: any) => any) | undefined =
-    undefined;
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-  constructor(
-    baseUrl?: string,
-    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> },
-  ) {
-    this.http = http ? http : (window as any);
-    this.baseUrl = baseUrl ?? "";
-  }
-
-  login(request: LoginRequestDto): Promise<LoginResponse> {
-    let url_ = this.baseUrl + "/api/auth/Login";
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(request);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processLogin(_response);
-    });
-  }
-
-  protected processLogin(response: Response): Promise<LoginResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as LoginResponse);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<LoginResponse>(null as any);
-  }
 
-  register(request: RegisterRequestDto): Promise<RegisterResponse> {
-    let url_ = this.baseUrl + "/api/auth/Register";
-    url_ = url_.replace(/[?&]$/, "");
+    login(request: LoginRequestDto): Promise<LoginResponse> {
+        let url_ = this.baseUrl + "/api/auth/Login";
+        url_ = url_.replace(/[?&]$/, "");
 
-    const content_ = JSON.stringify(request);
+        const content_ = JSON.stringify(request);
 
-    let options_: RequestInit = {
-      body: content_,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processRegister(_response);
-    });
-  }
-
-  protected processRegister(response: Response): Promise<RegisterResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as RegisterResponse);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<RegisterResponse>(null as any);
-  }
-
-  forgotPassword(dto: ForgotPasswordRequestDto): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/auth/ForgotPassword";
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(dto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processForgotPassword(_response);
-    });
-  }
-
-  protected processForgotPassword(response: Response): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLogin(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
 
-  resetPassword(dto: ResetPasswordRequestDto): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/auth/ResetPassword";
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(dto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processResetPassword(_response);
-    });
-  }
-
-  protected processResetPassword(response: Response): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processLogin(response: Response): Promise<LoginResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as LoginResponse;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<LoginResponse>(null as any);
     }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+
+    register(request: RegisterRequestDto): Promise<RegisterResponse> {
+        let url_ = this.baseUrl + "/api/auth/Register";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(request);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRegister(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
 
-  logout(): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/auth/Logout";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "POST",
-      headers: {
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processLogout(_response);
-    });
-  }
-
-  protected processLogout(response: Response): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processRegister(response: Response): Promise<RegisterResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as RegisterResponse;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RegisterResponse>(null as any);
     }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+
+    forgotPassword(dto: ForgotPasswordRequestDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/auth/ForgotPassword";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processForgotPassword(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
 
-  userInfo(): Promise<AuthUserInfo> {
-    let url_ = this.baseUrl + "/api/auth/UserInfo";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processUserInfo(_response);
-    });
-  }
-
-  protected processUserInfo(response: Response): Promise<AuthUserInfo> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processForgotPassword(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as AuthUserInfo);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    resetPassword(dto: ResetPasswordRequestDto): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/auth/ResetPassword";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(dto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processResetPassword(_response);
+        });
     }
-    return Promise.resolve<AuthUserInfo>(null as any);
-  }
+
+    protected processResetPassword(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    logout(): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/auth/Logout";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processLogout(_response);
+        });
+    }
+
+    protected processLogout(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    userInfo(): Promise<AuthUserInfo> {
+        let url_ = this.baseUrl + "/api/auth/UserInfo";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUserInfo(_response);
+        });
+    }
+
+    protected processUserInfo(response: Response): Promise<AuthUserInfo> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AuthUserInfo;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AuthUserInfo>(null as any);
+    }
 }
 
 export class GamesClient {
-  private http: {
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-  };
-  private baseUrl: string;
-  protected jsonParseReviver: ((key: string, value: any) => any) | undefined =
-    undefined;
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-  constructor(
-    baseUrl?: string,
-    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> },
-  ) {
-    this.http = http ? http : (window as any);
-    this.baseUrl = baseUrl ?? "";
-  }
-
-  getAllUpcomingGames(
-    filters: string | null | undefined,
-    sorts: string | null | undefined,
-    page: number | null | undefined,
-    pageSize: number | null | undefined,
-  ): Promise<PagedResultOfGameDto> {
-    let url_ = this.baseUrl + "/api/Games/GetAllUpcomingGames?";
-    if (filters !== undefined && filters !== null)
-      url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
-    if (sorts !== undefined && sorts !== null)
-      url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
-    if (page !== undefined && page !== null)
-      url_ += "Page=" + encodeURIComponent("" + page) + "&";
-    if (pageSize !== undefined && pageSize !== null)
-      url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetAllUpcomingGames(_response);
-    });
-  }
-
-  protected processGetAllUpcomingGames(
-    response: Response,
-  ): Promise<PagedResultOfGameDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as PagedResultOfGameDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getAllUpcomingGames(filters: string | null | undefined, sorts: string | null | undefined, page: number | null | undefined, pageSize: number | null | undefined): Promise<PagedResultOfGameDto> {
+        let url_ = this.baseUrl + "/api/Games/GetAllUpcomingGames?";
+        if (filters !== undefined && filters !== null)
+            url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
+        if (sorts !== undefined && sorts !== null)
+            url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
+        if (page !== undefined && page !== null)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize !== undefined && pageSize !== null)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllUpcomingGames(_response);
+        });
     }
-    return Promise.resolve<PagedResultOfGameDto>(null as any);
-  }
 
-  getAllPastGames(
-    filters: string | null | undefined,
-    sorts: string | null | undefined,
-    page: number | null | undefined,
-    pageSize: number | null | undefined,
-  ): Promise<PagedResultOfGameDto> {
-    let url_ = this.baseUrl + "/api/Games/GetAllPastGames?";
-    if (filters !== undefined && filters !== null)
-      url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
-    if (sorts !== undefined && sorts !== null)
-      url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
-    if (page !== undefined && page !== null)
-      url_ += "Page=" + encodeURIComponent("" + page) + "&";
-    if (pageSize !== undefined && pageSize !== null)
-      url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetAllPastGames(_response);
-    });
-  }
-
-  protected processGetAllPastGames(
-    response: Response,
-  ): Promise<PagedResultOfGameDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetAllUpcomingGames(response: Response): Promise<PagedResultOfGameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfGameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfGameDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as PagedResultOfGameDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getAllPastGames(filters: string | null | undefined, sorts: string | null | undefined, page: number | null | undefined, pageSize: number | null | undefined): Promise<PagedResultOfGameDto> {
+        let url_ = this.baseUrl + "/api/Games/GetAllPastGames?";
+        if (filters !== undefined && filters !== null)
+            url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
+        if (sorts !== undefined && sorts !== null)
+            url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
+        if (page !== undefined && page !== null)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize !== undefined && pageSize !== null)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllPastGames(_response);
+        });
     }
-    return Promise.resolve<PagedResultOfGameDto>(null as any);
-  }
 
-  getGameById(id: string): Promise<GameDto> {
-    let url_ = this.baseUrl + "/api/Games/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetGameById(_response);
-    });
-  }
-
-  protected processGetGameById(response: Response): Promise<GameDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetAllPastGames(response: Response): Promise<PagedResultOfGameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfGameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfGameDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as GameDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getGameById(id: string): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetGameById(_response);
+        });
     }
-    return Promise.resolve<GameDto>(null as any);
-  }
 
-  getCurrentGame(): Promise<GameDto> {
-    let url_ = this.baseUrl + "/api/Games/GetCurrentGame";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetCurrentGame(_response);
-    });
-  }
-
-  protected processGetCurrentGame(response: Response): Promise<GameDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetGameById(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as GameDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getCurrentGame(): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/GetCurrentGame";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetCurrentGame(_response);
+        });
     }
-    return Promise.resolve<GameDto>(null as any);
-  }
 
-  updateWinningNumbers(
-    id: string,
-    winningNumbersDto: WinningNumbersDto,
-  ): Promise<GameDto> {
-    let url_ = this.baseUrl + "/api/Games/{id}/UpdateWinningNumbers";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(winningNumbersDto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processUpdateWinningNumbers(_response);
-    });
-  }
-
-  protected processUpdateWinningNumbers(response: Response): Promise<GameDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetCurrentGame(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as GameDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getCurrentGameForPlayer(): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/player/current";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetCurrentGameForPlayer(_response);
+        });
     }
-    return Promise.resolve<GameDto>(null as any);
-  }
 
-  drawWinners(id: string): Promise<GameDto> {
-    let url_ = this.baseUrl + "/api/Games/{id}/DrawWinners";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "PATCH",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processDrawWinners(_response);
-    });
-  }
-
-  protected processDrawWinners(response: Response): Promise<GameDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetCurrentGameForPlayer(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as GameDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    updateWinningNumbers(id: string, winningNumbersDto: WinningNumbersDto): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/{id}/UpdateWinningNumbers";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(winningNumbersDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateWinningNumbers(_response);
+        });
     }
-    return Promise.resolve<GameDto>(null as any);
-  }
 
-  updateNumberOfPhysicalPlayers(
-    id: string,
-    numberOfPhysicalPlayersDto: NumberOfPhysicalPlayersDto,
-  ): Promise<GameDto> {
-    let url_ = this.baseUrl + "/api/Games/{id}/UpdateNumberOfPhysicalPlayers";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(numberOfPhysicalPlayersDto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processUpdateNumberOfPhysicalPlayers(_response);
-    });
-  }
-
-  protected processUpdateNumberOfPhysicalPlayers(
-    response: Response,
-  ): Promise<GameDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processUpdateWinningNumbers(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as GameDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    drawWinners(id: string): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/{id}/DrawWinners";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDrawWinners(_response);
+        });
     }
-    return Promise.resolve<GameDto>(null as any);
-  }
+
+    protected processDrawWinners(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
+    }
+
+    updateNumberOfPhysicalPlayers(id: string, numberOfPhysicalPlayersDto: NumberOfPhysicalPlayersDto): Promise<GameDto> {
+        let url_ = this.baseUrl + "/api/Games/{id}/UpdateNumberOfPhysicalPlayers";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(numberOfPhysicalPlayersDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateNumberOfPhysicalPlayers(_response);
+        });
+    }
+
+    protected processUpdateNumberOfPhysicalPlayers(response: Response): Promise<GameDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as GameDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<GameDto>(null as any);
+    }
 }
 
 export class HealthClient {
-  private http: {
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-  };
-  private baseUrl: string;
-  protected jsonParseReviver: ((key: string, value: any) => any) | undefined =
-    undefined;
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-  constructor(
-    baseUrl?: string,
-    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> },
-  ) {
-    this.http = http ? http : (window as any);
-    this.baseUrl = baseUrl ?? "";
-  }
-
-  up(): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/Health/App/Up";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processUp(_response);
-    });
-  }
-
-  protected processUp(response: Response): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
     }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+
+    up(): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Health/App/Up";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUp(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
 
-  databaseUp(): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/Health/Database/Up";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processDatabaseUp(_response);
-    });
-  }
-
-  protected processDatabaseUp(response: Response): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processUp(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
     }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+
+    databaseUp(): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Health/Database/Up";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDatabaseUp(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
+
+    protected processDatabaseUp(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
 }
 
 export class TransactionsClient {
-  private http: {
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-  };
-  private baseUrl: string;
-  protected jsonParseReviver: ((key: string, value: any) => any) | undefined =
-    undefined;
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-  constructor(
-    baseUrl?: string,
-    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> },
-  ) {
-    this.http = http ? http : (window as any);
-    this.baseUrl = baseUrl ?? "";
-  }
-
-  getAllTransactions(
-    filters: string | null | undefined,
-    sorts: string | null | undefined,
-    page: number | null | undefined,
-    pageSize: number | null | undefined,
-  ): Promise<PagedResultOfTransactionDto> {
-    let url_ = this.baseUrl + "/api/Transactions?";
-    if (filters !== undefined && filters !== null)
-      url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
-    if (sorts !== undefined && sorts !== null)
-      url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
-    if (page !== undefined && page !== null)
-      url_ += "Page=" + encodeURIComponent("" + page) + "&";
-    if (pageSize !== undefined && pageSize !== null)
-      url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetAllTransactions(_response);
-    });
-  }
-
-  protected processGetAllTransactions(
-    response: Response,
-  ): Promise<PagedResultOfTransactionDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as PagedResultOfTransactionDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<PagedResultOfTransactionDto>(null as any);
-  }
 
-  createTransaction(
-    createTransactionDto: CreateTransactionDto,
-  ): Promise<TransactionDto> {
-    let url_ = this.baseUrl + "/api/Transactions";
-    url_ = url_.replace(/[?&]$/, "");
+    getAllTransactions(filters: string | null | undefined, sorts: string | null | undefined, page: number | null | undefined, pageSize: number | null | undefined): Promise<PagedResultOfTransactionDto> {
+        let url_ = this.baseUrl + "/api/Transactions?";
+        if (filters !== undefined && filters !== null)
+            url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
+        if (sorts !== undefined && sorts !== null)
+            url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
+        if (page !== undefined && page !== null)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize !== undefined && pageSize !== null)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
 
-    const content_ = JSON.stringify(createTransactionDto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processCreateTransaction(_response);
-    });
-  }
-
-  protected processCreateTransaction(
-    response: Response,
-  ): Promise<TransactionDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 201) {
-      return response.text().then((_responseText) => {
-        let result201: any = null;
-        result201 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as TransactionDto);
-        return result201;
-      });
-    } else if (status === 400) {
-      return response.text().then((_responseText) => {
-        let result400: any = null;
-        result400 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as ValidationProblemDetails);
-        return throwException(
-          "A server side error occurred.",
-          status,
-          _responseText,
-          _headers,
-          result400,
-        );
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<TransactionDto>(null as any);
-  }
-
-  getTransactionsByUser(
-    userId: string,
-    filters: string | null | undefined,
-    sorts: string | null | undefined,
-    page: number | null | undefined,
-    pageSize: number | null | undefined,
-  ): Promise<PagedResultOfTransactionDto> {
-    let url_ = this.baseUrl + "/api/Transactions/User/{userId}?";
-    if (userId === undefined || userId === null)
-      throw new globalThis.Error("The parameter 'userId' must be defined.");
-    url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
-    if (filters !== undefined && filters !== null)
-      url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
-    if (sorts !== undefined && sorts !== null)
-      url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
-    if (page !== undefined && page !== null)
-      url_ += "Page=" + encodeURIComponent("" + page) + "&";
-    if (pageSize !== undefined && pageSize !== null)
-      url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetTransactionsByUser(_response);
-    });
-  }
-
-  protected processGetTransactionsByUser(
-    response: Response,
-  ): Promise<PagedResultOfTransactionDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as PagedResultOfTransactionDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<PagedResultOfTransactionDto>(null as any);
-  }
-
-  getTransactionById(id: string): Promise<TransactionDto> {
-    let url_ = this.baseUrl + "/api/Transactions/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetTransactionById(_response);
-    });
-  }
-
-  protected processGetTransactionById(
-    response: Response,
-  ): Promise<TransactionDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as TransactionDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<TransactionDto>(null as any);
-  }
-
-  updateTransactionStatus(
-    id: string,
-    updateTransactionDto: UpdateTransactionDto,
-  ): Promise<TransactionDto> {
-    let url_ = this.baseUrl + "/api/Transactions/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(updateTransactionDto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processUpdateTransactionStatus(_response);
-    });
-  }
-
-  protected processUpdateTransactionStatus(
-    response: Response,
-  ): Promise<TransactionDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as TransactionDto);
-        return result200;
-      });
-    } else if (status === 400) {
-      return response.text().then((_responseText) => {
-        let result400: any = null;
-        result400 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as ValidationProblemDetails);
-        return throwException(
-          "A server side error occurred.",
-          status,
-          _responseText,
-          _headers,
-          result400,
-        );
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<TransactionDto>(null as any);
-  }
-
-  deleteTransaction(id: string): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/Transactions/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "DELETE",
-      headers: {
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processDeleteTransaction(_response);
-    });
-  }
-
-  protected processDeleteTransaction(
-    response: Response,
-  ): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllTransactions(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
 
-  approveTransaction(id: string): Promise<PagedResultOfTransactionDto> {
-    let url_ = this.baseUrl + "/api/Transactions/{id}/approve";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "PATCH",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processApproveTransaction(_response);
-    });
-  }
-
-  protected processApproveTransaction(
-    response: Response,
-  ): Promise<PagedResultOfTransactionDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetAllTransactions(response: Response): Promise<PagedResultOfTransactionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfTransactionDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfTransactionDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as PagedResultOfTransactionDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<PagedResultOfTransactionDto>(null as any);
-  }
 
-  rejectTransaction(id: string): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/Transactions/{id}/reject";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
+    createTransaction(createTransactionDto: CreateTransactionDto): Promise<TransactionDto> {
+        let url_ = this.baseUrl + "/api/Transactions";
+        url_ = url_.replace(/[?&]$/, "");
 
-    let options_: RequestInit = {
-      method: "PATCH",
-      headers: {
-        Accept: "application/octet-stream",
-      },
-    };
+        const content_ = JSON.stringify(createTransactionDto);
 
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processRejectTransaction(_response);
-    });
-  }
-
-  protected processRejectTransaction(
-    response: Response,
-  ): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateTransaction(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
 
-  getPendingTransactionsCount(): Promise<number> {
-    let url_ = this.baseUrl + "/api/Transactions/GetPendingTransactionsCount";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetPendingTransactionsCount(_response);
-    });
-  }
-
-  protected processGetPendingTransactionsCount(
-    response: Response,
-  ): Promise<number> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processCreateTransaction(response: Response): Promise<TransactionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionDto;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ValidationProblemDetails;
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TransactionDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as number);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getTransactionsByUser(userId: string, filters: string | null | undefined, sorts: string | null | undefined, page: number | null | undefined, pageSize: number | null | undefined): Promise<PagedResultOfTransactionDto> {
+        let url_ = this.baseUrl + "/api/Transactions/User/{userId}?";
+        if (userId === undefined || userId === null)
+            throw new globalThis.Error("The parameter 'userId' must be defined.");
+        url_ = url_.replace("{userId}", encodeURIComponent("" + userId));
+        if (filters !== undefined && filters !== null)
+            url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
+        if (sorts !== undefined && sorts !== null)
+            url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
+        if (page !== undefined && page !== null)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize !== undefined && pageSize !== null)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetTransactionsByUser(_response);
+        });
     }
-    return Promise.resolve<number>(null as any);
-  }
 
-  getUserBalance(userId: string | undefined): Promise<number> {
-    let url_ = this.baseUrl + "/api/Transactions/GetUserBalance?";
-    if (userId === null)
-      throw new globalThis.Error("The parameter 'userId' cannot be null.");
-    else if (userId !== undefined)
-      url_ += "userId=" + encodeURIComponent("" + userId) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetUserBalance(_response);
-    });
-  }
-
-  protected processGetUserBalance(response: Response): Promise<number> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetTransactionsByUser(response: Response): Promise<PagedResultOfTransactionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfTransactionDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfTransactionDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as number);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getTransactionById(id: string): Promise<TransactionDto> {
+        let url_ = this.baseUrl + "/api/Transactions/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetTransactionById(_response);
+        });
     }
-    return Promise.resolve<number>(null as any);
-  }
 
-  getUserDepositTotal(userId: string | undefined): Promise<number> {
-    let url_ = this.baseUrl + "/api/Transactions/GetUserDepositTotal?";
-    if (userId === null)
-      throw new globalThis.Error("The parameter 'userId' cannot be null.");
-    else if (userId !== undefined)
-      url_ += "userId=" + encodeURIComponent("" + userId) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetUserDepositTotal(_response);
-    });
-  }
-
-  protected processGetUserDepositTotal(response: Response): Promise<number> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetTransactionById(response: Response): Promise<TransactionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TransactionDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as number);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    updateTransactionStatus(id: string, updateTransactionDto: UpdateTransactionDto): Promise<TransactionDto> {
+        let url_ = this.baseUrl + "/api/Transactions/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(updateTransactionDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateTransactionStatus(_response);
+        });
     }
-    return Promise.resolve<number>(null as any);
-  }
 
-  getUserPurchaseTotal(userId: string | undefined): Promise<number> {
-    let url_ = this.baseUrl + "/api/Transactions/GetUserPurchaseTotal?";
-    if (userId === null)
-      throw new globalThis.Error("The parameter 'userId' cannot be null.");
-    else if (userId !== undefined)
-      url_ += "userId=" + encodeURIComponent("" + userId) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetUserPurchaseTotal(_response);
-    });
-  }
-
-  protected processGetUserPurchaseTotal(response: Response): Promise<number> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processUpdateTransactionStatus(response: Response): Promise<TransactionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as TransactionDto;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ValidationProblemDetails;
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<TransactionDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as number);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    deleteTransaction(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Transactions/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeleteTransaction(_response);
+        });
     }
-    return Promise.resolve<number>(null as any);
-  }
+
+    protected processDeleteTransaction(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    approveTransaction(id: string): Promise<PagedResultOfTransactionDto> {
+        let url_ = this.baseUrl + "/api/Transactions/{id}/approve";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processApproveTransaction(_response);
+        });
+    }
+
+    protected processApproveTransaction(response: Response): Promise<PagedResultOfTransactionDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfTransactionDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfTransactionDto>(null as any);
+    }
+
+    rejectTransaction(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Transactions/{id}/reject";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRejectTransaction(_response);
+        });
+    }
+
+    protected processRejectTransaction(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    getPendingTransactionsCount(): Promise<number> {
+        let url_ = this.baseUrl + "/api/Transactions/GetPendingTransactionsCount";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetPendingTransactionsCount(_response);
+        });
+    }
+
+    protected processGetPendingTransactionsCount(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as number;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    getUserBalance(userId: string | undefined): Promise<number> {
+        let url_ = this.baseUrl + "/api/Transactions/GetUserBalance?";
+        if (userId === null)
+            throw new globalThis.Error("The parameter 'userId' cannot be null.");
+        else if (userId !== undefined)
+            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserBalance(_response);
+        });
+    }
+
+    protected processGetUserBalance(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as number;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    getUserDepositTotal(userId: string | undefined): Promise<number> {
+        let url_ = this.baseUrl + "/api/Transactions/GetUserDepositTotal?";
+        if (userId === null)
+            throw new globalThis.Error("The parameter 'userId' cannot be null.");
+        else if (userId !== undefined)
+            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserDepositTotal(_response);
+        });
+    }
+
+    protected processGetUserDepositTotal(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as number;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    getUserPurchaseTotal(userId: string | undefined): Promise<number> {
+        let url_ = this.baseUrl + "/api/Transactions/GetUserPurchaseTotal?";
+        if (userId === null)
+            throw new globalThis.Error("The parameter 'userId' cannot be null.");
+        else if (userId !== undefined)
+            url_ += "userId=" + encodeURIComponent("" + userId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserPurchaseTotal(_response);
+        });
+    }
+
+    protected processGetUserPurchaseTotal(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as number;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
 }
 
 export class UsersClient {
-  private http: {
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response>;
-  };
-  private baseUrl: string;
-  protected jsonParseReviver: ((key: string, value: any) => any) | undefined =
-    undefined;
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-  constructor(
-    baseUrl?: string,
-    http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> },
-  ) {
-    this.http = http ? http : (window as any);
-    this.baseUrl = baseUrl ?? "";
-  }
-
-  getAllUsers(
-    filters: string | null | undefined,
-    sorts: string | null | undefined,
-    page: number | null | undefined,
-    pageSize: number | null | undefined,
-  ): Promise<PagedResultOfUserDto> {
-    let url_ = this.baseUrl + "/api/Users?";
-    if (filters !== undefined && filters !== null)
-      url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
-    if (sorts !== undefined && sorts !== null)
-      url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
-    if (page !== undefined && page !== null)
-      url_ += "Page=" + encodeURIComponent("" + page) + "&";
-    if (pageSize !== undefined && pageSize !== null)
-      url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetAllUsers(_response);
-    });
-  }
-
-  protected processGetAllUsers(
-    response: Response,
-  ): Promise<PagedResultOfUserDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as PagedResultOfUserDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<PagedResultOfUserDto>(null as any);
-  }
 
-  createUser(createUserDto: CreateUserDto): Promise<UserDto> {
-    let url_ = this.baseUrl + "/api/Users";
-    url_ = url_.replace(/[?&]$/, "");
+    getAllUsers(filters: string | null | undefined, sorts: string | null | undefined, page: number | null | undefined, pageSize: number | null | undefined): Promise<PagedResultOfUserDto> {
+        let url_ = this.baseUrl + "/api/Users?";
+        if (filters !== undefined && filters !== null)
+            url_ += "Filters=" + encodeURIComponent("" + filters) + "&";
+        if (sorts !== undefined && sorts !== null)
+            url_ += "Sorts=" + encodeURIComponent("" + sorts) + "&";
+        if (page !== undefined && page !== null)
+            url_ += "Page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize !== undefined && pageSize !== null)
+            url_ += "PageSize=" + encodeURIComponent("" + pageSize) + "&";
+        url_ = url_.replace(/[?&]$/, "");
 
-    const content_ = JSON.stringify(createUserDto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processCreateUser(_response);
-    });
-  }
-
-  protected processCreateUser(response: Response): Promise<UserDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 201) {
-      return response.text().then((_responseText) => {
-        let result201: any = null;
-        result201 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
-        return result201;
-      });
-    } else if (status === 400) {
-      return response.text().then((_responseText) => {
-        let result400: any = null;
-        result400 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(
-                _responseText,
-                this.jsonParseReviver,
-              ) as ValidationProblemDetails);
-        return throwException(
-          "A server side error occurred.",
-          status,
-          _responseText,
-          _headers,
-          result400,
-        );
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<UserDto>(null as any);
-  }
-
-  getUserById(id: string): Promise<UserDto> {
-    let url_ = this.baseUrl + "/api/Users/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetUserById(_response);
-    });
-  }
-
-  protected processGetUserById(response: Response): Promise<UserDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<UserDto>(null as any);
-  }
-
-  updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
-    let url_ = this.baseUrl + "/api/Users/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    const content_ = JSON.stringify(updateUserDto);
-
-    let options_: RequestInit = {
-      body: content_,
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processUpdateUser(_response);
-    });
-  }
-
-  protected processUpdateUser(response: Response): Promise<UserDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
-    }
-    return Promise.resolve<UserDto>(null as any);
-  }
-
-  deleteUser(id: string): Promise<FileResponse> {
-    let url_ = this.baseUrl + "/api/Users/{id}";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "DELETE",
-      headers: {
-        Accept: "application/octet-stream",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processDeleteUser(_response);
-    });
-  }
-
-  protected processDeleteUser(response: Response): Promise<FileResponse> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
-    }
-    if (status === 200 || status === 206) {
-      const contentDisposition = response.headers
-        ? response.headers.get("content-disposition")
-        : undefined;
-      let fileNameMatch = contentDisposition
-        ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(
-            contentDisposition,
-          )
-        : undefined;
-      let fileName =
-        fileNameMatch && fileNameMatch.length > 1
-          ? fileNameMatch[3] || fileNameMatch[2]
-          : undefined;
-      if (fileName) {
-        fileName = decodeURIComponent(fileName);
-      } else {
-        fileNameMatch = contentDisposition
-          ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition)
-          : undefined;
-        fileName =
-          fileNameMatch && fileNameMatch.length > 1
-            ? fileNameMatch[1]
-            : undefined;
-      }
-      return response.blob().then((blob) => {
-        return {
-          fileName: fileName,
-          data: blob,
-          status: status,
-          headers: _headers,
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
         };
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetAllUsers(_response);
+        });
     }
-    return Promise.resolve<FileResponse>(null as any);
-  }
 
-  renewMembership(id: string): Promise<UserDto> {
-    let url_ = this.baseUrl + "/api/Users/{id}/renew-membership";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processRenewMembership(_response);
-    });
-  }
-
-  protected processRenewMembership(response: Response): Promise<UserDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetAllUsers(response: Response): Promise<PagedResultOfUserDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PagedResultOfUserDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<PagedResultOfUserDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    createUser(createUserDto: CreateUserDto): Promise<UserDto> {
+        let url_ = this.baseUrl + "/api/Users";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(createUserDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreateUser(_response);
+        });
     }
-    return Promise.resolve<UserDto>(null as any);
-  }
 
-  getPlayersCount(): Promise<number> {
-    let url_ = this.baseUrl + "/api/Users/GetPlayerCount";
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processGetPlayersCount(_response);
-    });
-  }
-
-  protected processGetPlayersCount(response: Response): Promise<number> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processCreateUser(response: Response): Promise<UserDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 201) {
+            return response.text().then((_responseText) => {
+            let result201: any = null;
+            result201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto;
+            return result201;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ValidationProblemDetails;
+            return throwException("A server side error occurred.", status, _responseText, _headers, result400);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as number);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    getUserById(id: string): Promise<UserDto> {
+        let url_ = this.baseUrl + "/api/Users/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetUserById(_response);
+        });
     }
-    return Promise.resolve<number>(null as any);
-  }
 
-  activateUser(id: string): Promise<UserDto> {
-    let url_ = this.baseUrl + "/api/Users/{id}/Activate";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "PATCH",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processActivateUser(_response);
-    });
-  }
-
-  protected processActivateUser(response: Response): Promise<UserDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processGetUserById(response: Response): Promise<UserDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDto> {
+        let url_ = this.baseUrl + "/api/Users/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(updateUserDto);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processUpdateUser(_response);
+        });
     }
-    return Promise.resolve<UserDto>(null as any);
-  }
 
-  deactivateUser(id: string): Promise<UserDto> {
-    let url_ = this.baseUrl + "/api/Users/{id}/Dectivate";
-    if (id === undefined || id === null)
-      throw new globalThis.Error("The parameter 'id' must be defined.");
-    url_ = url_.replace("{id}", encodeURIComponent("" + id));
-    url_ = url_.replace(/[?&]$/, "");
-
-    let options_: RequestInit = {
-      method: "PATCH",
-      headers: {
-        Accept: "application/json",
-      },
-    };
-
-    return this.http.fetch(url_, options_).then((_response: Response) => {
-      return this.processDeactivateUser(_response);
-    });
-  }
-
-  protected processDeactivateUser(response: Response): Promise<UserDto> {
-    const status = response.status;
-    let _headers: any = {};
-    if (response.headers && response.headers.forEach) {
-      response.headers.forEach((v: any, k: any) => (_headers[k] = v));
+    protected processUpdateUser(response: Response): Promise<UserDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDto>(null as any);
     }
-    if (status === 200) {
-      return response.text().then((_responseText) => {
-        let result200: any = null;
-        result200 =
-          _responseText === ""
-            ? null
-            : (JSON.parse(_responseText, this.jsonParseReviver) as UserDto);
-        return result200;
-      });
-    } else if (status !== 200 && status !== 204) {
-      return response.text().then((_responseText) => {
-        return throwException(
-          "An unexpected server error occurred.",
-          status,
-          _responseText,
-          _headers,
-        );
-      });
+
+    deleteUser(id: string): Promise<FileResponse> {
+        let url_ = this.baseUrl + "/api/Users/{id}";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+                "Accept": "application/octet-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeleteUser(_response);
+        });
     }
-    return Promise.resolve<UserDto>(null as any);
-  }
+
+    protected processDeleteUser(response: Response): Promise<FileResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            let fileNameMatch = contentDisposition ? /filename\*=(?:(\\?['"])(.*?)\1|(?:[^\s]+'.*?')?([^;\n]*))/g.exec(contentDisposition) : undefined;
+            let fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[3] || fileNameMatch[2] : undefined;
+            if (fileName) {
+                fileName = decodeURIComponent(fileName);
+            } else {
+                fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+                fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            }
+            return response.blob().then(blob => { return { fileName: fileName, data: blob, status: status, headers: _headers }; });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FileResponse>(null as any);
+    }
+
+    renewMembership(id: string): Promise<UserDto> {
+        let url_ = this.baseUrl + "/api/Users/{id}/renew-membership";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processRenewMembership(_response);
+        });
+    }
+
+    protected processRenewMembership(response: Response): Promise<UserDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDto>(null as any);
+    }
+
+    getPlayersCount(): Promise<number> {
+        let url_ = this.baseUrl + "/api/Users/GetPlayerCount";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGetPlayersCount(_response);
+        });
+    }
+
+    protected processGetPlayersCount(response: Response): Promise<number> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as number;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<number>(null as any);
+    }
+
+    activateUser(id: string): Promise<UserDto> {
+        let url_ = this.baseUrl + "/api/Users/{id}/Activate";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processActivateUser(_response);
+        });
+    }
+
+    protected processActivateUser(response: Response): Promise<UserDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDto>(null as any);
+    }
+
+    deactivateUser(id: string): Promise<UserDto> {
+        let url_ = this.baseUrl + "/api/Users/{id}/Dectivate";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "PATCH",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processDeactivateUser(_response);
+        });
+    }
+
+    protected processDeactivateUser(response: Response): Promise<UserDto> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as UserDto;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserDto>(null as any);
+    }
 }
 
 export interface PlaceBetResponse {
-  success: boolean;
-  message: string;
-  betId: string;
-  sortedNumbers: string;
-  count: number;
-  price: number;
-  createdAt: string;
+    success: boolean;
+    message: string;
+    betId: string;
+    sortedNumbers: string;
+    count: number;
+    price: number;
+    createdAt: string;
 }
 
 export interface CreateBetDto {
-  numbers: number[];
-  count: number;
-  price: number;
-  repeatWeeks: number;
+    numbers: number[];
+    count: number;
+    price: number;
+    repeatWeeks: number;
 }
 
 export interface BetHistoryResponse {
-  bets: BetHistoryDto[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
+    bets: BetHistoryDto[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
 }
 
 export interface BetHistoryDto {
-  id: string;
-  numbers: string;
-  count: number;
-  price: number;
-  date: string;
+    id: string;
+    numbers: string;
+    count: number;
+    price: number;
+    date: string;
+    isWinning: boolean;
+    betSeriesId: string | undefined;
+    seriesTotal: number | undefined;
+    seriesIndex: number | undefined;
+    gameWeek: number | undefined;
+    gameYear: number | undefined;
+    gameStartTime: string | undefined;
+}
+
+export interface UpdateBetDto {
+    numbers: number[];
 }
 
 export interface LoginResponse {
-  jwt: string;
+    jwt: string;
 }
 
 export interface LoginRequestDto {
-  email: string;
-  password: string;
+    email: string;
+    password: string;
 }
 
 export interface RegisterResponse {
-  name: string;
+    name: string;
 }
 
 export interface RegisterRequestDto {
-  email: string;
-  password: string;
-  name: string;
+    email: string;
+    password: string;
+    name: string;
 }
 
 export interface ForgotPasswordRequestDto {
-  email: string;
+    email: string;
 }
 
 export interface ResetPasswordRequestDto {
-  email: string;
-  token: string;
-  newPassword: string;
+    email: string;
+    token: string;
+    newPassword: string;
 }
 
 export interface AuthUserInfo {
-  id: string;
-  name: string;
-  isAdmin: boolean;
-  expiresAt: string | undefined;
-  deletedAt: string | undefined;
+    id: string;
+    name: string;
+    isAdmin: boolean;
+    expiresAt: string | undefined;
+    deletedAt: string | undefined;
 }
 
 export interface PagedResultOfGameDto {
-  items: GameDto[];
-  total: number;
-  pageSize: number;
-  pageNumber: number;
+    items: GameDto[];
+    total: number;
+    pageSize: number;
+    pageNumber: number;
 }
 
 export interface GameDto {
-  id: string;
-  weekNumber: number;
-  year: number;
-  startTime: string | undefined;
-  betDeadline: string;
-  drawDate: string | undefined;
-  revenue: number;
-  winningNumbers: string | undefined;
-  isDrawn: boolean;
-  canBet: boolean;
-  bets: Bet[];
-  numberOfPhysicalPlayers: number | undefined;
+    id: string;
+    weekNumber: number;
+    year: number;
+    startTime: string | undefined;
+    betDeadline: string;
+    drawDate: string | undefined;
+    revenue: number;
+    winningNumbers: string | undefined;
+    isDrawn: boolean;
+    canBet: boolean;
+    bets: Bet[];
+    numberOfPhysicalPlayers: number | undefined;
 }
 
 export interface Bet {
-  id: string;
-  userId: string;
-  user: User;
-  gameId: string;
-  game: Game;
-  transactionId: string;
-  transaction: Transaction;
-  selectedNumbers: string;
-  isWinning: boolean;
-  winnings: number;
-  createdAt: string;
-  deletedAt: string | undefined;
+    id: string;
+    userId: string;
+    user: User;
+    gameId: string;
+    game: Game;
+    transactionId: string;
+    transaction: Transaction;
+    selectedNumbers: string;
+    isWinning: boolean;
+    winnings: number;
+    createdAt: string;
+    deletedAt: string | undefined;
+    betSeriesId: string | undefined;
 }
 
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  isAdmin: boolean;
-  expiresAt: string | undefined;
-  createdAt: string;
-  updatedAt: string | undefined;
-  deletedAt: string | undefined;
-  isActive: boolean;
-  bets: Bet[];
-  transactions: Transaction[];
-  passwordResetToken: string | undefined;
-  passwordResetTokenExpiry: string | undefined;
+    id: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    isAdmin: boolean;
+    expiresAt: string | undefined;
+    createdAt: string;
+    updatedAt: string | undefined;
+    deletedAt: string | undefined;
+    isActive: boolean;
+    bets: Bet[];
+    transactions: Transaction[];
+    passwordResetToken: string | undefined;
+    passwordResetTokenExpiry: string | undefined;
 }
 
 export interface Transaction {
-  id: string;
-  userId: string;
-  user: User;
-  amount: number;
-  mobilePayTransactionNumber: number | undefined;
-  status: TransactionStatus;
-  type: TransactionType;
-  createdAt: string;
-  bet: Bet;
+    id: string;
+    userId: string;
+    user: User;
+    amount: number;
+    mobilePayTransactionNumber: number | undefined;
+    status: TransactionStatus;
+    type: TransactionType;
+    createdAt: string;
+    bet: Bet;
 }
 
 export enum TransactionStatus {
-  Pending = 0,
-  Accepted = 1,
-  Rejected = 2,
-  Cancelled = 3,
+    Pending = 0,
+    Accepted = 1,
+    Rejected = 2,
+    Cancelled = 3,
 }
 
 export enum TransactionType {
-  Deposit = 0,
-  Purchase = 1,
-  Refund = 2,
+    Deposit = 0,
+    Purchase = 1,
+    Refund = 2,
 }
 
 export interface Game {
-  id: string;
-  weekNumber: number;
-  year: number;
-  startTime: string;
-  betDeadline: string;
-  drawDate: string | undefined;
-  revenue: number;
-  winningNumbers: string | undefined;
-  bets: Bet[];
-  isDrawn: boolean;
-  canBet: boolean;
-  numberOfPhysicalPlayers: number | undefined;
+    id: string;
+    weekNumber: number;
+    year: number;
+    startTime: string;
+    betDeadline: string;
+    drawDate: string | undefined;
+    revenue: number;
+    winningNumbers: string | undefined;
+    bets: Bet[];
+    isDrawn: boolean;
+    canBet: boolean;
+    numberOfPhysicalPlayers: number | undefined;
 }
 
 export interface WinningNumbersDto {
-  winningNumbers: string;
+    winningNumbers: string;
 }
 
 export interface NumberOfPhysicalPlayersDto {
-  numberOfPhysicalPlayers: number | undefined;
+    numberOfPhysicalPlayers: number | undefined;
 }
 
 export interface PagedResultOfTransactionDto {
-  items: TransactionDto[];
-  total: number;
-  pageSize: number;
-  pageNumber: number;
+    items: TransactionDto[];
+    total: number;
+    pageSize: number;
+    pageNumber: number;
 }
 
 export interface TransactionDto {
-  id: string;
-  userId: string;
-  amount: number;
-  mobilePayTransactionNumber: number | undefined;
-  status: TransactionStatus;
-  type: TransactionType;
-  createdAt: string;
-  user: User;
+    id: string;
+    userId: string;
+    amount: number;
+    mobilePayTransactionNumber: number | undefined;
+    status: TransactionStatus;
+    type: TransactionType;
+    createdAt: string;
+    user: User;
 }
 
 export interface ProblemDetails {
-  type: string | undefined;
-  title: string | undefined;
-  status: number | undefined;
-  detail: string | undefined;
-  instance: string | undefined;
+    type: string | undefined;
+    title: string | undefined;
+    status: number | undefined;
+    detail: string | undefined;
+    instance: string | undefined;
 
-  [key: string]: any;
+    [key: string]: any;
 }
 
 export interface HttpValidationProblemDetails extends ProblemDetails {
-  errors: { [key: string]: string[] };
+    errors: { [key: string]: string[]; };
 
-  [key: string]: any;
+    [key: string]: any;
 }
 
 export interface ValidationProblemDetails extends HttpValidationProblemDetails {
-  errors: { [key: string]: string[] };
+    errors: { [key: string]: string[]; };
 
-  [key: string]: any;
+    [key: string]: any;
 }
 
 export interface CreateTransactionDto {
-  userId: string;
-  amount: number;
-  mobilePayTransactionNumber: number;
+    userId: string;
+    amount: number;
+    mobilePayTransactionNumber: number;
 }
 
 export interface UpdateTransactionDto {
-  status: TransactionStatus;
+    status: TransactionStatus;
 }
 
 export interface PagedResultOfUserDto {
-  items: UserDto[];
-  total: number;
-  pageSize: number;
-  pageNumber: number;
+    items: UserDto[];
+    total: number;
+    pageSize: number;
+    pageNumber: number;
 }
 
 export interface UserDto {
-  id: string;
-  name: string;
-  password: string;
-  email: string;
-  phoneNumber: string;
-  isAdmin: boolean;
-  isActive: boolean;
-  expiresAt: string | undefined;
-  createdAt: string;
-  updatedAt: string | undefined;
-  deletedAt: string | undefined;
+    id: string;
+    name: string;
+    password: string;
+    email: string;
+    phoneNumber: string;
+    isAdmin: boolean;
+    isActive: boolean;
+    expiresAt: string | undefined;
+    createdAt: string;
+    updatedAt: string | undefined;
+    deletedAt: string | undefined;
 }
 
 export interface CreateUserDto {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  isAdmin: boolean;
-  activateMembership: boolean;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    isAdmin: boolean;
+    activateMembership: boolean;
 }
 
 export interface UpdateUserDto {
-  name: string;
-  email: string;
-  phoneNumber: string;
+    name: string;
+    email: string;
+    phoneNumber: string;
 }
 
 export interface FileResponse {
-  data: Blob;
-  status: number;
-  fileName?: string;
-  headers?: { [name: string]: any };
+    data: Blob;
+    status: number;
+    fileName?: string;
+    headers?: { [name: string]: any };
 }
 
 export class ApiException extends Error {
-  override message: string;
-  status: number;
-  response: string;
-  headers: { [key: string]: any };
-  result: any;
+    override message: string;
+    status: number;
+    response: string;
+    headers: { [key: string]: any; };
+    result: any;
 
-  constructor(
-    message: string,
-    status: number,
-    response: string,
-    headers: { [key: string]: any },
-    result: any,
-  ) {
-    super();
+    constructor(message: string, status: number, response: string, headers: { [key: string]: any; }, result: any) {
+        super();
 
-    this.message = message;
-    this.status = status;
-    this.response = response;
-    this.headers = headers;
-    this.result = result;
-  }
+        this.message = message;
+        this.status = status;
+        this.response = response;
+        this.headers = headers;
+        this.result = result;
+    }
 
-  protected isApiException = true;
+    protected isApiException = true;
 
-  static isApiException(obj: any): obj is ApiException {
-    return obj.isApiException === true;
-  }
+    static isApiException(obj: any): obj is ApiException {
+        return obj.isApiException === true;
+    }
 }
 
-function throwException(
-  message: string,
-  status: number,
-  response: string,
-  headers: { [key: string]: any },
-  result?: any,
-): any {
-  if (result !== null && result !== undefined) throw result;
-  else throw new ApiException(message, status, response, headers, null);
+function throwException(message: string, status: number, response: string, headers: { [key: string]: any; }, result?: any): any {
+    if (result !== null && result !== undefined)
+        throw result;
+    else
+        throw new ApiException(message, status, response, headers, null);
 }

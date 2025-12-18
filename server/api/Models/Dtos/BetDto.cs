@@ -17,7 +17,14 @@ public record BetHistoryDto(
     string Numbers,
     int Count,
     int Price,
-    DateTime Date
+    DateTime Date,
+    bool IsWinning,
+    Guid? BetSeriesId,
+    int? SeriesTotal,
+    int? SeriesIndex,
+    int? GameWeek,
+    int? GameYear,
+    DateTime? GameStartTime
 );
 
 public record BetHistoryResponse(
@@ -32,4 +39,8 @@ public record CreateBetDto(
     int Count,
     int Price,
     int RepeatWeeks = 1
+);
+
+public record UpdateBetDto(
+    List<int> Numbers
 );

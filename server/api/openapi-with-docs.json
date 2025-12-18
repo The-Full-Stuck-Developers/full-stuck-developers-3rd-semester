@@ -111,6 +111,91 @@
             }
           }
         }
+      },
+      "put": {
+        "tags": [
+          "Bets"
+        ],
+        "operationId": "Bets_UpdateBet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBetDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Bets/player/active": {
+      "get": {
+        "tags": [
+          "Bets"
+        ],
+        "operationId": "Bets_GetUserActiveBoards",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetHistoryResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/auth/Login": {
@@ -450,6 +535,26 @@
           "Games"
         ],
         "operationId": "Games_GetCurrentGame",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Games/player/current": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "operationId": "Games_GetCurrentGameForPlayer",
         "responses": {
           "200": {
             "description": "",
@@ -1532,6 +1637,52 @@
           "date": {
             "type": "string",
             "format": "date-time"
+          },
+          "isWinning": {
+            "type": "boolean"
+          },
+          "betSeriesId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "seriesTotal": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesIndex": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "gameWeek": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "gameYear": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "gameStartTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateBetDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "numbers": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         }
       },
@@ -1774,6 +1925,11 @@
           "deletedAt": {
             "type": "string",
             "format": "date-time",
+            "nullable": true
+          },
+          "betSeriesId": {
+            "type": "string",
+            "format": "guid",
             "nullable": true
           }
         }
