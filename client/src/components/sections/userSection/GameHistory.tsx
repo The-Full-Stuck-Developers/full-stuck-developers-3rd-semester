@@ -52,7 +52,9 @@ export function GameHistory() {
           {t("game_history")}
         </h1>
         <div className="flex items-center gap-4">
-          <label className="text-sm text-gray-400">{t("items_per_page")}:</label>
+          <label className="text-sm text-gray-400">
+            {t("items_per_page")}:
+          </label>
           <select
             value={pageSize}
             onChange={(e) => {
@@ -84,13 +86,18 @@ export function GameHistory() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <div className={`text-xl font-bold ${bet.isWinning ? "text-yellow-200" : "text-white"}`}>
+                    <div
+                      className={`text-xl font-bold ${bet.isWinning ? "text-yellow-200" : "text-white"}`}
+                    >
                       {bet.count} numbers • {bet.price} kr
-                      {bet.seriesTotal && bet.seriesTotal > 1 && bet.seriesIndex && (
-                        <span className="ml-2 text-sm font-normal text-blue-400">
-                          ({t("week")} {bet.seriesIndex} {t("of")} {bet.seriesTotal})
-                        </span>
-                      )}
+                      {bet.seriesTotal &&
+                        bet.seriesTotal > 1 &&
+                        bet.seriesIndex && (
+                          <span className="ml-2 text-sm font-normal text-blue-400">
+                            ({t("week")} {bet.seriesIndex} {t("of")}{" "}
+                            {bet.seriesTotal})
+                          </span>
+                        )}
                     </div>
                     {bet.isWinning && (
                       <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full text-white text-sm font-bold shadow-lg shadow-yellow-500/50 animate-pulse">
@@ -100,7 +107,9 @@ export function GameHistory() {
                       </div>
                     )}
                   </div>
-                  <div className={`text-sm mt-2 ${bet.isWinning ? "text-yellow-300/80" : "text-gray-400"}`}>
+                  <div
+                    className={`text-sm mt-2 ${bet.isWinning ? "text-yellow-300/80" : "text-gray-400"}`}
+                  >
                     {new Date(bet.date).toLocaleDateString("en-US", {
                       day: "2-digit",
                       month: "long",
@@ -113,7 +122,9 @@ export function GameHistory() {
               </div>
 
               <div className="flex items-center gap-3 mt-4">
-                <span className={`text-sm font-medium ${bet.isWinning ? "text-yellow-200" : "text-gray-400"}`}>
+                <span
+                  className={`text-sm font-medium ${bet.isWinning ? "text-yellow-200" : "text-gray-400"}`}
+                >
                   {t("your_numbers")}
                 </span>
                 <div className="flex gap-2 flex-wrap">

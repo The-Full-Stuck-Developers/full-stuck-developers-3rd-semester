@@ -187,7 +187,8 @@ export function GameBoard() {
 
         <div className="max-w-xs mx-auto">
           <label className="block text-sm text-gray-400 mb-2 text-center">
-            {t("repeat_for")} <strong>{repeatWeeks}</strong> {repeatWeeks > 1 ? t("weeks") : t("week")}
+            {t("repeat_for")} <strong>{repeatWeeks}</strong>{" "}
+            {repeatWeeks > 1 ? t("weeks") : t("week")}
           </label>
           <input
             type="range"
@@ -212,7 +213,9 @@ export function GameBoard() {
           onClick={submitBoard}
         >
           {isNextButtonEnabled ? (
-            <>{t("submit_board")} ({cost * repeatWeeks} kr)</>
+            <>
+              {t("submit_board")} ({cost * repeatWeeks} kr)
+            </>
           ) : (
             t("pick_at_least_5")
           )}
@@ -227,9 +230,7 @@ export function GameBoard() {
           </button>
         )}
 
-        <p className="text-center text-sm text-gray-400">
-          {t("auto_saved")}
-        </p>
+        <p className="text-center text-sm text-gray-400">{t("auto_saved")}</p>
       </div>
     </div>
   );

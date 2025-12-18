@@ -31,16 +31,19 @@ export function DashboardOverview() {
         const deposits = await transactionsClient.getUserDepositTotal(user.id);
         setTotalDeposits(deposits);
 
-        const activeBoardsResponse = await betsClient.getUserActiveBoards(1, 100);
+        const activeBoardsResponse = await betsClient.getUserActiveBoards(
+          1,
+          100,
+        );
         setActiveBoards(activeBoardsResponse.totalCount);
 
         try {
           const token = tokenStorage.getItem(TOKEN_KEY, null);
           const response = await fetch(`${baseUrl}/api/Games/player/current`, {
             headers: {
-              'Authorization': token ? `Bearer ${token}` : '',
-              'Accept': 'application/json'
-            }
+              Authorization: token ? `Bearer ${token}` : "",
+              Accept: "application/json",
+            },
           });
           if (response.ok) {
             const currentGame = await response.json();
@@ -68,18 +71,20 @@ export function DashboardOverview() {
 
   const formatBetDeadline = (deadline: Date | null) => {
     if (!deadline) return null;
-    
+
     const now = new Date();
     const isPast = deadline < now;
-    
+
     const localDeadline = new Date(deadline);
-    const dayName = localDeadline.toLocaleDateString("en-US", { weekday: "long" });
-    const time = localDeadline.toLocaleTimeString("en-US", { 
-      hour: "2-digit", 
-      minute: "2-digit",
-      hour12: false 
+    const dayName = localDeadline.toLocaleDateString("en-US", {
+      weekday: "long",
     });
-    
+    const time = localDeadline.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+
     return { dayName, time, isPast };
   };
 
@@ -158,18 +163,22 @@ export function DashboardOverview() {
             <div className="text-3xl font-black">{t("place_your_bet")}</div>
             <p className="text-gray-400">{t("pick_numbers")}</p>
             {deadlineInfo && (
-              <div className={`mt-4 px-4 py-2 rounded-lg inline-block ${
-                deadlineInfo.isPast 
-                  ? "bg-red-900/30 border border-red-700 text-red-300" 
-                  : "bg-blue-900/30 border border-blue-700 text-blue-300"
-              }`}>
+              <div
+                className={`mt-4 px-4 py-2 rounded-lg inline-block ${
+                  deadlineInfo.isPast
+                    ? "bg-red-900/30 border border-red-700 text-red-300"
+                    : "bg-blue-900/30 border border-blue-700 text-blue-300"
+                }`}
+              >
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <Clock className="w-4 h-4" />
                   <span>
-                    {deadlineInfo.isPast 
+                    {deadlineInfo.isPast
                       ? t("betting_closed")
-                      : t("bets_until", { day: deadlineInfo.dayName, time: deadlineInfo.time })
-                    }
+                      : t("bets_until", {
+                          day: deadlineInfo.dayName,
+                          time: deadlineInfo.time,
+                        })}
                   </span>
                 </div>
               </div>
@@ -201,7 +210,9 @@ export function DashboardOverview() {
               className="block p-5 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition"
             >
               <div className="font-semibold">{t("add_funds")}</div>
-              <div className="text-sm text-gray-400">{t("top_up_mobilepay")}</div>
+              <div className="text-sm text-gray-400">
+                {t("top_up_mobilepay")}
+              </div>
             </Link>
             <Link
               to="/player/boards"

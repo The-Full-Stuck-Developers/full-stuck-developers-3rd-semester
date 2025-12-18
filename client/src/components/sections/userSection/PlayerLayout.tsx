@@ -163,7 +163,10 @@ export function PlayerLayout() {
         </main>
       </div>
 
-      <SettingsComponent isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsComponent
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </div>
   );
 }
