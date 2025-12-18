@@ -147,7 +147,6 @@ public class GameService(
             0, 1, 0, DateTimeKind.Utc
         );
         
-        // Bet deadline: Saturday at 17:00 (5 PM)
         var saturdayDeadline = weekMonday.AddDays(5);
         var betDeadline = new DateTime(
             saturdayDeadline.Year, saturdayDeadline.Month, saturdayDeadline.Day,
@@ -189,12 +188,82 @@ public class GameService(
             StartTime = startTime,
             BetDeadline = betDeadline,
             DrawDate = null,
-            WinningNumbers = null
+            WinningNumbers = null,
+            NumberOfPhysicalPlayers = 0
         };
 
         await gameRepository.AddAsync(newGame);
         
         return newGame;
+    }
+
+    public async Task<List<Game>> GetOrCreateGamesForWeeksAsync(int numberOfWeeks)
+    {
+        var games = new List<Game>();
+        var now = DateTime.UtcNow;
+        
+        // Start from current week
+        var currentWeek = ISOWeek.GetWeekOfYear(now);
+        var currentYear = now.Year;
+        
+        for (int i = 0; i < numberOfWeeks; i++)
+        {
+            var targetWeek = currentWeek + i;
+            var targetYear = currentYear;
+            
+            // Handle year rollover
+            var weeksInYear = ISOWeek.GetWeeksInYear(targetYear);
+            if (targetWeek > weeksInYear)
+            {
+                targetWeek -= weeksInYear;
+                targetYear++;
+            }
+            
+            // Try to find existing game
+            var existingGame = await gameRepository
+                .Query()
+                .FirstOrDefaultAsync(g => g.Year == targetYear && g.WeekNumber == targetWeek);
+            
+            if (existingGame != null)
+            {
+                games.Add(existingGame);
+            }
+            else
+            {
+                // Create game for this week
+                var weekMonday = DateTime.SpecifyKind(
+                    ISOWeek.ToDateTime(targetYear, targetWeek, DayOfWeek.Monday),
+                    DateTimeKind.Utc
+                );
+                
+                var startTime = new DateTime(
+                    weekMonday.Year, weekMonday.Month, weekMonday.Day,
+                    0, 1, 0, DateTimeKind.Utc
+                );
+                
+                var saturdayDeadline = weekMonday.AddDays(5);
+                var betDeadline = new DateTime(
+                    saturdayDeadline.Year, saturdayDeadline.Month, saturdayDeadline.Day,
+                    17, 0, 0, DateTimeKind.Utc
+                );
+                
+                var newGame = new Game
+                {
+                    Id = Guid.NewGuid(),
+                    WeekNumber = targetWeek,
+                    Year = targetYear,
+                    StartTime = startTime,
+                    BetDeadline = betDeadline,
+                    DrawDate = null,
+                    WinningNumbers = null
+                };
+                
+                await gameRepository.AddAsync(newGame);
+                games.Add(newGame);
+            }
+        }
+        
+        return games;
     }
 
 
@@ -246,6 +315,12 @@ public class GameService(
             else
             {
                 bet.IsWinning = false;
+            }
+            
+            // Soft delete all bets when game finishes - they should only appear in history
+            if (bet.DeletedAt == null)
+            {
+                bet.DeletedAt = DateTime.UtcNow;
             }
         }
 

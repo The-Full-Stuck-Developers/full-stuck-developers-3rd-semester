@@ -99,7 +99,12 @@ public class UserService(
             user.Email = updateUserDto.Email;
         }
 
-        // Add other property updates as needed
+        if (!string.IsNullOrWhiteSpace(updateUserDto.PhoneNumber))
+        {
+            user.PhoneNumber = updateUserDto.PhoneNumber;
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
 
         await userRepository.UpdateAsync(user);
 

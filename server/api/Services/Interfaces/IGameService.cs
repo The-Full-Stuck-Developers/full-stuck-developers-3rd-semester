@@ -14,6 +14,7 @@ public interface IGameService
     Task<GameDto?> GetGameById(Guid id);
     Task<Game> GetCurrentGame();
     Task<Game> GetOrCreateCurrentGameAsync();
+    Task<List<Game>> GetOrCreateGamesForWeeksAsync(int numberOfWeeks);
     Task<GameDto> UpdateWinningNumbers(Guid gameId, WinningNumbersDto winningNumbers);
     Task<GameDto> DrawWinners(Guid id);
     Task<GameDto> UpdateInPersonData(Guid id, InPersonDto dto);

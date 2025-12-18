@@ -167,7 +167,6 @@ public class DbSeeder(
                     DateTimeKind.Utc
                 );
 
-                // Bet deadline: Saturday at 17:00 (5 PM)
                 DateTime saturdayDeadline = weekMonday.AddDays(5);
                 DateTime betDeadline = new DateTime(
                     saturdayDeadline.Year,
