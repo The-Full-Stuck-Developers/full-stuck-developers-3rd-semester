@@ -83,6 +83,6 @@ public class AuthController(
    [HttpGet(nameof(UserInfo))]
    public async Task<AuthUserInfo> UserInfo()
    {
-       return authService.GetUserInfo(User);
+       return _authService.GetUserInfo(User);
    }
 }

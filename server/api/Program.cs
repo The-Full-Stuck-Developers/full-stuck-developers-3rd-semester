@@ -89,6 +89,7 @@ public class Program
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IGameService, GameService>();
+        services.AddScoped<IBoardService, BoardService>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddScoped<DbSeeder>();

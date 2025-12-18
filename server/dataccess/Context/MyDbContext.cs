@@ -1,4 +1,4 @@
-﻿using dataccess.Entities;
+using dataccess.Entities;
 using DefaultNamespace;
 using domain;
 using Microsoft.EntityFrameworkCore;
@@ -146,6 +146,16 @@ public partial class MyDbContext : DbContext
                 .HasForeignKey(b => b.GameId)
                 .HasConstraintName("bets_game_id_fkey")
                 .OnDelete(DeleteBehavior.Cascade);
+    entity.Property(e => e.WinningNumbers)
+        .HasColumnName("winning_numbers")
+        .HasMaxLength(64); 
+    
+    entity.HasMany(g => g.Bets)
+        .WithOne(b => b.Game)
+        .HasForeignKey(b => b.GameId)
+        .HasConstraintName("Bet_game_id_fkey")
+        .OnDelete(DeleteBehavior.Cascade);
+    
         });
 
         modelBuilder.HasPostgresEnum<TransactionStatus>();
@@ -234,6 +244,13 @@ public partial class MyDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnName("created_at")
                 .HasDefaultValueSql("now()");
+
+            entity.Property(e => e.DeletedAt)
+                .HasColumnName("deleted_at");
+
+            entity.HasIndex(e => e.DeletedAt)
+                .HasFilter("\"deleted_at\" IS NULL")
+                .HasDatabaseName("bets_deleted_at_idx");
 
             entity.HasOne(e => e.User)
                 .WithMany(u => u.Bets)

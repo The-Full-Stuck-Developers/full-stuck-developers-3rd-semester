@@ -8,11 +8,11 @@ import {
   Gamepad2,
   DollarSign,
   TrendingUp,
-  Settings,
   LogOut,
 } from "lucide-react";
 import Logo from "../../../jerneif-logo.png";
-import { useAuth } from "../../../hooks/auth.tsx"; // ✅ add
+import { useAuth } from "../../../hooks/auth.tsx";
+import { Toaster } from "react-hot-toast";
 
 export function PlayerLayout() {
   const { user, logout } = useAuth(); // ✅ add
@@ -38,6 +38,10 @@ export function PlayerLayout() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex">
+      <Toaster
+        position="top-center"
+        toastOptions={{ style: { background: "#1f2937", color: "#fff" } }}
+      />
       {/* Mobile  */}
       {sidebarOpen && (
         <div
@@ -112,11 +116,6 @@ export function PlayerLayout() {
             </div>
 
             <div className="space-y-2">
-              <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-700 transition text-left text-sm">
-                <Settings className="w-4 h-4" />
-                Settings
-              </button>
-
               <button
                 onClick={logout} // ✅ sign out properly
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-700 transition text-left text-sm text-red-400"

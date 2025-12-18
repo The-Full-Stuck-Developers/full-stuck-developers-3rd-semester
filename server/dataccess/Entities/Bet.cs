@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using dataccess;
 using dataccess.Entities;
 
@@ -18,4 +19,7 @@ public class Bet
 
     public int Winnings { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    [Column("deleted_at")]
+    public DateTime? DeletedAt { get; set; }
 }

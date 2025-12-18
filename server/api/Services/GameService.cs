@@ -119,15 +119,82 @@ public class GameService(
     public async Task<Game> GetOrCreateCurrentGameAsync()
     {
         var now = DateTime.UtcNow;
-
-        var game = await gameRepository
+        
+        // Find a game where betting is still open (inline for EF Core translation)
+        var currentGame = await gameRepository
             .Query()
             .Include(g => g.Bets)
             .Where(g => g.WinningNumbers == null && g.BetDeadline > now)
             .OrderBy(g => g.StartTime)
-            .FirstOrDefaultAsync(g => g.WinningNumbers == null && g.BetDeadline > now);
+            .FirstOrDefaultAsync();
 
-        return game ?? throw new InvalidOperationException("No future games available. Please seed more games.");
+        if (currentGame != null)
+            return currentGame;
+
+        // No game found - create one for the current week
+        var currentWeek = ISOWeek.GetWeekOfYear(now);
+        var currentYear = now.Year;
+        
+        // Get Monday of this ISO week
+        var weekMonday = DateTime.SpecifyKind(
+            ISOWeek.ToDateTime(currentYear, currentWeek, DayOfWeek.Monday),
+            DateTimeKind.Utc
+        );
+        
+        // Game starts Monday at 00:01
+        var startTime = new DateTime(
+            weekMonday.Year, weekMonday.Month, weekMonday.Day,
+            0, 1, 0, DateTimeKind.Utc
+        );
+        
+        // Bet deadline: Saturday at 17:00 (5 PM)
+        var saturdayDeadline = weekMonday.AddDays(5);
+        var betDeadline = new DateTime(
+            saturdayDeadline.Year, saturdayDeadline.Month, saturdayDeadline.Day,
+            17, 0, 0, DateTimeKind.Utc
+        );
+        
+        // If we're past this week's deadline, create next week's game
+        if (betDeadline <= now)
+        {
+            currentWeek++;
+            if (currentWeek > ISOWeek.GetWeeksInYear(currentYear))
+            {
+                currentWeek = 1;
+                currentYear++;
+            }
+            
+            weekMonday = DateTime.SpecifyKind(
+                ISOWeek.ToDateTime(currentYear, currentWeek, DayOfWeek.Monday),
+                DateTimeKind.Utc
+            );
+            
+            startTime = new DateTime(
+                weekMonday.Year, weekMonday.Month, weekMonday.Day,
+                0, 1, 0, DateTimeKind.Utc
+            );
+            
+            saturdayDeadline = weekMonday.AddDays(5);
+            betDeadline = new DateTime(
+                saturdayDeadline.Year, saturdayDeadline.Month, saturdayDeadline.Day,
+                17, 0, 0, DateTimeKind.Utc
+            );
+        }
+
+        var newGame = new Game
+        {
+            Id = Guid.NewGuid(),
+            WeekNumber = currentWeek,
+            Year = currentYear,
+            StartTime = startTime,
+            BetDeadline = betDeadline,
+            DrawDate = null,
+            WinningNumbers = null
+        };
+
+        await gameRepository.AddAsync(newGame);
+        
+        return newGame;
     }
 
 

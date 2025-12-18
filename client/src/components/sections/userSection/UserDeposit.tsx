@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import getTransactionsClient from "@core/clients/transactionClient.ts";
 import { useAuth } from "../../../hooks/auth.tsx";
 
@@ -71,11 +71,6 @@ export function UserDeposit() {
 
   return (
     <div>
-      <Toaster
-        position="top-center"
-        toastOptions={{ style: { background: "#1f2937", color: "#fff" } }}
-      />
-
       <h1 className="text-4xl font-black mb-10">Add Balance</h1>
 
       <div className="bg-gray-800 rounded-3xl border border-gray-700 shadow-2xl p-8 max-w-2xl">

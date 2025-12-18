@@ -6,7 +6,6 @@ import {
   TrendingUp,
   Menu,
   X,
-  Settings,
   LogOut,
   Moon,
   Languages,
@@ -16,7 +15,7 @@ import Logo from "../../../jerneif-logo.png";
 import { useAuth } from "../../../hooks/auth.tsx";
 
 export function PlayerDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -103,19 +102,18 @@ export function PlayerDashboard() {
                   <div className="font-medium truncate">
                     {user?.name ?? "Loading..."}
                   </div>
-                  <div className="text-xs text-gray-400 truncate">
-                    {user?.email ?? ""}
-                  </div>
+                  {/*<div className="text-xs text-gray-400 truncate">*/}
+                  {/*  {user?.email ?? ""}*/}
+                  {/*</div>*/}
                 </div>
-
-                <button className="p-2 hover:bg-gray-600 rounded-lg transition">
-                  <Settings className="w-4 h-4" />
-                </button>
               </div>
 
-              <div className="pt-4 border-t border-gray-700">
+              <div className="pt-4 border-t border-gray-700 space-y-2">
                 <button
-                  onClick={() => navigate("/login")}
+                  onClick={() => {
+                    logout();
+                    navigate("/login");
+                  }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition text-left"
                 >
                   <LogOut className="w-5 h-5" />

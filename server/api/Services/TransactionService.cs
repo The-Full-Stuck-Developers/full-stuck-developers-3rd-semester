@@ -152,7 +152,9 @@ public class TransactionService(MyDbContext dbContext, ISieveProcessor sieveProc
                     ? t.Amount
                     : t.Type == TransactionType.Purchase
                         ? -t.Amount
-                        : 0
+                        : t.Type == TransactionType.Refund && t.Status == TransactionStatus.Accepted
+                            ? t.Amount
+                            : 0
             );
     }
 
