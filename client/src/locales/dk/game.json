@@ -1,0 +1,12 @@
+{
+  "pick_winning_numbers": "Vælg vindende numre",
+  "pick_now": "Vælg nu",
+  "winning_numbers": "Vindende numre",
+  "game_details": "Spildetaljer",
+  "total_revenue": "Samlede indtægter",
+  "update_numbers": "Opdater numre",
+  "draw_winners": "Træk vindere",
+  "draw_winners_modal_message": "Er du sikker på, at du vil trække vinderne? Denne handling kan ikke fortrydes.",
+  "numbers_updated_successfully": "Numre opdateret succesfuldt",
+  "bets": "Væddemål"
+}

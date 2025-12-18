@@ -1,0 +1,12 @@
+{
+  "pick_winning_numbers": "Pick winning numbers",
+  "pick_now": "Pick now",
+  "winning_numbers": "Winning numbers",
+  "game_details": "Game details",
+  "total_revenue": "Total revenue",
+  "update_numbers": "Update numbers",
+  "draw_winners": "Draw winners",
+  "draw_winners_modal_message": "Are you sure you want to draw the winners? This action cannot be undone.",
+  "numbers_updated_successfully": "Numbers updated successfully",
+  "bets": "Bets"
+}

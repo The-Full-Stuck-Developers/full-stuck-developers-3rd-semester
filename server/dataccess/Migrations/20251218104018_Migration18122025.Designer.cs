@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dataccess;
@@ -11,9 +12,11 @@ using dataccess;
 namespace dataccess.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251218104018_Migration18122025")]
+    partial class Migration18122025
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,6 +51,10 @@ namespace dataccess.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("is_winning");
 
+                    b.Property<int>("NumbersCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("numbers_count");
+
                     b.Property<string>("SelectedNumbers")
                         .IsRequired()
                         .HasMaxLength(24)
@@ -61,9 +68,6 @@ namespace dataccess.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
-
-                    b.Property<int>("Winnings")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id")
                         .HasName("bets_pkey");
@@ -181,11 +185,8 @@ namespace dataccess.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("draw_date");
 
-                    b.Property<int>("NumberOfPhysicalPlayers")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0)
-                        .HasColumnName("number_of_physical_players");
+                    b.Property<int?>("NumberOfPhysicalPlayers")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp with time zone")

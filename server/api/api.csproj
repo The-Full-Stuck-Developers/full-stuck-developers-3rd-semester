@@ -26,6 +26,8 @@
         <PackageReference Include="NSwag.CodeGeneration.TypeScript" Version="*" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
         <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
+        
+        <ProjectReference Include="../domain/domain.csproj" />
     </ItemGroup>
     
 

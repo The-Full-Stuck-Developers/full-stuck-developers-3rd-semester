@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using dataccess;
@@ -11,9 +12,11 @@ using dataccess;
 namespace dataccess.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251218104144_Migration18122025-2")]
+    partial class Migration181220252
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -48,6 +51,10 @@ namespace dataccess.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("is_winning");
 
+                    b.Property<int>("NumbersCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("numbers_count");
+
                     b.Property<string>("SelectedNumbers")
                         .IsRequired()
                         .HasMaxLength(24)
@@ -61,9 +68,6 @@ namespace dataccess.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
-
-                    b.Property<int>("Winnings")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id")
                         .HasName("bets_pkey");

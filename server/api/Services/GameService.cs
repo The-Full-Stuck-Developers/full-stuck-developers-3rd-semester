@@ -1,8 +1,10 @@
 using System.Globalization;
 using api.Models;
+using api.Models.Dtos.Requests.Game;
 using dataccess;
 using dataccess.Repositories;
 using DefaultNamespace;
+using domain;
 using Dtos;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -77,20 +79,33 @@ public class GameService(
     public async Task<GameDto?> GetGameById(Guid id)
     {
         var game = await gameRepository.Query()
+            .Include(g => g.Bets)
+            .ThenInclude(b => b.Transaction)
+            .Include(g => g.Bets)
+            .ThenInclude(b => b.User)
             .FirstOrDefaultAsync(u => u.Id == id);
 
         return game == null ? null : new GameDto(game);
     }
 
-    public async Task<Game> GetCurrentGameAsync(Guid gameId)
+    public async Task<Game> GetCurrentGame()
     {
+        var now = DateTime.UtcNow;
+        var currentYear = now.Year;
+        var currentWeek = ISOWeek.GetWeekOfYear(now);
+
         var game = await gameRepository
             .Query()
             .Include(g => g.Bets)
+            .ThenInclude(b => b.Transaction)
+            .Include(g => g.Bets)
             .ThenInclude(b => b.User)
-            .FirstOrDefaultAsync(g => g.Id == gameId);
+            .FirstOrDefaultAsync(g =>
+                g.Year == currentYear &&
+                g.WeekNumber == currentWeek);
 
-        return game ?? throw new KeyNotFoundException($"Game {gameId} not found");
+        return game ?? throw new KeyNotFoundException(
+            $"No game found for year {currentYear}, week {currentWeek}");
     }
 
     public async Task<Game> GetOrCreateCurrentGameAsync()
@@ -103,7 +118,6 @@ public class GameService(
         if (currentGame != null)
             return currentGame;
 
-
         var now = DateTime.UtcNow;
         var nextGame = await gameRepository
             .Query()
@@ -114,9 +128,74 @@ public class GameService(
         return nextGame ?? throw new InvalidOperationException("No future games available. Please seed more games.");
     }
 
-    public Task<Game> DrawWinningNumbersAsync(Guid gameId, string winningNumbersCsv, Guid adminId)
+    public async Task<GameDto> UpdateWinningNumbers(Guid gameId, WinningNumbersDto winningNumbersDto)
     {
-        throw new NotImplementedException();
+        var game = await gameRepository
+            .Query()
+            .Where(g => g.Id == gameId)
+            .FirstOrDefaultAsync();
+
+        if (game == null)
+        {
+            throw new KeyNotFoundException("Game not found");
+        }
+
+        game.WinningNumbers = new GameWinningNumbers(winningNumbersDto.WinningNumbers).Value;
+
+        await gameRepository.UpdateAsync(game);
+
+        return new GameDto(game);
+    }
+
+    public async Task<GameDto> DrawWinners(Guid id)
+    {
+        var game = await gameRepository.Query()
+            .Include(g => g.Bets)
+            .ThenInclude(b => b.Transaction)
+            .FirstOrDefaultAsync(g => g.Id == id);
+
+        if (game == null)
+        {
+            throw new KeyNotFoundException("Game not found");
+        }
+
+        if (string.IsNullOrWhiteSpace(game.WinningNumbers))
+        {
+            throw new InvalidOperationException("Game does not have winning numbers set. Please set winning numbers before drawing winners.");
+        }
+
+        var winningNumbers = new GameWinningNumbers(game.WinningNumbers);
+
+        foreach (var bet in game.Bets)
+        {
+            if (!string.IsNullOrWhiteSpace(bet.SelectedNumbers))
+            {
+                var selectedNumbers = new GameWinningNumbers(bet.SelectedNumbers);
+                bet.IsWinning = winningNumbers.IsGuessedBy(selectedNumbers);
+            }
+            else
+            {
+                bet.IsWinning = false;
+            }
+        }
+
+        game.DrawDate = DateTime.UtcNow;
+
+        await gameRepository.UpdateAsync(game);
+
+        return new GameDto(game);
+    }
+
+    public async Task<GameDto> UpdateNumberOfPhysicalPlayers(Guid id,NumberOfPhysicalPlayersDto dto)
+    {
+        var game = await  gameRepository.Query()
+            .Where(g => g.Id == id)
+            .FirstOrDefaultAsync();
+
+        game.NumberOfPhysicalPlayers = dto.NumberOfPhysicalPlayers;
+        await gameRepository.UpdateAsync(game);
+
+        return new GameDto(game);
     }
 
     public async Task<List<Bet>> GetDigitalWinningBetsAsync(Guid gameId)

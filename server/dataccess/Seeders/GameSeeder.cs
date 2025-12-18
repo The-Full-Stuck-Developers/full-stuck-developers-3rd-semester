@@ -26,7 +26,6 @@ public class GameSeeder : ISeeder
                 WeekNumber = 42,
                 Year = now.Year,
                 WinningNumbers = "1,5,10,14,22",
-                Revenue = 10000
             },
             new Game
             {
@@ -37,7 +36,6 @@ public class GameSeeder : ISeeder
                 WeekNumber = 43,
                 Year = now.Year,
                 WinningNumbers = "4,1,16,8,23",
-                Revenue = 5500
             }
         };
 

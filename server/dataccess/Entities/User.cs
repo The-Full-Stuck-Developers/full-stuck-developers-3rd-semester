@@ -33,7 +33,6 @@ public class User
     public bool IsActive { get; set; }
 
     public ICollection<Bet> Bets { get; set; } = new List<Bet>();
-    public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
     public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     public string? PasswordResetToken { get; set; }
     public DateTime? PasswordResetTokenExpiry { get; set; }
