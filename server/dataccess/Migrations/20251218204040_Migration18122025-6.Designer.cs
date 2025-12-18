@@ -12,8 +12,8 @@ using dataccess;
 namespace dataccess.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20251218104144_Migration18122025-2")]
-    partial class Migration181220252
+    [Migration("20251218204040_Migration18122025-6")]
+    partial class Migration181220256
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,7 @@ namespace dataccess.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_status", new[] { "pending", "accepted", "rejected", "cancelled" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_type", new[] { "deposit", "purchase" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "transaction_type", new[] { "deposit", "purchase", "refund" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("DefaultNamespace.Bet", b =>
@@ -41,6 +41,10 @@ namespace dataccess.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("deleted_at");
+
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid")
                         .HasColumnName("game_id");
@@ -50,10 +54,6 @@ namespace dataccess.Migrations
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasColumnName("is_winning");
-
-                    b.Property<int>("NumbersCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("numbers_count");
 
                     b.Property<string>("SelectedNumbers")
                         .IsRequired()
@@ -69,8 +69,15 @@ namespace dataccess.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
+                    b.Property<int>("Winnings")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id")
                         .HasName("bets_pkey");
+
+                    b.HasIndex("DeletedAt")
+                        .HasDatabaseName("bets_deleted_at_idx")
+                        .HasFilter("\"deleted_at\" IS NULL");
 
                     b.HasIndex("GameId");
 
@@ -185,11 +192,17 @@ namespace dataccess.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("draw_date");
 
+                    b.Property<int>("InPersonPrizePool")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("in_person_prize_pool");
+
                     b.Property<int>("InPersonWinners")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
-                        .HasColumnName("number_of_physical_players");
+                        .HasColumnName("in_person_winners");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp with time zone")

@@ -153,7 +153,7 @@ export default function PastGamesList() {
                       <td className="px-3 py-3">{game.bets.length}</td>
 
                       <td className="px-3 py-3">
-                        {game.winningNumbers ?? t("not_drawn_yet")}
+                        {game.winningNumbers ?? t("game:not_drawn_yet")}
                       </td>
 
                       <td>

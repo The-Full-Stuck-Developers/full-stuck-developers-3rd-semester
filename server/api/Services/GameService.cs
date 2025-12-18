@@ -188,7 +188,8 @@ public class GameService(
             StartTime = startTime,
             BetDeadline = betDeadline,
             DrawDate = null,
-            WinningNumbers = null
+            WinningNumbers = null,
+            NumberOfPhysicalPlayers = 0
         };
 
         await gameRepository.AddAsync(newGame);
@@ -299,7 +300,7 @@ public class GameService(
 
         if (string.IsNullOrWhiteSpace(game.WinningNumbers))
         {
-            throw new InvalidOperationException("Game does not have winning numbers set. Please set winning numbers before drawing winners.");
+            throw new InvalidOperationException("please_set_winning_numbers_first");
         }
 
         var winningNumbers = new GameWinningNumbers(game.WinningNumbers);
@@ -330,13 +331,15 @@ public class GameService(
         return new GameDto(game);
     }
 
-    public async Task<GameDto> UpdateNumberOfPhysicalPlayers(Guid id,NumberOfPhysicalPlayersDto dto)
+    public async Task<GameDto> UpdateInPersonData(Guid id,InPersonDto dto)
     {
         var game = await  gameRepository.Query()
             .Where(g => g.Id == id)
             .FirstOrDefaultAsync();
 
-        game.NumberOfPhysicalPlayers = dto.NumberOfPhysicalPlayers;
+        game.InPersonWinners = dto.InPersonWinners;
+        game.InPersonPrizePool = dto.InPersonPrizePool;
+
         await gameRepository.UpdateAsync(game);
 
         return new GameDto(game);

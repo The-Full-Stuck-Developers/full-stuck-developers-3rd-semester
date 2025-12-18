@@ -5,24 +5,18 @@
 namespace dataccess.Migrations
 {
     /// <inheritdoc />
-    public partial class Migration18122025 : Migration
+    public partial class Migration181220256 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "InPersonWinners",
-                table: "games",
-                type: "integer",
-                nullable: true);
+
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "InPersonWinners",
-                table: "games");
+
         }
     }
 }

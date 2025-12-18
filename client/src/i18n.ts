@@ -7,6 +7,7 @@ import enUser from "./locales/en/user.json";
 import enValidation from "./locales/en/validation.json";
 import enGame from "./locales/en/game.json";
 import enPlayer from "./locales/en/player.json";
+import enHome from "./locales/en/home.json";
 
 import dkCommon from "./locales/dk/common.json";
 import dkMessages from "./locales/dk/messages.json";
@@ -15,6 +16,7 @@ import dkUser from "./locales/dk/user.json";
 import dkValidation from "./locales/dk/validation.json";
 import dkGame from "./locales/dk/game.json";
 import dkPlayer from "./locales/dk/player.json";
+import dkHome from "./locales/dk/home.json";
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -26,6 +28,7 @@ i18n.use(initReactI18next).init({
       validation: enValidation,
       game: enGame,
       player: enPlayer,
+      home: enHome,
     },
     dk: {
       common: dkCommon,
@@ -35,6 +38,7 @@ i18n.use(initReactI18next).init({
       validation: dkValidation,
       game: dkGame,
       player: dkPlayer,
+      home: dkHome,
     },
   },
   lng: "en",
