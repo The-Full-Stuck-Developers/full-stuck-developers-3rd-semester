@@ -53,9 +53,7 @@ export function DashboardOverview() {
           <h1 className="text-4xl font-black mb-2">
             Welcome back, {user?.name ?? "Loading..."}!
           </h1>
-          <p className="text-xl text-gray-400">
-            Ready to play?
-          </p>
+          <p className="text-xl text-gray-400">Ready to play?</p>
         </div>
       </div>
 
@@ -101,9 +99,7 @@ export function DashboardOverview() {
 
         <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
           <div className="flex items-start justify-between mb-4">
-            <div className="text-4xl font-bold">
-              {loading ? "..." : "0 kr"}
-            </div>
+            <div className="text-4xl font-bold">{loading ? "..." : "0 kr"}</div>
             <div className="p-3 rounded-xl bg-purple-900/30">
               <TrendingUp className="w-6 h-6 text-purple-400" />
             </div>

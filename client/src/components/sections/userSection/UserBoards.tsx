@@ -40,7 +40,7 @@ export function UserBoards() {
         setLoading(true);
         const client = getBetsClient();
         const response = await client.getUserHistory(currentPage, pageSize);
-        
+
         const boards: SubmittedBoard[] = response.bets.map((bet) => ({
           id: bet.id,
           numbers: bet.numbers.split(",").map((n) => parseInt(n.trim(), 10)),
@@ -49,7 +49,7 @@ export function UserBoards() {
           repeatWeeks: 1, // This isn't stored in the bet history, defaulting to 1
           submittedAt: bet.date,
         }));
-        
+
         setSubmittedBoards(boards);
         setTotalCount(response.totalCount);
       } catch (error) {
@@ -69,18 +69,27 @@ export function UserBoards() {
   };
 
   const handleDeleteBoard = async (boardId: string) => {
-    if (!confirm("Are you sure you want to delete this board? The money will be refunded to your account.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this board? The money will be refunded to your account.",
+      )
+    ) {
       return;
     }
 
     try {
       const client = getBetsClient();
       await client.deleteBet(boardId);
-      
-      toast.success("Board deleted successfully. Money has been refunded to your account.");
-      
+
+      toast.success(
+        "Board deleted successfully. Money has been refunded to your account.",
+      );
+
       // Reload boards
-      const historyResponse = await client.getUserHistory(currentPage, pageSize);
+      const historyResponse = await client.getUserHistory(
+        currentPage,
+        pageSize,
+      );
       const boards: SubmittedBoard[] = historyResponse.bets.map((bet) => ({
         id: bet.id,
         numbers: bet.numbers.split(",").map((n) => parseInt(n.trim(), 10)),
@@ -93,7 +102,10 @@ export function UserBoards() {
       setTotalCount(historyResponse.totalCount);
     } catch (error: any) {
       console.error("Error deleting board:", error);
-      const errorMessage = error?.response || error?.message || "Failed to delete board. Please try again.";
+      const errorMessage =
+        error?.response ||
+        error?.message ||
+        "Failed to delete board. Please try again.";
       toast.error(errorMessage);
     }
   };
@@ -188,7 +200,7 @@ export function UserBoards() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       className="p-2 hover:bg-red-900/50 rounded-lg transition"
                       onClick={() => handleDeleteBoard(board.id)}
                     >
@@ -210,7 +222,7 @@ export function UserBoards() {
               </div>
             ))}
           </div>
-          
+
           {Math.ceil(totalCount / pageSize) > 1 && (
             <div className="mt-6">
               <Pagination
