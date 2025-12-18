@@ -16,51 +16,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x" # change if needed
+          dotnet-version: "8.0.x"
 
       - name: Restore
-        run: dotnet restore
-        working-directory: ./server
+        run: dotnet restore server/tests/tests.csproj
 
       - name: Build
-        run: dotnet build --no-restore -c Release
-        working-directory: ./server
+        run: dotnet build server/tests/tests.csproj -c Release --no-restore
 
       - name: Test
-        run: dotnet test --no-build -c Release
-        working-directory: ./server
+        run: dotnet test server/tests/tests.csproj -c Release --no-build --verbosity normal
 
   react-tests:
     name: React tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
-          cache-dependency-path: ./client/package-lock.json
+          cache: npm
+          cache-dependency-path: client/package-lock.json
 
-      - name: Install dependencies
+      - name: Install
         run: npm ci
-        working-directory: ./client
 
       - name: Test
-        run: npm test -- --watchAll=false
-        working-directory: ./client
+        run: npm run test:run
         env:
           CI: true
 
       - name: Build
         run: npm run build
-        working-directory: ./client
+
