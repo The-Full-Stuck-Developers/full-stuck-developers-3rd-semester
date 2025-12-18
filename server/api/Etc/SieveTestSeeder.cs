@@ -5,7 +5,7 @@ using dataccess;
 
 namespace api.Etc;
 
-public class SieveTestSeeder(MyDbContext ctx, TimeProvider timeProvider)
+public class SieveTestSeeder(MyDbContext ctx, TimeProvider timeProvider) : ISeeder
 {
     public async Task Seed()
     {
@@ -95,6 +95,12 @@ public class SieveTestSeeder(MyDbContext ctx, TimeProvider timeProvider)
         // Stop tracking
         ctx.ChangeTracker.Clear();
     }
+
+    public Task Seed(string defaultPassword)
+    {
+        throw new NotImplementedException();
+    }
+
 
     private static string GenerateRealisticBookTitle(Faker f)
     {
