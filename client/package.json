@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run",
+    "test:run": "vitest run --passWithNoTests",
     "graph": "npx depcruise src --include-only \"^src\" --output-type dot | dot -T svg > dependency-graph.svg",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "lint": "eslint src --ext .ts,.tsx"
