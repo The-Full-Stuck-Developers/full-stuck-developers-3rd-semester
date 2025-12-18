@@ -189,7 +189,6 @@ public class GameService(
             BetDeadline = betDeadline,
             DrawDate = null,
             WinningNumbers = null,
-            NumberOfPhysicalPlayers = 0
         };
 
         await gameRepository.AddAsync(newGame);
