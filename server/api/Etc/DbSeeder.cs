@@ -138,7 +138,6 @@ public class DbSeeder(
                 StartTime = startTime,
                 BetDeadline = betDeadline,
                 DrawDate = drawDate,
-                Revenue = revenue,
                 WinningNumbers = winningNumbers
             };
 
@@ -184,7 +183,6 @@ public class DbSeeder(
                     StartTime = startTime,
                     BetDeadline = betDeadline,
                     DrawDate = null,
-                    Revenue = 0,
                     WinningNumbers = null,
                 };
 

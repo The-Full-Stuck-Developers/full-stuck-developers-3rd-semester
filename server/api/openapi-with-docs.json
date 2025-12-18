@@ -337,6 +337,146 @@
         }
       }
     },
+    "/api/Games/GetCurrentGame": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "operationId": "Games_GetCurrentGame",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Games/{id}/UpdateWinningNumbers": {
+      "patch": {
+        "tags": [
+          "Games"
+        ],
+        "operationId": "Games_UpdateWinningNumbers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "winningNumbersDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WinningNumbersDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Games/{id}/DrawWinners": {
+      "patch": {
+        "tags": [
+          "Games"
+        ],
+        "operationId": "Games_DrawWinners",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Games/{id}/UpdateNumberOfPhysicalPlayers": {
+      "patch": {
+        "tags": [
+          "Games"
+        ],
+        "operationId": "Games_UpdateNumberOfPhysicalPlayers",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "numberOfPhysicalPlayersDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NumberOfPhysicalPlayersDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Health/App/Up": {
       "get": {
         "tags": [
@@ -1362,6 +1502,275 @@
           },
           "canBet": {
             "type": "boolean"
+          },
+          "bets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bet"
+            }
+          },
+          "numberOfPhysicalPlayers": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "Bet": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "gameId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "game": {
+            "$ref": "#/components/schemas/Game"
+          },
+          "transactionId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          },
+          "selectedNumbers": {
+            "type": "string"
+          },
+          "isWinning": {
+            "type": "boolean"
+          },
+          "winnings": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "isAdmin": {
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "bets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bet"
+            }
+          },
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          },
+          "passwordResetToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "passwordResetTokenExpiry": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mobilePayTransactionNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/TransactionStatus"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TransactionType"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "bet": {
+            "$ref": "#/components/schemas/Bet"
+          }
+        }
+      },
+      "TransactionStatus": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Pending",
+          "Accepted",
+          "Rejected",
+          "Cancelled"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "TransactionType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Deposit",
+          "Purchase"
+        ],
+        "enum": [
+          0,
+          1
+        ]
+      },
+      "Game": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "weekNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "betDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "drawDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "revenue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "winningNumbers": {
+            "type": "string",
+            "nullable": true
+          },
+          "bets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Bet"
+            }
+          },
+          "isDrawn": {
+            "type": "boolean"
+          },
+          "canBet": {
+            "type": "boolean"
+          },
+          "numberOfPhysicalPlayers": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "WinningNumbersDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "winningNumbers"
+        ],
+        "properties": {
+          "winningNumbers": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^\\d{1,2},\\d{1,2},\\d{1,2}$"
+          }
+        }
+      },
+      "NumberOfPhysicalPlayersDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "numberOfPhysicalPlayers": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         }
       },
@@ -1422,277 +1831,6 @@
           },
           "user": {
             "$ref": "#/components/schemas/User"
-          }
-        }
-      },
-      "TransactionStatus": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Pending",
-          "Accepted",
-          "Rejected",
-          "Cancelled"
-        ],
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ]
-      },
-      "TransactionType": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Deposit",
-          "Purchase"
-        ],
-        "enum": [
-          0,
-          1
-        ]
-      },
-      "User": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "phoneNumber": {
-            "type": "string"
-          },
-          "isAdmin": {
-            "type": "boolean"
-          },
-          "expiresAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "deletedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "isActive": {
-            "type": "boolean"
-          },
-          "bets": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Bet"
-            }
-          },
-          "subscriptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Subscription"
-            }
-          },
-          "transactions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Transaction"
-            }
-          },
-          "passwordResetToken": {
-            "type": "string",
-            "nullable": true
-          },
-          "passwordResetTokenExpiry": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "Bet": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "userId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "gameId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "game": {
-            "$ref": "#/components/schemas/Game"
-          },
-          "selectedNumbers": {
-            "type": "string"
-          },
-          "numbersCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "price": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "Game": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "weekNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "year": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "startTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "betDeadline": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "drawDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "revenue": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "winningNumbers": {
-            "type": "string",
-            "nullable": true
-          },
-          "bets": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Bet"
-            }
-          },
-          "isDrawn": {
-            "type": "boolean"
-          },
-          "canBet": {
-            "type": "boolean"
-          }
-        }
-      },
-      "Subscription": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "userId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "createdByAdminId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "createdByAdmin": {
-            "$ref": "#/components/schemas/User"
-          },
-          "validFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "validTo": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "revokedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "revokedByAdminId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          }
-        }
-      },
-      "Transaction": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "userId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          },
-          "amount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "mobilePayTransactionNumber": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "status": {
-            "$ref": "#/components/schemas/TransactionStatus"
-          },
-          "type": {
-            "$ref": "#/components/schemas/TransactionType"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },

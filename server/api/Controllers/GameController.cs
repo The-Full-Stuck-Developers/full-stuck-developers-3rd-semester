@@ -1,4 +1,5 @@
 using api.Models;
+using api.Models.Dtos.Requests.Game;
 using api.Services;
 using dataccess;
 using Microsoft.AspNetCore.Authorization;
@@ -43,6 +44,43 @@ public class GamesController(
     {
         var game = await gameService.GetGameById(id);
 
+        return Ok(game);
+    }
+
+    [HttpGet("GetCurrentGame")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> GetCurrentGame()
+    {
+        var game = await gameService.GetCurrentGame();
+
+        return Ok(game);
+    }
+
+    [HttpPatch("{id:guid}/UpdateWinningNumbers")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> UpdateWinningNumbers(Guid id,
+        [FromBody] WinningNumbersDto winningNumbersDto)
+    {
+        var game = await gameService.UpdateWinningNumbers(id, winningNumbersDto);
+
+        return Ok(game);
+    }
+
+    [HttpPatch("{id:guid}/DrawWinners")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> DrawWinners(Guid id)
+    {
+        var game = await gameService.DrawWinners(id);
+
+        return Ok(game);
+    }
+
+    [HttpPatch("{id:guid}/UpdateNumberOfPhysicalPlayers")]
+    [Authorize(Policy = "IsAdmin")]
+    public async Task<ActionResult<GameDto>> UpdateNumberOfPhysicalPlayers(Guid id,
+        [FromBody] NumberOfPhysicalPlayersDto numberOfPhysicalPlayersDto)
+    {
+        var game = await gameService.UpdateNumberOfPhysicalPlayers(id, numberOfPhysicalPlayersDto);
         return Ok(game);
     }
 }

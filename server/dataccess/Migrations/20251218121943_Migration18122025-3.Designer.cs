@@ -12,8 +12,8 @@ using dataccess;
 namespace dataccess.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20251215200604_NewMigration1234")]
-    partial class NewMigration1234
+    [Migration("20251218121943_Migration18122025-3")]
+    partial class Migration181220253
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,13 +45,11 @@ namespace dataccess.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("game_id");
 
-                    b.Property<int>("NumbersCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("numbers_count");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("integer")
-                        .HasColumnName("price");
+                    b.Property<bool>("IsWinning")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_winning");
 
                     b.Property<string>("SelectedNumbers")
                         .IsRequired()
@@ -59,68 +57,28 @@ namespace dataccess.Migrations
                         .HasColumnType("character varying(24)")
                         .HasColumnName("selected_numbers");
 
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
+
+                    b.Property<int>("Winnings")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id")
                         .HasName("bets_pkey");
 
                     b.HasIndex("GameId");
 
+                    b.HasIndex("TransactionId")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
                     b.ToTable("bets", (string)null);
-                });
-
-            modelBuilder.Entity("dataccess.Entities.Subscription", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<Guid>("CreatedByAdminId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by_admin_id");
-
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("revoked_at");
-
-                    b.Property<Guid?>("RevokedByAdminId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("revoked_by_admin_id");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.Property<DateTime>("ValidFrom")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_from");
-
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_to");
-
-                    b.HasKey("Id")
-                        .HasName("subscriptions_pkey");
-
-                    b.HasIndex("CreatedByAdminId");
-
-                    b.HasIndex("RevokedByAdminId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("subscriptions", (string)null);
                 });
 
             modelBuilder.Entity("dataccess.Entities.User", b =>
@@ -226,11 +184,11 @@ namespace dataccess.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("draw_date");
 
-                    b.Property<int>("Revenue")
+                    b.Property<int>("NumberOfPhysicalPlayers")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
-                        .HasColumnName("revenue");
+                        .HasColumnName("number_of_physical_players");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp with time zone")
@@ -318,6 +276,13 @@ namespace dataccess.Migrations
                         .IsRequired()
                         .HasConstraintName("bets_game_id_fkey");
 
+                    b.HasOne("dataccess.Transaction", "Transaction")
+                        .WithOne("Bet")
+                        .HasForeignKey("DefaultNamespace.Bet", "TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("bets_transaction_id_fkey");
+
                     b.HasOne("dataccess.Entities.User", "User")
                         .WithMany("Bets")
                         .HasForeignKey("UserId")
@@ -327,32 +292,7 @@ namespace dataccess.Migrations
 
                     b.Navigation("Game");
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("dataccess.Entities.Subscription", b =>
-                {
-                    b.HasOne("dataccess.Entities.User", "CreatedByAdmin")
-                        .WithMany()
-                        .HasForeignKey("CreatedByAdminId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("subscriptions_created_by_admin_id_fkey");
-
-                    b.HasOne("dataccess.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("RevokedByAdminId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("subscriptions_revoked_by_admin_id_fkey");
-
-                    b.HasOne("dataccess.Entities.User", "User")
-                        .WithMany("Subscriptions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("subscriptions_user_id_fkey");
-
-                    b.Navigation("CreatedByAdmin");
+                    b.Navigation("Transaction");
 
                     b.Navigation("User");
                 });
@@ -373,14 +313,18 @@ namespace dataccess.Migrations
                 {
                     b.Navigation("Bets");
 
-                    b.Navigation("Subscriptions");
-
                     b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("dataccess.Game", b =>
                 {
                     b.Navigation("Bets");
+                });
+
+            modelBuilder.Entity("dataccess.Transaction", b =>
+                {
+                    b.Navigation("Bet")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

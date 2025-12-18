@@ -18,13 +18,16 @@ import { ActionMenu } from "@components/ActionMenu";
 import { useTranslation } from "react-i18next";
 import getGameClient from "@core/clients/gameClient.ts";
 import { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function UpcomingGamesList() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [games, setGames] = useState<GameDto[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   const fetchGames = (page: number) => {
     const client = getGameClient();
@@ -34,6 +37,7 @@ export default function UpcomingGamesList() {
       .then((res) => {
         setGames(res.items);
         setTotalPages(Math.ceil(res.total / pageSize));
+        setTotalItems(res.total);
       })
       .catch(console.error);
   };
@@ -140,7 +144,18 @@ export default function UpcomingGamesList() {
                       </td>
 
                       <td>
-                        <ActionMenu dropdown={true} actions={[]} />
+                        <ActionMenu
+                          dropdown={true}
+                          actions={[
+                            {
+                              label: t("game_details"),
+                              color: "#d0d0d0",
+                              icon: <Wallet color="#d0d0d0" />,
+                              onClick: () =>
+                                navigate(`/admin/game-details/${game.id}`),
+                            },
+                          ]}
+                        />
                       </td>
                     </tr>
                   );
@@ -162,6 +177,8 @@ export default function UpcomingGamesList() {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
+              perPage={pageSize}
+              totalItems={totalItems}
             />
           </div>
         )}

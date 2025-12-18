@@ -25,6 +25,7 @@ export default function PastGamesList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   const fetchGames = (page: number) => {
     const client = getGameClient();
@@ -34,6 +35,7 @@ export default function PastGamesList() {
       .then((res) => {
         setGames(res.items);
         setTotalPages(Math.ceil(res.total / pageSize));
+        setTotalItems(res.total);
       })
       .catch(console.error);
   };
@@ -162,6 +164,8 @@ export default function PastGamesList() {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
+              perPage={pageSize}
+              totalItems={totalItems}
             />
           </div>
         )}

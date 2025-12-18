@@ -1,4 +1,5 @@
 using dataccess.Entities;
+using DefaultNamespace;
 
 namespace dataccess;
 
@@ -14,4 +15,5 @@ public class Transaction
     public TransactionType Type { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public Bet Bet { get; set; } = null!;
 }

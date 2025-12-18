@@ -21,6 +21,7 @@ import { PlayerLayout } from "@components/sections/userSection/PlayerLayout.tsx"
 import { GameHistory } from "@components/sections/userSection/GameHistory.tsx";
 import UpcomingGamesList from "@components/admin/UpcomingGamesList.tsx";
 import PastGamesList from "@components/admin/PastGamesList.tsx";
+import GameDetails from "@components/admin/GameDetails.tsx";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="users" element={<UsersList />} />
           <Route path="upcoming-games" element={<UpcomingGamesList />} />
           <Route path="past-games" element={<PastGamesList />} />
+          <Route path="game-details/:id" element={<GameDetails />} />
           <Route path="my-profile" element={<MyProfilePage />} />
           <Route path="transactions" element={<TransactionsList />} />
           <Route

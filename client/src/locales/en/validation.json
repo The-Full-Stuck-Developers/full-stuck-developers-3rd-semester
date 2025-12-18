@@ -1,6 +1,6 @@
 {
+  "email_address": "The email address is invalid",
   "email_field_required": "The email field is required",
-  "required": "This field is required",
   "min_length_3": "The field must be at least 3 characters long",
-  "email_address": "The email address is invalid"
+  "required": "This field is required"
 }
