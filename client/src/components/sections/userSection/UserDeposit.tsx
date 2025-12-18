@@ -112,7 +112,9 @@ export function UserDeposit() {
         </div>
 
         <div className="mb-8">
-          <p className="text-sm font-bold text-gray-400 mb-4">{t("quick_amounts")}</p>
+          <p className="text-sm font-bold text-gray-400 mb-4">
+            {t("quick_amounts")}
+          </p>
           <div className="grid grid-cols-4 gap-4">
             {QUICK_AMOUNTS.map((v) => (
               <button
