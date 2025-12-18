@@ -6,13 +6,15 @@
   "game_details": "Game details",
   "game_is_finished": "Game is finished",
   "in_person": "In person",
-  "number_of_physical_player_winners": "Number of physical winners",
+  "number_of_physical_player_winners": "Number of winners in person",
   "numbers_updated_successfully": "Numbers updated successfully",
   "online": "Online",
+  "online_bets": "Online bets",
   "pick_now": "Pick now",
   "pick_winning_numbers": "Pick winning numbers",
   "players": "Players",
   "price": "Price",
+  "revenue": "Revenue",
   "selected_numbers": "Selected numbers",
   "total_revenue": "Total revenue",
   "update_numbers": "Update numbers",
@@ -20,7 +22,8 @@
   "winners_drawn_successfully": "Winners drawn successfully",
   "winning_numbers": "Winning numbers",
   "winnings_per_player": "Winnings per player",
-  "online_bets": "Online bets",
-  "game_details": "Game details",
-  "revenue": "Revenue"
+  "you_can_calculate_after_drawing_winners": "You can calculate winnings after drawing the winners.",
+  "please_set_winning_numbers": "Please set winning numbers before picking winners.",
+  "not_drawn_yet": "Not drawn yet",
+  "in_person_prize_pool": "In person prize pool"
 }

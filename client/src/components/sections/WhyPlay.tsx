@@ -1,15 +1,18 @@
 import { Shield, Clock3, Users, TrendingUp } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function WhyPlay() {
+  const { t } = useTranslation();
+
   return (
     <section className="w-full bg-gray-50 py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 lg:mb-16">
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0f2b5b] tracking-tighter">
-            WHY PLAY DEAD PIGEONS?
+            {t("home:why_play_dead_pigeons")}
           </h2>
           <p className="mt-4 text-lg sm:text-xl text-gray-700 max-w-3xl mx-auto font-semibold">
-            A fun, secure, and community-driven way to support Jerne IF Esbjerg
+            {t("home:fun_secure_game")}
           </p>
         </div>
 
@@ -20,10 +23,10 @@ export function WhyPlay() {
                 <Shield className="w-9 h-9 text-[#e30613] group-hover:text-white" />
               </div>
               <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
-                Secure Balance System
+                {t("home:secure_balance_system")}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Your deposits are tracked and verified by admins before use.
+                {t("home:deposits_are_tracked")}
               </p>
             </div>
           </div>
@@ -34,10 +37,10 @@ export function WhyPlay() {
                 <Clock3 className="w-9 h-9 text-[#e30613] group-hover:text-white" />
               </div>
               <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
-                Weekly Drawings
+                {t("home:weekly_drawings")}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                New winning numbers every Sunday – never miss a draw.
+                {t("home:new_numbers_every_week")}
               </p>
             </div>
           </div>
@@ -48,10 +51,10 @@ export function WhyPlay() {
                 <Users className="w-9 h-9 text-[#e30613] group-hover:text-white" />
               </div>
               <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
-                Community First
+                {t("home:community_first")}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                70% of all proceeds go directly to players.
+                {t("home:70_percent_goes_to_players")}
               </p>
             </div>
           </div>
@@ -62,10 +65,10 @@ export function WhyPlay() {
                 <TrendingUp className="w-9 h-9 text-[#e30613] group-hover:text-white" />
               </div>
               <h3 className="text-xl font-bold text-[#0f2b5b] mb-3">
-                Flexible & Fair Pricing
+                {t("home:flexible_and_fair_pricing")}
               </h3>
               <p className="text-gray-600 leading-relaxed">
-                Pick 5–8 numbers. Prices from just 20 kr up to 160 kr per row.
+                {t("home:pick_5_to_9_numbers")}
               </p>
             </div>
           </div>

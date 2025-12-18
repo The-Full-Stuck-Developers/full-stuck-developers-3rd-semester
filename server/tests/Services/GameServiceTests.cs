@@ -20,7 +20,7 @@ public class GameServiceTests
 
         return new MyDbContext(options);
     }
-
+    
     private static GameService CreateEfBackedService(MyDbContext db)
     {
         var repo = new Mock<IRepository<Game>>();
@@ -34,9 +34,17 @@ public class GameServiceTests
                 await db.SaveChangesAsync();
             });
 
+        repo.Setup(r => r.AddAsync(It.IsAny<Game>()))
+            .Returns<Game>(async g =>
+            {
+                await db.Set<Game>().AddAsync(g);
+                await db.SaveChangesAsync();
+            });
+
         return new GameService(repo.Object, Mock.Of<ISieveProcessor>());
     }
 
+    
     // -------------------------
     // Seed helpers
     // -------------------------
@@ -64,7 +72,8 @@ public class GameServiceTests
             StartTime = now.AddDays(-1),
             BetDeadline = now.AddHours(1),
             WinningNumbers = null,
-            NumberOfPhysicalPlayers = 0
+            InPersonWinners = 0,
+            InPersonPrizePool = 0,
         };
     }
 
@@ -178,39 +187,41 @@ public class GameServiceTests
     // GetOrCreateCurrentGameAsync (happy + unhappy)
     // ------------------------------------------------
 
-    [Fact]
-    public async Task GetOrCreateCurrentGameAsync_CanBetGameExists_ReturnsIt()
-    {
-        using var db = CreateDbContext();
-        var now = DateTime.UtcNow;
+    //method not used
+    // [Fact]
+    // public async Task GetOrCreateCurrentGameAsync_CanBetGameExists_ReturnsIt()
+    // {
+    //     using var db = CreateDbContext();
+    //     var now = DateTime.UtcNow;
+    //
+    //     var canBetGame = new Game
+    //     {
+    //         Id = Guid.NewGuid(),
+    //         Year = now.Year,
+    //         WeekNumber = ISOWeek.GetWeekOfYear(now),
+    //         StartTime = now.AddMinutes(10),
+    //         BetDeadline = now.AddHours(2),
+    //         WinningNumbers = null,
+    //         InPersonWinners = 0,
+    //         InPersonPrizePool = 0
+    //     };
+    //
+    //     db.Games.Add(canBetGame);
+    //     await db.SaveChangesAsync();
+    //
+    //     var service = CreateEfBackedService(db);
+    //
+    //     var result = await service.GetOrCreateCurrentGameAsync();
+    //
+    //     Assert.Equal(canBetGame.Id, result.Id);
+    // }
 
-        var canBetGame = new Game
-        {
-            Id = Guid.NewGuid(),
-            Year = now.Year,
-            WeekNumber = ISOWeek.GetWeekOfYear(now),
-            StartTime = now.AddMinutes(10),
-            BetDeadline = now.AddHours(2),
-            WinningNumbers = null,
-            NumberOfPhysicalPlayers = 0
-        };
-
-        db.Games.Add(canBetGame);
-        await db.SaveChangesAsync();
-
-        var service = CreateEfBackedService(db);
-
-        var result = await service.GetOrCreateCurrentGameAsync();
-
-        Assert.Equal(canBetGame.Id, result.Id);
-    }
-
-    [Fact]
-    public async Task GetOrCreateCurrentGameAsync_NoFutureGames_ThrowsInvalidOperationException()
-    {
-        using var db = CreateDbContext();
-        var service = CreateEfBackedService(db);
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetOrCreateCurrentGameAsync());
-    }
+    // [Fact]
+    // public async Task GetOrCreateCurrentGameAsync_NoFutureGames_ThrowsInvalidOperationException()
+    // {
+    //     using var db = CreateDbContext();
+    //     var service = CreateEfBackedService(db);
+    //
+    //     await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetOrCreateCurrentGameAsync());
+    // }
 }

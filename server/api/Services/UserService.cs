@@ -140,31 +140,39 @@ public class UserService(
         }
 
         var now = DateTime.UtcNow;
-        var expiresAt = user.ExpiresAt.Value;
-        var renewalWindowStart = expiresAt.AddHours(-168);
 
-        if (expiresAt < now)
+        // If no expiration date, set it to one year from now
+        if (!user.ExpiresAt.HasValue)
         {
             user.ExpiresAt = now.AddYears(1);
         }
-        else if (now >= renewalWindowStart)
-        {
-            user.ExpiresAt = expiresAt.AddYears(1);
-        }
         else
         {
-            // Too early to renew
-            var daysUntilRenewal = (renewalWindowStart - now).TotalDays;
-            throw new InvalidOperationException(
-                $"Membership can only be renewed within 7 days of expiration. " +
-                $"Renewal available in {Math.Ceiling(daysUntilRenewal)} days");
+            var expiresAt = user.ExpiresAt.Value;
+            var renewalWindowStart = expiresAt.AddHours(-168);
+
+            if (expiresAt < now)
+            {
+                user.ExpiresAt = now.AddYears(1);
+            }
+            else if (now >= renewalWindowStart)
+            {
+                user.ExpiresAt = expiresAt.AddYears(1);
+            }
+            else
+            {
+                // Too early to renew
+                var daysUntilRenewal = (renewalWindowStart - now).TotalDays;
+                throw new InvalidOperationException(
+                    $"Membership can only be renewed within 7 days of expiration. " +
+                    $"Renewal available in {Math.Ceiling(daysUntilRenewal)} days");
+            }
         }
 
         await userRepository.UpdateAsync(user);
 
         return new UserDto(user);
     }
-
     public async Task<int> GetUsersCount()
     {
         return await userRepository.Query()
