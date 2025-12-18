@@ -44,7 +44,9 @@ export function UserBoards() {
 
       const boards: SubmittedBoard[] = response.bets.map((bet: any) => ({
         id: bet.id,
-        numbers: bet.numbers.split(",").map((n: string) => parseInt(n.trim(), 10)),
+        numbers: bet.numbers
+          .split(",")
+          .map((n: string) => parseInt(n.trim(), 10)),
         fieldCount: bet.count as 5 | 6 | 7 | 8,
         price: bet.price,
         repeatWeeks: bet.seriesTotal || 1,
@@ -132,7 +134,8 @@ export function UserBoards() {
                   {t("continue_your_board")}
                 </div>
                 <div className="text-sm text-gray-300">
-                  {t("numbers_selected", { count: draft.selected.length })} • {draft.repeatWeeks}{" "}
+                  {t("numbers_selected", { count: draft.selected.length })} •{" "}
+                  {draft.repeatWeeks}{" "}
                   {draft.repeatWeeks > 1 ? t("weeks") : t("week")}
                 </div>
               </div>
@@ -183,11 +186,14 @@ export function UserBoards() {
                     <div>
                       <div className="font-bold text-lg">
                         {board.fieldCount} {t("numbers")} • {board.price} kr
-                        {board.seriesTotal && board.seriesTotal > 1 && board.seriesIndex && (
-                          <span className="ml-2 text-sm font-normal text-blue-400">
-                            ({t("week")} {board.seriesIndex} {t("of")} {board.seriesTotal})
-                          </span>
-                        )}
+                        {board.seriesTotal &&
+                          board.seriesTotal > 1 &&
+                          board.seriesIndex && (
+                            <span className="ml-2 text-sm font-normal text-blue-400">
+                              ({t("week")} {board.seriesIndex} {t("of")}{" "}
+                              {board.seriesTotal})
+                            </span>
+                          )}
                       </div>
                       <div className="text-sm text-gray-400">
                         {board.gameWeek && board.gameYear ? (
@@ -195,9 +201,12 @@ export function UserBoards() {
                             {t("week")} {board.gameWeek}, {board.gameYear}
                             {board.gameStartTime && (
                               <span className="ml-2">
-                                • {new Date(board.gameStartTime).toLocaleDateString("en-US", {
+                                •{" "}
+                                {new Date(
+                                  board.gameStartTime,
+                                ).toLocaleDateString("en-US", {
                                   month: "short",
-                                  day: "numeric"
+                                  day: "numeric",
                                 })}
                               </span>
                             )}
@@ -248,7 +257,9 @@ export function UserBoards() {
       ) : !draft ? (
         <div className="text-center py-20">
           <Gamepad2 className="w-24 h-24 text-gray-600 mx-auto mb-6" />
-          <p className="text-2xl font-bold text-gray-400 mb-4">{t("no_boards_yet")}</p>
+          <p className="text-2xl font-bold text-gray-400 mb-4">
+            {t("no_boards_yet")}
+          </p>
           <Link
             to="/game/current"
             className="inline-block px-10 py-5 bg-red-600 hover:bg-red-700 text-white font-black text-xl rounded-full"

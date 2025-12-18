@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { X, Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-export function Settings({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+export function Settings({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const { t, i18n } = useTranslation("player");
   const [currentLang, setCurrentLang] = useState<"en" | "dk">("en");
 
@@ -24,10 +30,7 @@ export function Settings({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 
   return (
     <>
-      <div
-        className="fixed inset-0 bg-black/50 z-50"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />
       <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
         <div
           className="bg-gray-800 rounded-2xl p-6 max-w-md w-full border border-gray-700"
