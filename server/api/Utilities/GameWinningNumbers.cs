@@ -1,4 +1,4 @@
-namespace domain;
+namespace api.Utilities;
 
 using System.Globalization;
 
