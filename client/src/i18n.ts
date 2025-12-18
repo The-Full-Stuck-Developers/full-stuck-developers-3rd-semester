@@ -39,7 +39,15 @@ i18n.use(initReactI18next).init({
   },
   lng: "en",
   fallbackLng: "en",
-  ns: ["common", "messages", "placeholders", "user", "validation", "game", "player"],
+  ns: [
+    "common",
+    "messages",
+    "placeholders",
+    "user",
+    "validation",
+    "game",
+    "player",
+  ],
   defaultNS: "common",
   interpolation: {
     escapeValue: false,
