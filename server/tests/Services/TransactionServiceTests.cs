@@ -2,6 +2,7 @@ using api.Services;
 using api.Models;
 using api.Models.Dtos.Requests.Transaction;
 using dataccess;
+using dataccess.Entities;
 using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
@@ -20,22 +21,44 @@ public class TransactionServiceTests
             .Options;
 
         _db = new MyDbContext(options);
-        
-        // Use real SieveProcessor with default options
+
+        // IMPORTANT: give Sieve a non-zero DefaultPageSize, otherwise Apply() can return 0 items
         _sieveProcessor = new SieveProcessor(new SieveOptionsAccessor());
-        
+
         _service = new TransactionService(_db, _sieveProcessor);
     }
+
+    private static SieveModel DefaultSieve() => new()
+    {
+        Page = 1,
+        PageSize = 50
+    };
+
+    private static User CreateValidUser(string suffix = "u") => new()
+    {
+        Id = Guid.NewGuid(),
+        Name = "User",
+        Email = $"{suffix}@test.local",
+        PasswordHash = "hashed",
+        PhoneNumber = "12345678",
+        IsActive = true,
+        CreatedAt = DateTime.UtcNow
+    };
 
     [Fact]
     public async Task GetAllTransactions_ReturnsOnlyDeposits()
     {
         // Arrange
-                _db.Transactions.AddRange(
+        var u1 = CreateValidUser("u1");
+        var u2 = CreateValidUser("u2");
+        _db.Users.AddRange(u1, u2);
+
+        _db.Transactions.AddRange(
             new Transaction
             {
                 Id = Guid.NewGuid(),
-                UserId = Guid.NewGuid(),
+                UserId = u1.Id,
+                User = u1,
                 Type = TransactionType.Deposit,
                 Amount = 100,
                 Status = TransactionStatus.Accepted,
@@ -44,58 +67,71 @@ public class TransactionServiceTests
             new Transaction
             {
                 Id = Guid.NewGuid(),
-                UserId = Guid.NewGuid(),
+                UserId = u2.Id,
+                User = u2,
                 Type = TransactionType.Purchase,
                 Amount = 50,
                 Status = TransactionStatus.Accepted,
                 CreatedAt = DateTime.UtcNow
             }
         );
+
         await _db.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetAllTransactions(new SieveModel());
+        var result = await _service.GetAllTransactions(DefaultSieve());
 
         // Assert
         Assert.Single(result.Items);
         Assert.Equal(1, result.Total);
+        Assert.All(result.Items, t => Assert.Equal(TransactionType.Deposit, t.Type));
     }
-    
+
     [Fact]
     public async Task GetTransactionsByUser_ReturnsOnlyUserDeposits()
     {
         // Arrange
-        var userId = Guid.NewGuid();
+        var user = CreateValidUser("target");
+        var other = CreateValidUser("other");
+        _db.Users.AddRange(user, other);
+
         _db.Transactions.AddRange(
             new Transaction
             {
-                UserId = userId,
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                User = user,
                 Type = TransactionType.Deposit,
                 Amount = 100,
+                Status = TransactionStatus.Accepted,
                 CreatedAt = DateTime.UtcNow
             },
             new Transaction
             {
-                UserId = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
+                UserId = other.Id,
+                User = other,
                 Type = TransactionType.Deposit,
                 Amount = 200,
+                Status = TransactionStatus.Accepted,
                 CreatedAt = DateTime.UtcNow
             }
         );
+
         await _db.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetTransactionsByUser(userId, new SieveModel());
+        var result = await _service.GetTransactionsByUser(user.Id, DefaultSieve());
 
         // Assert
         Assert.Single(result.Items);
-        Assert.Equal(userId, result.Items.First().UserId);
+        Assert.Equal(user.Id, result.Items.First().UserId);
+        Assert.All(result.Items, t => Assert.Equal(TransactionType.Deposit, t.Type));
     }
 
     [Fact]
     public async Task CreateTransaction_ValidDto_CreatesPendingTransaction()
     {
-        // Arrange
         var dto = new CreateTransactionDto
         {
             UserId = Guid.NewGuid().ToString(),
@@ -103,10 +139,8 @@ public class TransactionServiceTests
             MobilePayTransactionNumber = 552255998
         };
 
-        // Act
         var result = await _service.CreateTransaction(dto);
 
-        // Assert
         Assert.Equal(TransactionStatus.Pending, result.Status);
         Assert.Equal(1, _db.Transactions.Count());
     }
@@ -114,7 +148,6 @@ public class TransactionServiceTests
     [Fact]
     public async Task UpdateTransactionStatus_UpdatesStatus()
     {
-        // Arrange
         var transaction = new Transaction
         {
             Id = Guid.NewGuid(),
@@ -123,20 +156,17 @@ public class TransactionServiceTests
         _db.Transactions.Add(transaction);
         await _db.SaveChangesAsync();
 
-        // Act
         var result = await _service.UpdateTransactionStatus(
             transaction.Id,
             new UpdateTransactionDto { Status = TransactionStatus.Accepted });
 
-        // Assert
         Assert.NotNull(result);
-        Assert.Equal(TransactionStatus.Accepted, result.Status);
+        Assert.Equal(TransactionStatus.Accepted, result!.Status);
     }
 
     [Fact]
     public async Task DeleteTransaction_SetsStatusCancelled()
     {
-        // Arrange
         var transaction = new Transaction
         {
             Id = Guid.NewGuid(),
@@ -145,17 +175,14 @@ public class TransactionServiceTests
         _db.Transactions.Add(transaction);
         await _db.SaveChangesAsync();
 
-        // Act
         await _service.DeleteTransaction(transaction.Id);
 
-        // Assert
         Assert.Equal(TransactionStatus.Cancelled, transaction.Status);
     }
 
     [Fact]
     public async Task ApproveTransaction_SetsAccepted()
     {
-        // Arrange
         var transaction = new Transaction
         {
             Id = Guid.NewGuid(),
@@ -164,17 +191,14 @@ public class TransactionServiceTests
         _db.Transactions.Add(transaction);
         await _db.SaveChangesAsync();
 
-        // Act
         var result = await _service.ApproveTransaction(transaction.Id);
 
-        // Assert
         Assert.Equal(TransactionStatus.Accepted, result.Status);
     }
 
     [Fact]
     public async Task RejectTransaction_SetsRejected()
     {
-        // Arrange
         var transaction = new Transaction
         {
             Id = Guid.NewGuid(),
@@ -183,34 +207,28 @@ public class TransactionServiceTests
         _db.Transactions.Add(transaction);
         await _db.SaveChangesAsync();
 
-        // Act
         var result = await _service.RejectTransaction(transaction.Id);
 
-        // Assert
         Assert.Equal(TransactionStatus.Rejected, result.Status);
     }
 
     [Fact]
     public async Task GetPendingTransactionsCount_ReturnsCorrectCount()
     {
-        // Arrange
         _db.Transactions.AddRange(
             new Transaction { Status = TransactionStatus.Pending },
             new Transaction { Status = TransactionStatus.Accepted }
         );
         await _db.SaveChangesAsync();
 
-        // Act
         var count = await _service.GetPendingTransactionsCount();
 
-        // Assert
         Assert.Equal(1, count);
     }
 
     [Fact]
     public async Task GetUserBalance_CalculatesCorrectly()
     {
-        // Arrange
         var userId = Guid.NewGuid();
         _db.Transactions.AddRange(
             new Transaction
@@ -229,10 +247,8 @@ public class TransactionServiceTests
         );
         await _db.SaveChangesAsync();
 
-        // Act
         var balance = await _service.GetUserBalance(userId);
 
-        // Assert
         Assert.Equal(60, balance);
     }
 }
@@ -240,5 +256,9 @@ public class TransactionServiceTests
 // Helper class to provide Sieve options
 public class SieveOptionsAccessor : Microsoft.Extensions.Options.IOptions<SieveOptions>
 {
-    public SieveOptions Value => new SieveOptions();
+    public SieveOptions Value => new()
+    {
+        DefaultPageSize = 50,
+        MaxPageSize = 200
+    };
 }
