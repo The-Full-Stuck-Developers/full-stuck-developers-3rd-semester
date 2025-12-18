@@ -20,7 +20,7 @@ public class GameServiceTests
 
         return new MyDbContext(options);
     }
-
+    
     private static GameService CreateEfBackedService(MyDbContext db)
     {
         var repo = new Mock<IRepository<Game>>();
@@ -34,9 +34,17 @@ public class GameServiceTests
                 await db.SaveChangesAsync();
             });
 
+        repo.Setup(r => r.AddAsync(It.IsAny<Game>()))
+            .Returns<Game>(async g =>
+            {
+                await db.Set<Game>().AddAsync(g);
+                await db.SaveChangesAsync();
+            });
+
         return new GameService(repo.Object, Mock.Of<ISieveProcessor>());
     }
 
+    
     // -------------------------
     // Seed helpers
     // -------------------------
@@ -206,11 +214,14 @@ public class GameServiceTests
     }
 
     [Fact]
-    public async Task GetOrCreateCurrentGameAsync_NoFutureGames_ThrowsInvalidOperationException()
+    public async Task GetOrCreateCurrentGameAsync_NoOpenGames_CreatesNewGame()
     {
         using var db = CreateDbContext();
         var service = CreateEfBackedService(db);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GetOrCreateCurrentGameAsync());
+        var game = await service.GetOrCreateCurrentGameAsync();
+
+        Assert.NotNull(game);
+        Assert.True(game.BetDeadline > DateTime.UtcNow);
     }
 }

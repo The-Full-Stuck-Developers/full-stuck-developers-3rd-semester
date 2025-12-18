@@ -1,6 +1,5 @@
 using dataccess.Entities;
 using DefaultNamespace;
-using domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace dataccess;
