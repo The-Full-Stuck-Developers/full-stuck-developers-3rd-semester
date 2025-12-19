@@ -2,11 +2,14 @@
 
 A full-stack web application for managing a weekly lottery game system where users can place bets on number combinations, with separate admin and player interfaces. The platform supports multi-week betting, transaction management, and game history tracking.
 
+# Link to the deployed app
+https://deadpigeons.vercel.app/
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
 - [Architecture](#architecture)
-- [Routes & Authorization](#routes--authorization)
+- [Security & Authorization](#security--authorization)
 - [Environment & Configuration](#environment--configuration)
 - [Linting & Code Quality](#linting--code-quality)
 - [Current State](#current-state)
@@ -94,11 +97,12 @@ full-stuck-developers-3rd-semester/
 └── README.md
 ```
 
-## Routes & Authorization
+## Security & Authorization
 
 ### Authentication
 
 The application uses **JWT (JSON Web Tokens)** for authentication:
+
 - **Token Generation**: Tokens are created using HMAC-SHA512 algorithm
 - **Token Expiration**: 7 days
 - **Token Storage**: Tokens are stored in browser localStorage (client-side)
@@ -106,87 +110,45 @@ The application uses **JWT (JSON Web Tokens)** for authentication:
 
 ### Authorization Policies
 
-The application implements role-based access control with the following policies:
+The application implements role-based access control with two main user types:
 
-1. **`AllowAnonymous`** - Public access, no authentication required
-2. **`[Authorize]`** - Requires authenticated user (any logged-in user)
-3. **`[Authorize(Policy = "IsAdmin")]`** - Requires authenticated admin user
+#### 1. **Admin Users** (`IsAdmin` Policy)
 
-**IsAdmin Policy Implementation:**
+Admin users have access to:
+- User management (CRUD operations)
+- Game management (create, update, draw winners)
+- Transaction viewing and management
+- Dashboard with revenue statistics
+
+**Authorization Implementation:**
 - Custom `IsAdmin` authorization requirement
 - `AdminAuthorizationHandler` checks user's `IsAdmin` property
 - Fast path: Checks JWT claim `is_admin` first
 - Fallback: Database lookup if claim not present
 - Applied via `[Authorize(Policy = "IsAdmin")]` attribute
 
-### Complete Route Listing
+**Protected Endpoints:**
+- `/api/Users/*` - All user management endpoints
+- `/api/Games/*` - Game management (except `player/current`)
+- `/api/Transactions/*` - Transaction viewing
 
-#### Public Routes (AllowAnonymous)
+#### 2. **Regular Users (Players)**
 
-| Method | Route | Description |
-|--------|-------|-------------|
-| `GET` | `/` | API status check |
-| `GET` | `/api/Health/App/Up` | Application health check |
-| `GET` | `/api/Health/Database/Up` | Database health check |
-| `POST` | `/api/auth/Login` | User login |
-| `POST` | `/api/auth/Register` | User registration |
-| `POST` | `/api/auth/ForgotPassword` | Request password reset email |
-| `POST` | `/api/auth/ResetPassword` | Reset password with token |
+Regular users can:
+- Place bets
+- View their own boards and history
+- Manage their balance
+- View current game information
 
-#### Authenticated Routes (Any Logged-in User)
+**Authorization Implementation:**
+- Default fallback policy requires authenticated user
+- Users can only access their own data (enforced in controllers)
+- Applied via `[Authorize]` attribute (without policy)
 
-| Method | Route | Description | Notes |
-|--------|-------|-------------|-------|
-| `POST` | `/api/auth/Logout` | User logout | Currently not implemented |
-| `GET` | `/api/auth/UserInfo` | Get current user info | Returns user's own info |
-| `POST` | `/api/Bets` | Place a bet | Users can only place bets for themselves |
-| `GET` | `/api/Bets/player/active` | Get user's active boards | Returns only user's own bets |
-| `GET` | `/api/Bets/player/history` | Get user's bet history | Returns only user's own bets |
-| `DELETE` | `/api/Bets/{id}` | Delete a bet | Users can only delete their own bets |
-| `PUT` | `/api/Bets/{id}` | Update a bet | Users can only update their own bets |
-| `GET` | `/api/Games/player/current` | Get current game for player | Public game information |
-| `POST` | `/api/Transactions` | Create transaction | Typically deposits |
-| `GET` | `/api/Transactions/User/{userId}` | Get transactions by user | Access depends on userId matching current user or admin status |
-| `GET` | `/api/Transactions/GetUserBalance` | Get user balance | Requires userId parameter |
-| `GET` | `/api/Transactions/GetUserDepositTotal` | Get total deposits | Requires userId parameter |
-| `GET` | `/api/Transactions/GetUserPurchaseTotal` | Get total purchases | Requires userId parameter |
-
-#### Admin-Only Routes (IsAdmin Policy)
-
-**User Management:**
-| Method | Route | Description |
-|--------|-------|-------------|
-| `GET` | `/api/Users` | Get all users (paginated, filtered) |
-| `GET` | `/api/Users/{id}` | Get user by ID |
-| `POST` | `/api/Users` | Create new user |
-| `PATCH` | `/api/Users/{id}` | Update user |
-| `DELETE` | `/api/Users/{id}` | Delete user |
-| `POST` | `/api/Users/{id}/RenewMembership` | Renew user membership |
-| `PATCH` | `/api/Users/{id}/Activate` | Activate user account |
-| `PATCH` | `/api/Users/{id}/Dectivate` | Deactivate user account |
-| `GET` | `/api/Users/GetPlayerCount` | Get total player count |
-
-**Game Management:**
-| Method | Route | Description |
-|--------|-------|-------------|
-| `GET` | `/api/Games/GetAllUpcomingGames` | Get all upcoming games (paginated) |
-| `GET` | `/api/Games/GetAllPastGames` | Get all past games (paginated) |
-| `GET` | `/api/Games/{id}` | Get game by ID |
-| `GET` | `/api/Games/GetCurrentGame` | Get current game |
-| `PATCH` | `/api/Games/{id}/UpdateWinningNumbers` | Set winning numbers for game |
-| `PATCH` | `/api/Games/{id}/DrawWinners` | Draw winners for game |
-| `PATCH` | `/api/Games/{id}/UpdateInPersonData` | Update in-person player data |
-
-**Transaction Management:**
-| Method | Route | Description |
-|--------|-------|-------------|
-| `GET` | `/api/Transactions` | Get all transactions (paginated, filtered) |
-| `GET` | `/api/Transactions/{id}` | Get transaction by ID |
-| `PATCH` | `/api/Transactions/{id}` | Update transaction status |
-| `DELETE` | `/api/Transactions/{id}` | Delete transaction |
-| `PATCH` | `/api/Transactions/{id}/approve` | Approve transaction |
-| `PATCH` | `/api/Transactions/{id}/reject` | Reject transaction |
-| `GET` | `/api/Transactions/GetPendingTransactionsCount` | Get count of pending transactions |
+**Protected Endpoints:**
+- `/api/Bets/*` - Bet management (users can only access their own bets)
+- `/api/Transactions/user/*` - User's own transactions
+- `/api/Games/player/current` - Current game information
 
 ### Security Features
 
@@ -202,10 +164,9 @@ The application implements role-based access control with the following policies
 
 ### Data Access Control
 
-- **User Isolation**: Users can only view/modify their own bets (enforced in controllers via user ID checks)
-- **Admin Override**: Admins can view all data via admin-only endpoints
+- **User Isolation**: Users can only view/modify their own bets and transactions
+- **Admin Override**: Admins can view all data but cannot modify user bets directly
 - **Soft Deletes**: Bets are soft-deleted (marked with `DeletedAt`) when games finish, preserving history
-- **Transaction Access**: Users can query their own transactions via `/api/Transactions/User/{userId}` endpoint
 
 ## Environment & Configuration
 
@@ -261,12 +222,6 @@ cd server/api
 dotnet ef migrations add <MigrationName> --project ../dataccess
 dotnet ef database update --project ../dataccess
 ```
-
-### Default Login Credentials
-
-- **Admin**: `admin@example.com` / `hashed_password_here`
-- **User**: `user@example.com` / `hashed_password_here`
-- **Player**: `player@example.com` / `hashed_password_here`
 
 ## Linting & Code Quality
 
@@ -375,7 +330,7 @@ The codebase has been cleaned of redundant comments. Only essential, non-obvious
    - Deadline is shown in UTC, may need timezone conversion for better UX
 
 3. **Email Functionality**
-   - SMTP configuration is optional, email features may not work if not configured
+   - Email service is not configured, so the email features will not work (for resetting password, etc.)
 
 4. **Transaction Refunds**
    - When deleting bets, refunds are created but original transaction amount is preserved for audit trail
@@ -383,14 +338,9 @@ The codebase has been cleaned of redundant comments. Only essential, non-obvious
 
 5. **Game History Pagination**
    - Pagination works correctly, but series information display could be improved
-
-### 🔄 Recent Changes
-
-- Removed bet editing functionality (as per user requirements)
-- Cleaned up redundant comments throughout codebase
-- Fixed bet deadline to Saturday 17:00 (not 18:00)
-- Improved multi-week bet creation logic
-- Enhanced winning board visual design in game history
+  
+6. **Localization**
+   - Some validation messages from the api might not be translated on the client side
 
 ## Setup Instructions
 
@@ -591,11 +541,14 @@ npm run build
 **Environment Variables:**
 - `VITE_API_BASE_URL` - API base URL for production
 
+### Database
+** For the production database we are using the Neon DB platform for serverless Postgres hosting.
+
 ### CI/CD
 
 GitHub Actions workflows:
-- `.github/workflows/format.yml` - Code formatting check
-- `.github/workflows/ci-tests.yml` - Continuous integration tests
+- `.github/workflows/format.yml` - Code formatting (only setup for client at the time)
+- `.github/workflows/ci-tests.yml` - Continuous integration tests (only the api has working tests)
 
 ## Additional Notes
 
@@ -629,5 +582,4 @@ TypeScript API client is auto-generated from OpenAPI spec:
 
 ---
 
-**Last Updated:** December 2025  
-**Maintainers:** Full Stack Developers Team
+**Last Updated:** December 202**Maintainers:** Full Stack Developers Team
