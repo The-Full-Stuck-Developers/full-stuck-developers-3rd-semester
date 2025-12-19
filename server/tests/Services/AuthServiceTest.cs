@@ -1,9 +1,4 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 using api.Etc;
 using api.Models;
 using api.Models.Dtos.Requests;
@@ -14,13 +9,28 @@ using dataccess.Entities;
 using dataccess.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
 public class AuthServiceTests
 {
+    private sealed class TestDbContext : DbContext
+    {
+        public TestDbContext(DbContextOptions<TestDbContext> options) : base(options) { }
+        public DbSet<User> Users => Set<User>();
+    }
+
+    private static TestDbContext CreateDb()
+    {
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseInMemoryDatabase($"auth-tests-{Guid.NewGuid():N}")
+            .EnableSensitiveDataLogging()
+            .Options;
+
+        return new TestDbContext(options);
+    }
+
     private readonly Mock<ILogger<AuthService>> _loggerMock = new();
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock = new();
     private readonly Mock<IRepository<User>> _userRepositoryMock = new();
@@ -54,20 +64,41 @@ public class AuthServiceTests
             Email = email,
             PasswordHash = passwordHash,
             Name = name,
-            PhoneNumber = phone,
+            PhoneNumber = phone,          
             IsAdmin = isAdmin,
             DeletedAt = deletedAt,
             ExpiresAt = expiresAt,
             CreatedAt = DateTime.UtcNow,
-            IsActive = true
+            UpdatedAt = DateTime.UtcNow,
+            IsActive = true,
+            PasswordResetToken = null,
+            PasswordResetTokenExpiry = null
         };
     }
 
-    private void SetupUsers(params User[] users)
+    private void WireRepositoryToDb(TestDbContext db)
     {
+        _userRepositoryMock.Reset();
+
         _userRepositoryMock
             .Setup(r => r.Query())
-            .Returns(users.AsAsyncQueryable());
+            .Returns(db.Users);
+
+        _userRepositoryMock
+            .Setup(r => r.AddAsync(It.IsAny<User>()))
+            .Returns(async (User u) =>
+            {
+                db.Users.Add(u);
+                await db.SaveChangesAsync();
+            });
+
+        _userRepositoryMock
+            .Setup(r => r.UpdateAsync(It.IsAny<User>()))
+            .Returns(async (User u) =>
+            {
+                db.Users.Update(u);
+                await db.SaveChangesAsync();
+            });
     }
 
     // ----------------------------
@@ -77,9 +108,12 @@ public class AuthServiceTests
     [Fact]
     public void Authenticate_ValidCredentials_ReturnsUserInfo()
     {
-        var user = NewUser(isAdmin: true);
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
 
-        SetupUsers(user);
+        var user = NewUser(isAdmin: true);
+        db.Users.Add(user);
+        db.SaveChanges();
 
         _passwordHasherMock
             .Setup(h => h.VerifyHashedPassword(user, user.PasswordHash, "password"))
@@ -101,9 +135,12 @@ public class AuthServiceTests
     [Fact]
     public void Authenticate_InvalidPassword_ThrowsAuthenticationError()
     {
-        var user = NewUser();
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
 
-        SetupUsers(user);
+        var user = NewUser();
+        db.Users.Add(user);
+        db.SaveChanges();
 
         _passwordHasherMock
             .Setup(h => h.VerifyHashedPassword(user, user.PasswordHash, "wrong"))
@@ -122,33 +159,45 @@ public class AuthServiceTests
     [Fact]
     public void Authenticate_DeletedUser_ThrowsAuthenticationError()
     {
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
+
         var user = NewUser(deletedAt: DateTime.UtcNow.AddDays(-1));
-        SetupUsers(user);
+        db.Users.Add(user);
+        db.SaveChanges();
 
         var service = CreateService();
 
-        Assert.ThrowsAny<AuthenticationError>(() =>
+        var ex = Assert.ThrowsAny<AuthenticationError>(() =>
             service.Authenticate(new LoginRequestDto
             {
                 Email = user.Email,
                 Password = "password"
             }));
+
+        Assert.Contains("inactive", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
     public void Authenticate_ExpiredMembership_ThrowsAuthenticationError()
     {
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
+
         var user = NewUser(expiresAt: DateTime.UtcNow.AddMinutes(-1));
-        SetupUsers(user);
+        db.Users.Add(user);
+        db.SaveChanges();
 
         var service = CreateService();
 
-        Assert.ThrowsAny<AuthenticationError>(() =>
+        var ex = Assert.ThrowsAny<AuthenticationError>(() =>
             service.Authenticate(new LoginRequestDto
             {
                 Email = user.Email,
                 Password = "password"
             }));
+
+        Assert.Contains("expired", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     // ----------------------------
@@ -158,7 +207,8 @@ public class AuthServiceTests
     [Fact]
     public async Task Register_NewUser_AddsUserAndReturnsInfo()
     {
-        SetupUsers(); // empty list
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
 
         _passwordHasherMock
             .Setup(h => h.HashPassword(It.IsAny<User>(), "password"))
@@ -166,7 +216,12 @@ public class AuthServiceTests
 
         _userRepositoryMock
             .Setup(r => r.AddAsync(It.IsAny<User>()))
-            .Returns(Task.CompletedTask);
+            .Returns(async (User u) =>
+            {
+                u.PhoneNumber = "12345678"; // REQUIRED FIELD
+                db.Users.Add(u);
+                await db.SaveChangesAsync();
+            });
 
         var service = CreateService();
 
@@ -180,13 +235,21 @@ public class AuthServiceTests
         Assert.Equal("New User", result.Name);
         Assert.False(result.IsAdmin);
 
-        _userRepositoryMock.Verify(r => r.AddAsync(It.Is<User>(u => u.Email == "new@test.com")), Times.Once);
+        var saved = await db.Users.SingleAsync(u => u.Email == "new@test.com");
+        Assert.Equal("12345678", saved.PhoneNumber);
+
+        _userRepositoryMock.Verify(r => r.AddAsync(It.IsAny<User>()), Times.Once);
     }
+
 
     [Fact]
     public async Task Register_EmailExists_ThrowsAuthenticationError()
     {
-        SetupUsers(NewUser(email: "test@test.com"));
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
+
+        db.Users.Add(NewUser(email: "test@test.com"));
+        await db.SaveChangesAsync();
 
         var service = CreateService();
 
@@ -206,11 +269,15 @@ public class AuthServiceTests
     [Fact]
     public void GetUserInfo_UserExists_ReturnsDto()
     {
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
+
         var userId = Guid.NewGuid();
         var user = NewUser();
         user.Id = userId;
 
-        SetupUsers(user);
+        db.Users.Add(user);
+        db.SaveChanges();
 
         var claims = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
@@ -232,12 +299,12 @@ public class AuthServiceTests
     [Fact]
     public async Task SendPasswordResetEmail_UserExists_SetsToken_UpdatesUser_AndSendsEmail()
     {
-        var user = NewUser();
-        SetupUsers(user);
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
 
-        _userRepositoryMock
-            .Setup(r => r.UpdateAsync(It.IsAny<User>()))
-            .Returns(Task.CompletedTask);
+        var user = NewUser();
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
 
         _emailServiceMock
             .Setup(e => e.SendPasswordResetEmail(user.Email, user.Name, It.IsAny<string>()))
@@ -247,17 +314,21 @@ public class AuthServiceTests
 
         await service.SendPasswordResetEmail(user.Email);
 
-        Assert.False(string.IsNullOrWhiteSpace(user.PasswordResetToken));
-        Assert.NotNull(user.PasswordResetTokenExpiry);
+        var saved = await db.Users.SingleAsync(u => u.Id == user.Id);
 
-        _userRepositoryMock.Verify(r => r.UpdateAsync(user), Times.Once);
+        Assert.False(string.IsNullOrWhiteSpace(saved.PasswordResetToken));
+        Assert.NotNull(saved.PasswordResetTokenExpiry);
+        Assert.True(saved.PasswordResetTokenExpiry > DateTime.UtcNow);
+
+        _userRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Once);
         _emailServiceMock.Verify(e => e.SendPasswordResetEmail(user.Email, user.Name, It.IsAny<string>()), Times.Once);
     }
 
     [Fact]
     public async Task SendPasswordResetEmail_UserNotFound_DoesNothing()
     {
-        SetupUsers(); // empty
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
 
         var service = CreateService();
 
@@ -274,19 +345,19 @@ public class AuthServiceTests
     [Fact]
     public async Task ResetPassword_ValidToken_UpdatesPassword_AndClearsToken()
     {
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
+
         var user = NewUser();
         user.PasswordResetToken = "token";
         user.PasswordResetTokenExpiry = DateTime.UtcNow.AddMinutes(10);
 
-        SetupUsers(user);
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
 
         _passwordHasherMock
-            .Setup(h => h.HashPassword(user, "newpassword"))
+            .Setup(h => h.HashPassword(It.IsAny<User>(), "newpassword"))
             .Returns("new-hash");
-
-        _userRepositoryMock
-            .Setup(r => r.UpdateAsync(user))
-            .Returns(Task.CompletedTask);
 
         var service = CreateService();
 
@@ -297,21 +368,27 @@ public class AuthServiceTests
             NewPassword = "newpassword"
         });
 
-        Assert.Equal("new-hash", user.PasswordHash);
-        Assert.Null(user.PasswordResetToken);
-        Assert.Null(user.PasswordResetTokenExpiry);
+        var saved = await db.Users.SingleAsync(u => u.Id == user.Id);
 
-        _userRepositoryMock.Verify(r => r.UpdateAsync(user), Times.Once);
+        Assert.Equal("new-hash", saved.PasswordHash);
+        Assert.Null(saved.PasswordResetToken);
+        Assert.Null(saved.PasswordResetTokenExpiry);
+
+        _userRepositoryMock.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Once);
     }
 
     [Fact]
     public async Task ResetPassword_InvalidToken_ThrowsAuthenticationError()
     {
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
+
         var user = NewUser();
         user.PasswordResetToken = "correct";
         user.PasswordResetTokenExpiry = DateTime.UtcNow.AddMinutes(10);
 
-        SetupUsers(user);
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
 
         var service = CreateService();
 
@@ -327,11 +404,15 @@ public class AuthServiceTests
     [Fact]
     public async Task ResetPassword_ExpiredToken_ThrowsAuthenticationError()
     {
+        using var db = CreateDb();
+        WireRepositoryToDb(db);
+
         var user = NewUser();
         user.PasswordResetToken = "token";
         user.PasswordResetTokenExpiry = DateTime.UtcNow.AddMinutes(-1);
 
-        SetupUsers(user);
+        db.Users.Add(user);
+        await db.SaveChangesAsync();
 
         var service = CreateService();
 
@@ -343,87 +424,4 @@ public class AuthServiceTests
                 NewPassword = "password"
             }));
     }
-}
-
-// ------------------------------------------------------------------
-// Async IQueryable that supports EF Core's FirstOrDefaultAsync, etc.
-// ------------------------------------------------------------------
-
-internal static class AsyncQueryableExtensions
-{
-    public static IQueryable<T> AsAsyncQueryable<T>(this IEnumerable<T> source)
-        => new TestAsyncEnumerable<T>(source);
-}
-
-internal sealed class TestAsyncEnumerable<T> : EnumerableQuery<T>, IAsyncEnumerable<T>, IQueryable<T>
-{
-    public TestAsyncEnumerable(IEnumerable<T> enumerable) : base(enumerable) { }
-    public TestAsyncEnumerable(Expression expression) : base(expression) { }
-
-    public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
-        => new TestAsyncEnumerator<T>(this.AsEnumerable().GetEnumerator());
-
-    IQueryProvider IQueryable.Provider => new TestAsyncQueryProvider<T>(this);
-}
-
-internal sealed class TestAsyncEnumerator<T> : IAsyncEnumerator<T>
-{
-    private readonly IEnumerator<T> _inner;
-
-    public TestAsyncEnumerator(IEnumerator<T> inner) => _inner = inner;
-
-    public T Current => _inner.Current;
-
-    public ValueTask DisposeAsync()
-    {
-        _inner.Dispose();
-        return ValueTask.CompletedTask;
-    }
-
-    public ValueTask<bool> MoveNextAsync()
-        => new(_inner.MoveNext());
-}
-
-internal sealed class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
-{
-    private readonly IQueryProvider _inner;
-
-    public TestAsyncQueryProvider(IQueryProvider inner) => _inner = inner;
-
-    public IQueryable CreateQuery(Expression expression) => new TestAsyncEnumerable<TEntity>(expression);
-
-    public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
-        => new TestAsyncEnumerable<TElement>(expression);
-
-    public object Execute(Expression expression) => _inner.Execute(expression)!;
-
-    public TResult Execute<TResult>(Expression expression) => _inner.Execute<TResult>(expression)!;
-
-    // EF Core calls this with TResult = Task<T>
-    public TResult ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken = default)
-    {
-        // unwrap Task<T>
-        var tResult = typeof(TResult);
-        if (tResult.IsGenericType && tResult.GetGenericTypeDefinition() == typeof(Task<>))
-        {
-            var innerType = tResult.GetGenericArguments()[0];
-            var execGeneric = typeof(IQueryProvider).GetMethods()
-                .Single(m => m.Name == nameof(IQueryProvider.Execute) && m.IsGenericMethod && m.GetParameters().Length == 1)
-                .MakeGenericMethod(innerType);
-
-            var result = execGeneric.Invoke(_inner, new object[] { expression });
-
-            var fromResult = typeof(Task).GetMethods()
-                .Single(m => m.Name == nameof(Task.FromResult) && m.IsGenericMethod)
-                .MakeGenericMethod(innerType);
-
-            return (TResult)fromResult.Invoke(null, new[] { result })!;
-        }
-
-        // If EF calls with a non-Task result, just execute sync
-        return Execute<TResult>(expression);
-    }
-
-    public IAsyncEnumerable<TResult> ExecuteAsync<TResult>(Expression expression)
-        => new TestAsyncEnumerable<TResult>(expression);
 }

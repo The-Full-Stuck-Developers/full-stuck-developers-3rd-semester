@@ -4,67 +4,84 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-#pragma warning disable CS8625, CS8618
-
-public class PasswordHasherTest
+public class PasswordHasherTest : IDisposable
 {
-    private readonly IPasswordHasher<User> _sut;
+    private readonly ServiceProvider _rootProvider;
 
     public PasswordHasherTest()
     {
         var builder = WebApplication.CreateBuilder();
         Program.ConfigureServices(builder, builder.Configuration);
 
-        var app = builder.Build();
-
-        _sut = app.Services.GetRequiredService<IPasswordHasher<User>>();
-        Console.WriteLine($"Using password hasher: {_sut.GetType().Name}");
+        _rootProvider = builder.Services.BuildServiceProvider();
     }
 
-    [Fact]
-    public async Task HashAndVerifyPassword()
+    public void Dispose()
     {
-        // Arrange
+        _rootProvider.Dispose();
+    }
+
+    private IPasswordHasher<User> GetHasherFromScope()
+    {
+        var scope = _rootProvider.CreateScope();
+        return scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+    }
+
+    private static User CreateUser() => new User
+    {
+        Id = Guid.NewGuid(),
+        Email = "test@test.local",
+        Name = "Test User",
+        PhoneNumber = "12345678",
+        IsActive = true,
+        CreatedAt = DateTime.UtcNow
+    };
+
+    [Fact]
+    public void HashAndVerifyPassword()
+    {
+        using var scope = _rootProvider.CreateScope();
+        var sut = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+
+        var user = CreateUser();
         var password = "S3cret!1";
-        
-        // Act
-        var hash = _sut.HashPassword(null, password);
-        var result = _sut.VerifyHashedPassword(null, hash, password);
-        
-        // Assert
+
+        var hash = sut.HashPassword(user, password);
+        var result = sut.VerifyHashedPassword(user, hash, password);
+
         Assert.Equal(PasswordVerificationResult.Success, result);
     }
 
     [Fact]
-    public async Task VerifyPassword_Fails_WithWrongPassword()
+    public void VerifyPassword_Fails_WithWrongPassword()
     {
-        // Arrange
+        using var scope = _rootProvider.CreateScope();
+        var sut = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+
+        var user = CreateUser();
         var password = "S3cret!1";
         var wrongPassword = "WrongPassword123";
-        
-        // Act
-        var hash = _sut.HashPassword(null, password);
-        var result = _sut.VerifyHashedPassword(null, hash, wrongPassword);
-        
-        // Assert
+
+        var hash = sut.HashPassword(user, password);
+        var result = sut.VerifyHashedPassword(user, hash, wrongPassword);
+
         Assert.Equal(PasswordVerificationResult.Failed, result);
     }
 
     [Fact]
-    public async Task HashPassword_GeneratesDifferentHashes_ForSamePassword()
+    public void HashPassword_GeneratesDifferentHashes_ForSamePassword()
     {
-        // Arrange
+        using var scope = _rootProvider.CreateScope();
+        var sut = scope.ServiceProvider.GetRequiredService<IPasswordHasher<User>>();
+
+        var user = CreateUser();
         var password = "S3cret!1";
-        
-        // Act
-        var hash1 = _sut.HashPassword(null, password);
-        var hash2 = _sut.HashPassword(null, password);
-        
-        // Assert
-        Assert.NotEqual(hash1, hash2); // Hashes should be different due to salt
-        
-        // But both should verify correctly
-        Assert.Equal(PasswordVerificationResult.Success, _sut.VerifyHashedPassword(null, hash1, password));
-        Assert.Equal(PasswordVerificationResult.Success, _sut.VerifyHashedPassword(null, hash2, password));
+
+        var hash1 = sut.HashPassword(user, password);
+        var hash2 = sut.HashPassword(user, password);
+
+        Assert.NotEqual(hash1, hash2); 
+        Assert.Equal(PasswordVerificationResult.Success, sut.VerifyHashedPassword(user, hash1, password));
+        Assert.Equal(PasswordVerificationResult.Success, sut.VerifyHashedPassword(user, hash2, password));
     }
 }

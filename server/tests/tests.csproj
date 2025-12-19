@@ -1,34 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<!-- File: server/tests/tests.csproj
+     FIX: Your test project is wrongly set as an EXE. It must be a Library.
+     Also: keep xUnit + runner + Microsoft.NET.Test.Sdk. -->
 
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <OutputType>Exe</OutputType>
-        <RootNamespace>tests</RootNamespace>
-        <TargetFramework>net9.0</TargetFramework>
-       
+
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
-    </ItemGroup>
-    
-    <ItemGroup>
-        <Using Include="Xunit" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
-        <ProjectReference Include="..\api\api.csproj" />
-        <PackageReference Include="Moq" Version="4.20.72" />
-        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.10.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-        <PackageReference Include="xunit.v3" Version="3.0.1" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+
+        <PackageReference Include="Moq" Version="4.20.72" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+        <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.10.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\dataccess\dataccess.csproj" />
+        <ProjectReference Include="..\api\api.csproj" />
+        <ProjectReference Include="..\dataccess\dataccess.csproj" />
     </ItemGroup>
-
 </Project>

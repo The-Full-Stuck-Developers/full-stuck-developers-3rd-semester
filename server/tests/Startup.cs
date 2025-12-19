@@ -1,35 +1,48 @@
-using api;
+using api.Services;
 using dataccess;
+using dataccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Time.Testing;
+using Sieve.Services;
 using Testcontainers.PostgreSql;
 
 namespace tests;
 
-public class Startup
+public sealed class Startup : IDisposable
 {
-    public static void ConfigureServices(IServiceCollection services)
+    private static readonly PostgreSqlContainer Db =
+        new PostgreSqlBuilder()
+            .WithDatabase("testdb")
+            .WithUsername("postgres")
+            .WithPassword("postgres")
+            .Build();
+
+    private static bool _started;
+
+    public Startup()
     {
-        // Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
-        // Program.ConfigureServices(services);
-        // services.RemoveAll(typeof(MyDbContext));
-        // services.AddScoped<MyDbContext>(factory =>
-        // {
-        //     var postgreSqlContainer = new PostgreSqlBuilder().Build();
-        //     postgreSqlContainer.StartAsync().GetAwaiter().GetResult();
-        //     var connectionString = postgreSqlContainer.GetConnectionString();
-        //     var options = new DbContextOptionsBuilder<MyDbContext>()
-        //         .UseNpgsql(connectionString)
-        //         .Options;
-        //
-        //     var ctx = new MyDbContext(options);
-        //     ctx.Database.EnsureCreated();
-        //     return ctx;
-        // });
-        // services.RemoveAll<TimeProvider>();
-        // var fakeTime = new FakeTimeProvider();
-        // services.AddSingleton<TimeProvider>(fakeTime);
+        if (_started) return;
+
+        // Start container BEFORE DI resolves DbContext
+        Db.StartAsync().GetAwaiter().GetResult();
+        _started = true;
+    }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddDbContext<MyDbContext>(opts => opts.UseNpgsql(Db.GetConnectionString()));
+
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+        services.AddScoped<ISieveProcessor, SieveProcessor>();
+        services.AddScoped<GameService>();
+    }
+
+    public void Dispose()
+    {
+        if (!_started) return;
+
+        Db.DisposeAsync().AsTask().GetAwaiter().GetResult();
+        _started = false;
     }
 }
