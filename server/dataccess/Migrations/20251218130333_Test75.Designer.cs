@@ -12,8 +12,8 @@ using dataccess;
 namespace dataccess.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20251218121943_Migration18122025-3")]
-    partial class Migration181220253
+    [Migration("20251218130333_Test75")]
+    partial class Test75
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

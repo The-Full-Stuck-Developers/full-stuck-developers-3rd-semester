@@ -5,6 +5,7 @@ using dataccess;
 using dataccess.Entities;
 using dataccess.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Sieve.Models;
 using Sieve.Services;
 using Xunit;
@@ -25,12 +26,13 @@ public class UserServiceTests
             .Options;
 
         _db = new MyDbContext(options);
-        _sieveProcessor = new SieveProcessor(new SieveOptionsAccessor());
+        _sieveProcessor = new SieveProcessor(Options.Create(new SieveOptions()));
         _userRepository = new UserRepository(_db);
         _userService = new UserService(_userRepository, _sieveProcessor);
     }
 
-    #region GetAllUsers Tests
+
+#region GetAllUsers Tests
 
     [Fact]
     public async Task GetAllUsers_ReturnsPagedResult_WithCorrectData()
@@ -86,7 +88,7 @@ public class UserServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         _db.Users.Add(new User { Id = userId, Name = "Test User", Email = "test@test.com" });
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _userService.GetUserById(userId);
@@ -134,7 +136,7 @@ public class UserServiceTests
         Assert.Equal("New User", result.Name);
         Assert.Equal("newuser@test.com", result.Email);
         Assert.Equal("1234567890", result.PhoneNumber);
-        Assert.Equal(1, await _db.Users.CountAsync());
+        Assert.Equal(1, await _db.Users.CountAsync(cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -216,7 +218,7 @@ public class UserServiceTests
             Email = "old@test.com",
             DeletedAt = null
         });
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var updateUserDto = new UpdateUserDto
         {
@@ -285,7 +287,7 @@ public class UserServiceTests
         await _userService.DeleteUser(userId);
 
         // Assert
-        var deletedUser = await _db.Users.FindAsync(userId);
+        var deletedUser = await _db.Users.FindAsync(new object?[] { userId }, TestContext.Current.CancellationToken);
         Assert.Null(deletedUser);
     }
 
@@ -317,7 +319,7 @@ public class UserServiceTests
             ExpiresAt = DateTime.UtcNow.AddDays(-10),
             DeletedAt = null
         });
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _userService.RenewMembership(userId);
@@ -418,7 +420,7 @@ public class UserServiceTests
             new User { Id = Guid.NewGuid(), IsAdmin = true, DeletedAt = null },
             new User { Id = Guid.NewGuid(), IsAdmin = false, DeletedAt = DateTime.UtcNow }
         );
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _userService.GetUsersCount();
@@ -532,10 +534,4 @@ public class UserRepository : IRepository<User>
         _context.Users.Remove(entity);
         await _context.SaveChangesAsync();
     }
-}
-
-// Helper class to provide Sieve options
-public class SieveOptionsAccessor : Microsoft.Extensions.Options.IOptions<SieveOptions>
-{
-    public SieveOptions Value => new SieveOptions();
 }

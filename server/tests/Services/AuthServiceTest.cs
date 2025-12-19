@@ -4,15 +4,12 @@ using api.Models;
 using api.Models.Dtos.Requests;
 using api.Models.Dtos.Requests.Auth;
 using api.Models.Requests;
-using api.Security;
 using api.Services;
 using dataccess.Entities;
 using dataccess.Repositories;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
 
 public class AuthServiceTests
 {

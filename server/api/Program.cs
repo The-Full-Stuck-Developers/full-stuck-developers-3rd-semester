@@ -6,12 +6,10 @@ using api.Services;
 using dataccess;
 using dataccess.Entities;
 using dataccess.Repositories;
-using dataccess.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Scalar.AspNetCore;
 using Sieve.Models;
 using Sieve.Services;
 
@@ -46,11 +44,13 @@ public class Program
         var seeder = scope.ServiceProvider.GetRequiredService<DbSeeder>();
         seeder.Seed(defaultPassword).Wait();
     }
-
     public static void ConfigureServices(WebApplicationBuilder builder, IConfiguration configuration)
     {
-        var services = builder.Services;
+        ConfigureServices(builder.Services, configuration);
+    }
 
+    public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    {
         var appOptions = new AppOptions();
         configuration.GetSection("AppOptions").Bind(appOptions);
         services.AddSingleton(appOptions);
@@ -99,10 +99,10 @@ public class Program
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters =
-                    JwtService.CreateValidationParams(builder.Configuration);
+                    JwtService.CreateValidationParams(configuration);
             });
 
-        builder.Services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
+        services.AddScoped<IAuthorizationHandler, AdminAuthorizationHandler>();
 
         services.AddAuthorization(options =>
         {
