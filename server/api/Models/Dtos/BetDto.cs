@@ -39,7 +39,10 @@ public record CreateBetDto(
     int Count,
     int Price,
     int RepeatWeeks = 1
-);
+)
+{
+
+}
 
 public record UpdateBetDto(
     List<int> Numbers
