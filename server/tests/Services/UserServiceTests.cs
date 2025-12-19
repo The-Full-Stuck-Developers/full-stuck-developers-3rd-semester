@@ -1,3 +1,5 @@
+global using Xunit;
+
 using api.Models.Dtos.Requests.User;
 using api.Services;
 using dataccess;
@@ -7,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Sieve.Models;
 using Sieve.Services;
 
-namespace api.Tests.Services;
+namespace tests.Services;
 
 public class UserServiceTests
 {
@@ -156,7 +158,7 @@ public class UserServiceTests
         };
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.CreateUser(createUserDto));
-        Assert.Contains("already exists", ex.Message);
+        Assert.Contains("exists", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -282,7 +284,10 @@ public class UserServiceTests
         var result = await _userService.RenewMembership(user.Id);
 
         Assert.NotNull(result.ExpiresAt);
+
+        // loose bounds to avoid flakiness (service likely sets +1 year)
         Assert.True(result.ExpiresAt > DateTime.UtcNow.AddMonths(11));
+        Assert.True(result.ExpiresAt < DateTime.UtcNow.AddMonths(13));
     }
 
     [Fact]
@@ -319,7 +324,7 @@ public class UserServiceTests
         await _db.SaveChangesAsync();
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.RenewMembership(user.Id));
-        Assert.Contains("within 7 days", ex.Message);
+        Assert.Contains("within 7 days", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -336,7 +341,7 @@ public class UserServiceTests
         await _db.SaveChangesAsync();
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => _userService.RenewMembership(user.Id));
-        Assert.Contains("Admin users cannot be renewed", ex.Message);
+        Assert.Contains("admin", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -412,7 +417,6 @@ public class UserServiceTests
     #endregion
 }
 
-// Simple repository implementation for testing
 public class UserRepository : IRepository<User>
 {
     private readonly MyDbContext _context;

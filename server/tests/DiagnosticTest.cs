@@ -10,7 +10,6 @@ public class DiagnosticTest
     [Fact]
     public void CanCreateDbContext()
     {
-        // This will help us see what's failing
         var options = new DbContextOptionsBuilder<MyDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;

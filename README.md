@@ -1,6 +1,6 @@
 # DeadPigeons - Weekly Lottery Game Platform
 
-A full-stack web application for managing a weekly lottery game system where users can place bets on number combinations, with separate admin and player interfaces. The platform supports multi-week betting, transaction management, and game history tracking.
+A full-stack web application for managing a weekly lottery game system where users can place bets on number combinations, with separate admin and player interfaces. The platform supports multi-week betting, transaction management, and game history tracking and it's bilingual in English and Danish.
 
 # Link to the deployed app
 https://deadpigeons.vercel.app/
@@ -342,6 +342,10 @@ The codebase has been cleaned of redundant comments. Only essential, non-obvious
 6. **Localization**
    - Some validation messages from the api might not be translated on the client side
 
+7. **Fully tested in real life**
+   - To make sure the app works according to the requirements, we need to test it with real players and associates from Jerne IF.
+  
+     
 ## Setup Instructions
 
 ### Prerequisites
