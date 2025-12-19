@@ -98,7 +98,7 @@ public class DbSeeder(
                 weekMonday.AddDays(5).Year,
                 weekMonday.AddDays(5).Month,
                 weekMonday.AddDays(5).Day,
-                17, 0, 0,
+                16, 0, 0,
                 DateTimeKind.Utc
             );
 
@@ -172,7 +172,7 @@ public class DbSeeder(
                     saturdayDeadline.Year,
                     saturdayDeadline.Month,
                     saturdayDeadline.Day,
-                    17, 0, 0,
+                    16, 0, 0,
                     DateTimeKind.Utc
                 );
 

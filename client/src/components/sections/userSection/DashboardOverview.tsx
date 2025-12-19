@@ -47,6 +47,7 @@ export function DashboardOverview() {
           });
           if (response.ok) {
             const currentGame = await response.json();
+
             if (currentGame && currentGame.betDeadline) {
               setBetDeadline(new Date(currentGame.betDeadline));
             }
@@ -78,11 +79,13 @@ export function DashboardOverview() {
     const localDeadline = new Date(deadline);
     const dayName = localDeadline.toLocaleDateString("en-US", {
       weekday: "long",
+      timeZone: "Europe/Copenhagen",
     });
     const time = localDeadline.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
+      timeZone: "Europe/Copenhagen",
     });
 
     return { dayName, time, isPast };
