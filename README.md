@@ -2,6 +2,9 @@
 
 A full-stack web application for managing a weekly lottery game system where users can place bets on number combinations, with separate admin and player interfaces. The platform supports multi-week betting, transaction management, and game history tracking.
 
+# Link to the deployed app
+https://deadpigeons.vercel.app/
+
 ## Table of Contents
 
 - [Project Overview](#project-overview)
@@ -327,7 +330,7 @@ The codebase has been cleaned of redundant comments. Only essential, non-obvious
    - Deadline is shown in UTC, may need timezone conversion for better UX
 
 3. **Email Functionality**
-   - SMTP configuration is optional, email features may not work if not configured
+   - Email service is not configured, so the email features will not work (for resetting password, etc.)
 
 4. **Transaction Refunds**
    - When deleting bets, refunds are created but original transaction amount is preserved for audit trail
@@ -335,14 +338,9 @@ The codebase has been cleaned of redundant comments. Only essential, non-obvious
 
 5. **Game History Pagination**
    - Pagination works correctly, but series information display could be improved
-
-### 🔄 Recent Changes
-
-- Removed bet editing functionality (as per user requirements)
-- Cleaned up redundant comments throughout codebase
-- Fixed bet deadline to Saturday 17:00 (not 18:00)
-- Improved multi-week bet creation logic
-- Enhanced winning board visual design in game history
+  
+6. **Localization**
+   - Some validation messages from the api might not be translated on the client side
 
 ## Setup Instructions
 
@@ -543,11 +541,14 @@ npm run build
 **Environment Variables:**
 - `VITE_API_BASE_URL` - API base URL for production
 
+### Database
+** For the production database we are using the Neon DB platform for serverless Postgres hosting.
+
 ### CI/CD
 
 GitHub Actions workflows:
-- `.github/workflows/format.yml` - Code formatting check
-- `.github/workflows/ci-tests.yml` - Continuous integration tests
+- `.github/workflows/format.yml` - Code formatting (only setup for client at the time)
+- `.github/workflows/ci-tests.yml` - Continuous integration tests (only the api has working tests)
 
 ## Additional Notes
 
@@ -579,21 +580,6 @@ TypeScript API client is auto-generated from OpenAPI spec:
 - Output: `client/src/core/generated-client.ts`
 - Do not manually edit this file
 
-### Game Logic
-
-**Betting Rules:**
-- Minimum 5 numbers, maximum 8 numbers
-- Numbers selected from 1-16
-- Pricing: 5 numbers = 20 DKK, 6 = 40, 7 = 80, 8 = 160
-- Multi-week bets create separate bets for each week
-- Betting closes Saturday at 17:00 (UTC)
-
-**Winning:**
-- Winning numbers are 3 numbers drawn on Sunday
-- Order doesn't matter (e.g., 8,1,10 matches 1,8,10)
-- Winning boards are highlighted in game history
-
 ---
 
-**Last Updated:** December 2025  
-**Maintainers:** Full Stack Developers Team
+**Last Updated:** December 202**Maintainers:** Full Stack Developers Team
